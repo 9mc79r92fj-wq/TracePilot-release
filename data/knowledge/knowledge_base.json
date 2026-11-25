@@ -1,0 +1,44 @@
+{
+  "dataset": "tracepilot-demo-knowledge",
+  "version": "1.0.0",
+  "data_source": "synthetic",
+  "note": "合成的演示知识库，仅用于验证本地 RAG 检索能力；不代表真实业务知识，也不得作为真实资料引用。",
+  "documents": [
+    {
+      "doc_id": "kb-trace-001",
+      "title": "Trace 与 DAG 基础",
+      "content": "TracePilot 的 Trace 记录一次 Agent 执行的步骤序列、输入输出、工具调用与错误信息。根据步骤依赖可以构建 DAG，用于展示串行、并行和收敛关系。DAG 依赖只表示执行先后关系，不等于因果关系。",
+      "data_source": "synthetic"
+    },
+    {
+      "doc_id": "kb-attribution-002",
+      "title": "故障归因的证据等级",
+      "content": "坏案例归因使用证据等级表达可信度：CONFIRMED_EVENT 表示 Trace 中有直接记录（例如故障注入或工具错误），POTENTIAL_CAUSE 表示仅由依赖关系推断，不构成因果证明。候选根因可以多条并存，不应强行合并为单一结论。",
+      "data_source": "synthetic"
+    },
+    {
+      "doc_id": "kb-counterfactual-003",
+      "title": "反事实实验与最小修复",
+      "content": "反事实实验在受控模拟器中固定某一步输出或替换工具结果，然后重新执行后续步骤，比较干预前后的状态差异。最小修复引擎生成有限候选并通过受控验证判断是否改善，不修改原始 Trace。",
+      "data_source": "synthetic"
+    },
+    {
+      "doc_id": "kb-evaluation-004",
+      "title": "确定性评测指标",
+      "content": "评测引擎从任务成功、工具正确性、过程质量、恢复、效率、安全六个维度判定每个案例。UNKNOWN 表示证据不足，绝不能当作 0 或失败；未执行案例不进入通过率分母，但绝不会被算作成功。",
+      "data_source": "synthetic"
+    },
+    {
+      "doc_id": "kb-cost-005",
+      "title": "Token 与成本口径",
+      "content": "Token 用量来源分为 PROVIDER_REPORTED、ESTIMATED、SIMULATED、UNKNOWN。缺少可信价格时成本状态为 PRICE_UNKNOWN，金额为 null，不能把估算金额称为实际账单或已扣费金额。模拟执行器成本为 0 表示没有真实调用。",
+      "data_source": "synthetic"
+    },
+    {
+      "doc_id": "kb-safety-006",
+      "title": "安全审查与上下文审查",
+      "content": "安全维度扫描危险工具调用、敏感字符串与可疑代码执行痕迹；上下文审查检查提示注入、重复内容、超长上下文和密钥模式。规则扫描不等于完整安全审计，也不保证语义安全。",
+      "data_source": "synthetic"
+    }
+  ]
+}

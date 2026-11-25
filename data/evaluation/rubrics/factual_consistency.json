@@ -1,0 +1,42 @@
+{
+  "rubric_id": "factual_consistency",
+  "version": "1.0.0",
+  "title": "事实一致性 Rubric",
+  "description": "评估最终回答与执行轨迹中记录的事实（工具返回值、步骤输出）是否一致，重点检测矛盾与无依据断言。",
+  "scale": { "min": 1, "max": 5 },
+  "dimensions": [
+    {
+      "key": "factual_consistency",
+      "label": "Factual Consistency",
+      "description": "回答中的每个事实性数字/结论是否能在轨迹证据中找到支撑，是否存在与工具返回相矛盾的陈述。",
+      "weight": 0.5
+    },
+    {
+      "key": "evidence_grounding",
+      "label": "Evidence Grounding",
+      "description": "回答是否明确或可追溯地引用轨迹中的证据，而非凭空生成。",
+      "weight": 0.3
+    },
+    {
+      "key": "task_relevance",
+      "label": "Answer Relevance",
+      "description": "一致性判断仅针对与任务相关的陈述；无关陈述不计入，但若无关陈述替代了应有回答则扣分。",
+      "weight": 0.2
+    }
+  ],
+  "scoring_rules": {
+    "1": "回答与证据存在直接矛盾且无任何支撑",
+    "2": "多处关键陈述缺乏证据支撑",
+    "3": "部分陈述有证据支撑，部分无",
+    "4": "关键事实均有支撑，个别表述不够精确",
+    "5": "所有关键事实均可逐条对应到轨迹证据"
+  },
+  "evidence_requirements": [
+    "每条矛盾或支撑判断都必须引用具体证据片段（工具返回值或步骤输出原文）",
+    "若断言无证据支撑，必须显式说明「轨迹中未见对应证据」"
+  ],
+  "unknown_conditions": [
+    "轨迹中没有任何可核对的事实性证据（无工具返回、无中间输出）",
+    "最终回答完全为空"
+  ]
+}

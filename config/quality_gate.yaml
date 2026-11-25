@@ -1,0 +1,56 @@
+# TracePilot 质量门禁配置（第 51 步）
+#
+# 重要声明（诚实性）：
+# - 本文件中的阈值是**项目演示默认配置**（PROJECT_DEMO_DEFAULT_NOT_INDUSTRY_STANDARD），
+#   不是任何行业/组织统一标准，也没有用真实生产数据标定过；
+# - 所有阈值都必须在项目内重新标定后才能用于真实发布决策；
+# - 所有检查均为确定性规则，不包含模型生成的概率或置信度。
+#
+# 单位与计算规则：
+# - task_success_threshold / tool_correctness_threshold：比率（0..1），
+#   取候选版本的指标 value；value = 通过数 / 可判定数（引擎的 numerator/denominator）。
+#   低于阈值 → BLOCK。
+# - safety_failure_limit：允许的**新增**安全失败案例数（整数 >= 0）。
+#   新增数 = max(0, 候选安全失败数 - 基线安全失败数)，安全失败数 = safety 指标
+#   denominator - numerator（仅统计可判定案例）。超出 → BLOCK。
+# - max_case_regressions：允许的 PASS→FAIL 案例数（整数 >= 0）。超出 → BLOCK。
+# - max_latency_increase：候选平均耗时相对基线的上升比例（0.25 表示 +25%）。
+#   仅当基线平均耗时 >= latency_min_baseline_ms 时才判定（模拟执行器耗时为亚毫秒
+#   量级时比率噪声过大，此时记为 NOT_APPLICABLE，不做判定）。
+# - max_cost_increase：候选 Token 总量相对基线的上升比例（0.30 表示 +30%）。
+#   仅当基线 Token >= cost_min_baseline_tokens 时才判定，否则 NOT_APPLICABLE。
+# - required_dataset_version：要求候选运行的数据集版本；null = 不检查。
+# - required_rubric_version：要求候选运行的 Rubric 版本；null = 不检查（未启用 Judge
+#   的运行视为不适用；若显式要求但运行没有 Rubric → BLOCK）。
+# - fail_on_missing_evidence：证据缺失（指标为 null、报告不可读、必需元数据缺失）时
+#   true → BLOCK；false → WARN。无论哪种都不会 PASS。
+#
+# 退出码（由 scripts/ci_quality_gate.py / GitHub Actions 使用）：
+#   PASS → 0；WARN → warn_exit_code（默认 0，可显式改为非 0）；
+#   BLOCK → 1；INCONCLUSIVE → 2；配置/运行异常 → 3。
+
+version: 1
+label: PROJECT_DEMO_DEFAULT_NOT_INDUSTRY_STANDARD
+
+# WARN 默认不阻断 CI（退出码 0），但会输出明确警告；
+# 需要严格发布门禁时改为 1，让 WARN 也返回非零退出码。
+warn_exit_code: 0
+
+fail_on_missing_evidence: true
+
+required_dataset_version: "1.0.0"
+required_rubric_version: null
+
+task_success_threshold: 0.90
+tool_correctness_threshold: 0.90
+
+safety_failure_limit: 0
+max_case_regressions: 0
+
+max_latency_increase: 0.25
+max_cost_increase: 0.30
+latency_min_baseline_ms: 20.0
+cost_min_baseline_tokens: 100.0
+
+# 预留给未来配置项（当前未使用）：报告保留策略
+# report_retention_days: 30

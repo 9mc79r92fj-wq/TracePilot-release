@@ -1,0 +1,60 @@
+{
+  "rubric_id": "answer_quality",
+  "version": "1.0.0",
+  "title": "回答质量 Rubric",
+  "description": "评估 Agent 最终回答与用户任务的相关性、事实一致性、完整性与证据支撑。",
+  "scale": { "min": 1, "max": 5 },
+  "dimensions": [
+    {
+      "key": "task_relevance",
+      "label": "Task Relevance",
+      "description": "最终回答是否直接回应用户任务，而非答非所问或泛泛而谈。",
+      "weight": 0.2
+    },
+    {
+      "key": "factual_consistency",
+      "label": "Factual Consistency",
+      "description": "回答中的事实性陈述是否与输入材料（工具结果、检索内容）一致，无自相矛盾。",
+      "weight": 0.25
+    },
+    {
+      "key": "completeness",
+      "label": "Completeness",
+      "description": "是否覆盖任务要求的全部要点，未遗漏关键环节。",
+      "weight": 0.2
+    },
+    {
+      "key": "reasoning_quality",
+      "label": "Reasoning Quality",
+      "description": "仅依据可观察输出、工具调用与执行记录判断结论是否与执行过程自洽；不得要求或推断隐藏思维链。",
+      "weight": 0.15
+    },
+    {
+      "key": "instruction_following",
+      "label": "Instruction Following",
+      "description": "是否遵守任务中明确给出的格式、步骤与约束。",
+      "weight": 0.1
+    },
+    {
+      "key": "evidence_grounding",
+      "label": "Evidence Grounding",
+      "description": "结论是否引用执行轨迹中真实存在的证据（工具返回、步骤输出）。",
+      "weight": 0.1
+    }
+  ],
+  "scoring_rules": {
+    "1": "完全未满足该维度要求",
+    "2": "大部分未满足，仅有个别相关线索",
+    "3": "部分满足，存在明显缺口",
+    "4": "基本满足，仅有轻微不足",
+    "5": "完全满足，且可被证据直接支撑"
+  },
+  "evidence_requirements": [
+    "每个维度必须给出至少 1 条可引用的证据（直接引用 Trace 中的原文片段或步骤 ID）",
+    "证据必须来自被测输入材料，不得由评审者自行编造"
+  ],
+  "unknown_conditions": [
+    "输入材料不足以判断该维度（如缺少工具返回、最终回答为空）",
+    "该维度与当前任务不适用（如任务未要求格式，则 instruction_following 可判 UNKNOWN）"
+  ]
+}

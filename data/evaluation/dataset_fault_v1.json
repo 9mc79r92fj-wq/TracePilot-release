@@ -1,0 +1,319 @@
+{
+  "dataset_id": "tracepilot-fault-v1",
+  "dataset_version": "1.0.0",
+  "created_at": "2026-11-19T00:00:00Z",
+  "data_source": "synthetic",
+  "data_source_note": "用于归因模块的受控失败数据集（synthetic）：案例被设计为可预期失败，未调用任何付费模型",
+  "cases": [
+    {
+      "case_id": "fail-01-timeout",
+      "task_description": "工具超时后仍应给出结果",
+      "scenario_type": "tool_timeout",
+      "data_source": "synthetic",
+      "execution": {
+        "scenario": "tool_timeout",
+        "tool": "calculator",
+        "arguments": {
+          "expression": "125*48"
+        },
+        "fault": {
+          "type": "tool_timeout",
+          "count": 9
+        },
+        "max_retries": 2
+      },
+      "expected_outcome": {
+        "answer_match": {
+          "type": "numeric",
+          "expected": 6000,
+          "tolerance": 0.0001
+        },
+        "tool_should_succeed": true
+      },
+      "expected_tool_behavior": {
+        "required_tools": [
+          "calculator"
+        ],
+        "forbidden_tools": [],
+        "expects_tool_error": false
+      },
+      "evaluation_rules": {
+        "min_steps": 3,
+        "max_steps": 12,
+        "allow_tool_errors": true,
+        "expects_recovery": false,
+        "max_duration_ms": 10000
+      }
+    },
+    {
+      "case_id": "fail-02-exception",
+      "task_description": "工具异常后应给出结果",
+      "scenario_type": "tool_exception",
+      "data_source": "synthetic",
+      "execution": {
+        "scenario": "tool_exception",
+        "tool": "calculator",
+        "arguments": {
+          "expression": "125*48"
+        },
+        "fault": {
+          "type": "tool_exception",
+          "count": 9
+        },
+        "max_retries": 2
+      },
+      "expected_outcome": {
+        "answer_match": {
+          "type": "numeric",
+          "expected": 6000,
+          "tolerance": 0.0001
+        },
+        "tool_should_succeed": true
+      },
+      "expected_tool_behavior": {
+        "required_tools": [
+          "calculator"
+        ],
+        "forbidden_tools": [],
+        "expects_tool_error": false
+      },
+      "evaluation_rules": {
+        "min_steps": 3,
+        "max_steps": 12,
+        "allow_tool_errors": true,
+        "expects_recovery": false,
+        "max_duration_ms": 10000
+      }
+    },
+    {
+      "case_id": "fail-03-invalid-args",
+      "task_description": "非法参数计算",
+      "scenario_type": "invalid_arguments",
+      "data_source": "synthetic",
+      "execution": {
+        "scenario": "invalid_arguments",
+        "tool": "calculator",
+        "arguments": {
+          "expression": "这不是表达式"
+        },
+        "fault": {
+          "type": "invalid_arguments",
+          "count": 1
+        },
+        "max_retries": 2
+      },
+      "expected_outcome": {
+        "answer_match": {
+          "type": "numeric",
+          "expected": 42,
+          "tolerance": 0.0001
+        },
+        "tool_should_succeed": true
+      },
+      "expected_tool_behavior": {
+        "required_tools": [
+          "calculator"
+        ],
+        "forbidden_tools": [],
+        "expects_tool_error": false
+      },
+      "evaluation_rules": {
+        "min_steps": 3,
+        "max_steps": 12,
+        "allow_tool_errors": true,
+        "expects_recovery": false,
+        "max_duration_ms": 10000
+      }
+    },
+    {
+      "case_id": "fail-04-invalid-result",
+      "task_description": "工具返回被篡改的结果",
+      "scenario_type": "invalid_tool_result",
+      "data_source": "synthetic",
+      "execution": {
+        "scenario": "invalid_tool_result",
+        "tool": "calculator",
+        "arguments": {
+          "expression": "1+1"
+        },
+        "fault": {
+          "type": "invalid_tool_result",
+          "count": 1
+        },
+        "max_retries": 2
+      },
+      "expected_outcome": {
+        "answer_match": {
+          "type": "numeric",
+          "expected": 2,
+          "tolerance": 0.0001
+        },
+        "tool_should_succeed": true
+      },
+      "expected_tool_behavior": {
+        "required_tools": [
+          "calculator"
+        ],
+        "forbidden_tools": [],
+        "expects_tool_error": false
+      },
+      "evaluation_rules": {
+        "min_steps": 3,
+        "max_steps": 12,
+        "allow_tool_errors": true,
+        "expects_recovery": false,
+        "max_duration_ms": 10000
+      }
+    },
+    {
+      "case_id": "fail-05-empty-retrieval",
+      "task_description": "检索结果为空",
+      "scenario_type": "empty_retrieval",
+      "data_source": "synthetic",
+      "execution": {
+        "scenario": "empty_retrieval",
+        "tool": "text_analyzer",
+        "arguments": {
+          "text": "TracePilot sample"
+        },
+        "fault": {
+          "type": "empty_retrieval",
+          "count": 1
+        },
+        "max_retries": 2
+      },
+      "expected_outcome": {
+        "answer_match": {
+          "type": "substring",
+          "expected": "word_count"
+        },
+        "tool_should_succeed": true
+      },
+      "expected_tool_behavior": {
+        "required_tools": [
+          "text_analyzer"
+        ],
+        "forbidden_tools": [],
+        "expects_tool_error": false
+      },
+      "evaluation_rules": {
+        "min_steps": 3,
+        "max_steps": 12,
+        "allow_tool_errors": true,
+        "expects_recovery": false,
+        "max_duration_ms": 10000
+      }
+    },
+    {
+      "case_id": "fail-06-permission",
+      "task_description": "权限被拒绝但期望成功",
+      "scenario_type": "permission_denied",
+      "data_source": "synthetic",
+      "execution": {
+        "scenario": "permission_denied",
+        "tool": "sqlite_query",
+        "arguments": {
+          "query": "SELECT COUNT(*) FROM sales"
+        },
+        "fault": {
+          "type": "permission_denied",
+          "count": 1
+        },
+        "max_retries": 2
+      },
+      "expected_outcome": {
+        "answer_match": {
+          "type": "numeric",
+          "expected": 3,
+          "tolerance": 0.0001
+        },
+        "tool_should_succeed": true
+      },
+      "expected_tool_behavior": {
+        "required_tools": [
+          "sqlite_query"
+        ],
+        "forbidden_tools": [],
+        "expects_tool_error": false
+      },
+      "evaluation_rules": {
+        "min_steps": 3,
+        "max_steps": 12,
+        "allow_tool_errors": true,
+        "expects_recovery": false,
+        "max_duration_ms": 10000
+      }
+    },
+    {
+      "case_id": "fail-07-wrong-tool",
+      "task_description": "统计文本词数（错误工具）",
+      "scenario_type": "wrong_tool",
+      "data_source": "synthetic",
+      "execution": {
+        "scenario": "wrong_tool",
+        "tool": "calculator",
+        "arguments": {
+          "expression": "0"
+        },
+        "max_retries": 2
+      },
+      "expected_outcome": {
+        "answer_match": {
+          "type": "substring",
+          "expected": "word_count"
+        },
+        "tool_should_succeed": true
+      },
+      "expected_tool_behavior": {
+        "required_tools": [
+          "text_analyzer"
+        ],
+        "forbidden_tools": [],
+        "expects_tool_error": false
+      },
+      "evaluation_rules": {
+        "min_steps": 3,
+        "max_steps": 12,
+        "allow_tool_errors": true,
+        "expects_recovery": false,
+        "max_duration_ms": 10000
+      }
+    },
+    {
+      "case_id": "fail-08-answer-mismatch",
+      "task_description": "计算结果与期望不一致",
+      "scenario_type": "answer_mismatch",
+      "data_source": "synthetic",
+      "execution": {
+        "scenario": "answer_mismatch",
+        "tool": "calculator",
+        "arguments": {
+          "expression": "125*48"
+        },
+        "max_retries": 2
+      },
+      "expected_outcome": {
+        "answer_match": {
+          "type": "numeric",
+          "expected": 9999,
+          "tolerance": 0.0001
+        },
+        "tool_should_succeed": true
+      },
+      "expected_tool_behavior": {
+        "required_tools": [
+          "calculator"
+        ],
+        "forbidden_tools": [],
+        "expects_tool_error": false
+      },
+      "evaluation_rules": {
+        "min_steps": 3,
+        "max_steps": 12,
+        "allow_tool_errors": true,
+        "expects_recovery": false,
+        "max_duration_ms": 10000
+      }
+    }
+  ]
+}

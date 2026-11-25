@@ -1,0 +1,50 @@
+# Render Blueprint（Docker 后端）
+# 使用方式：Render Dashboard → New → Blueprint → 选择本仓库（main 分支）。
+#
+# 安全说明：
+# - 不设置 DEEPSEEK_API_KEY / TRACEPILOT_ALLOW_REAL_API，公开演示默认只能 Mock；
+# - TRACEPILOT_PUBLIC_DEMO=1 会在代码层强制禁止真实 API，即使误设开关也不会放行；
+# - CORS 由 TRACEPILOT_CORS_ORIGINS 精确配置（Vercel 前端地址，部署后填写并重新部署）。
+#
+# 持久化说明：
+# - Render 免费实例没有持久化磁盘，/app/data 在重新部署/重启后会丢失；
+# - 如需保留 SQLite / Trace / 上传文件，把 plan 改为 starter（会产生费用，需用户确认），
+#   并取消下方 disk 段注释；挂载路径必须是 /app/data。
+services:
+  - type: web
+    name: tracepilot-api
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: TRACEPILOT_ENV
+        value: production
+      - key: TRACEPILOT_PUBLIC_DEMO
+        value: "1"
+      - key: TRACEPILOT_RATE_LIMIT_ENABLED
+        value: "1"
+      - key: TRACEPILOT_RATE_LIMIT_GENERAL_PER_MINUTE
+        value: "120"
+      - key: TRACEPILOT_RATE_LIMIT_HEAVY_PER_MINUTE
+        value: "10"
+      - key: TRACEPILOT_TRUST_PROXY
+        value: "1"
+      - key: TRACEPILOT_DATA_DIR
+        value: /app/data
+      - key: TRACEPILOT_DB_PATH
+        value: /app/data/tracepilot.db
+      - key: DEEPSEEK_MODEL
+        value: deepseek-chat
+      # 部署 Vercel 后填入正式前端地址（逗号分隔可多个），例如：
+      # https://tracepilot.vercel.app
+      - key: TRACEPILOT_CORS_ORIGINS
+        sync: false
+    # 以下磁盘配置需要付费实例（plan: starter，约 $7/月起，需用户明确确认后启用）：
+    # disk:
+    #   name: tracepilot-data
+    #   mountPath: /app/data
+    #   sizeGB: 1

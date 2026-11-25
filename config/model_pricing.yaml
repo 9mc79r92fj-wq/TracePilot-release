@@ -1,0 +1,72 @@
+# TracePilot 模型价格配置（第 53 步）
+#
+# 重要声明（诚实性）：
+# 1. 本项目**没有配置可信的 DeepSeek 官方价格**，因此 deepseek 条目价格均为 null，
+#    成本计算会返回 PRICE_UNKNOWN（而不是编造价格或默认 0）；
+# 2. 如需真实计费估算，请填入**有明确来源与生效日期**的官方价格，例如：
+#      pricing_source: "https://api-docs.deepseek.com/quick_start/pricing"
+#      effective_date: "2026-11-01"
+#      input_price_per_million_tokens: <官方输入价格>
+#      output_price_per_million_tokens: <官方输出价格>
+#    并在 pricing_source 中保留来源 URL/文档版本；价格变更时提升 pricing_version；
+# 3. 金额只是**按本地价格表计算的成本估算**，不是 Provider 实际账单金额，
+#    不得称为「已扣费金额」；
+# 4. 货币、输入/输出单价、缓存读写单价分别配置，不把所有 Token 按一个价格计算；
+# 5. 如果 Provider 返回缓存 Token 分桶（如 prompt_cache_hit_tokens）而未配置缓存价格，
+#    该调用成本返回 PRICE_UNKNOWN（无法可靠拆分计费）。
+#
+# 字段：
+#   provider / model_name：匹配键；model_name 支持 "*" 通配（低优先级）
+#   currency：ISO 4217 货币代码
+#   input_price_per_million_tokens：输入 Token 单价（每百万 Token），null = 未知
+#   output_price_per_million_tokens：输出 Token 单价（每百万 Token），null = 未知
+#   cache_read_price_per_million_tokens：缓存命中输入单价（可选）
+#   cache_write_price_per_million_tokens：缓存写入单价（可选）
+#   effective_date：价格生效日期（YYYY-MM-DD）
+#   pricing_version：价格表版本
+#   pricing_source：价格来源（URL / 文档名 / NOT_CONFIGURED）
+#   billing_note：口径说明
+#
+# 顶层 meta 为条目的默认值（条目可覆盖）。
+
+meta:
+  pricing_version: "2026.11-demo-unconfigured"
+  effective_date: "2026-11-19"
+  currency: "CNY"
+  pricing_source: "NOT_CONFIGURED_FOR_BILLING"
+  note: >-
+    项目演示配置：未提供可信官方价格，DeepSeek 调用成本返回 PRICE_UNKNOWN。
+    修改本文件不会影响历史报告；每次分析都会记录使用到的价格版本与来源。
+
+providers:
+  - provider: "local-simulation"
+    model_name: "*"
+    currency: "CNY"
+    input_price_per_million_tokens: 0.0
+    output_price_per_million_tokens: 0.0
+    effective_date: "2026-11-19"
+    pricing_version: "2026.11-demo-simulated-zero"
+    pricing_source: "SIMULATED_ZERO_COST"
+    billing_note: "受控确定性模拟执行器不调用付费 API；0 表示未产生调用，不是真实计费"
+
+  - provider: "deepseek"
+    model_name: "deepseek-chat"
+    currency: "CNY"
+    input_price_per_million_tokens: null
+    output_price_per_million_tokens: null
+    cache_read_price_per_million_tokens: null
+    cache_write_price_per_million_tokens: null
+    effective_date: "2026-11-19"
+    pricing_version: "unconfigured"
+    pricing_source: "UNKNOWN_OFFICIAL_PRICE_NOT_CONFIGURED"
+    billing_note: "未配置可信官方价格，禁止编造；成本状态为 PRICE_UNKNOWN"
+
+  - provider: "deepseek"
+    model_name: "deepseek-reasoner"
+    currency: "CNY"
+    input_price_per_million_tokens: null
+    output_price_per_million_tokens: null
+    effective_date: "2026-11-19"
+    pricing_version: "unconfigured"
+    pricing_source: "UNKNOWN_OFFICIAL_PRICE_NOT_CONFIGURED"
+    billing_note: "未配置可信官方价格，禁止编造；成本状态为 PRICE_UNKNOWN"

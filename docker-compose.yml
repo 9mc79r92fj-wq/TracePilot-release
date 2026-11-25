@@ -1,0 +1,26 @@
+# TracePilot 本地 Docker Compose（第 55 步补齐部署配置）
+#
+# 状态：NOT_VERIFIED —— 当前开发机未安装 Docker，未执行 `docker compose up`。
+# 安全：默认不设置任何 API Key；真实模型调用默认关闭（不授权就不会产生付费调用）。
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-deepseek-chat}
+      # 不注入 DEEPSEEK_API_KEY：需要真实 API 时由用户显式传入并自行承担费用
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend

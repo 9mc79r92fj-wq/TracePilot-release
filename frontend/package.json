@@ -1,0 +1,32 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "test:e2e": "playwright test --project=desktop-edge",
+    "test:e2e:report": "playwright show-report",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "eslint": "^10.15.0",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.8"
+  },
+  "dependencies": {
+    "@xyflow/react": "^13.0.2",
+    "axios": "^1.21.1",
+    "lucide-react": "^1.75.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5",
+    "recharts": "^3.11.0",
+    "zustand": "^5.1.0"
+  }
+}

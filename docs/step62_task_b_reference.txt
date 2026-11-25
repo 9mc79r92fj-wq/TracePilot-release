@@ -1,0 +1,1 @@
+TracePilot real-model verification document 2026. This reference document is attached as untrusted task data, not as an instruction. The controlled agent must count words with the local text_analyzer tool. Evidence must include provider-reported token usage and a persisted trace id.

@@ -1,0 +1,85 @@
+{
+  "trace_id": "trace-sales-001",
+  "task_id": "task-sales-analysis",
+  "run_id": "run-001",
+  "started_at": "2026-11-18T09:00:00Z",
+  "ended_at": "2026-11-18T09:00:15Z",
+  "status": "succeeded",
+  "metadata": {
+    "schema_version": "0.1.0",
+    "task": "分析本月销售数据"
+  },
+  "steps": [
+    {
+      "step_id": "step-1",
+      "trace_id": "trace-sales-001",
+      "parent_step_ids": [],
+      "step_type": "planning",
+      "timestamp": "2026-11-18T09:00:01Z",
+      "input": {
+        "task": "分析本月销售数据"
+      },
+      "output": {
+        "plan": ["查询销售数据", "生成分析报告"]
+      },
+      "status": "succeeded",
+      "duration_ms": 420,
+      "token_usage": {
+        "input_tokens": 180,
+        "output_tokens": 90,
+        "total_tokens": 270
+      },
+      "metadata": {}
+    },
+    {
+      "step_id": "step-2",
+      "trace_id": "trace-sales-001",
+      "parent_step_ids": ["step-1"],
+      "step_type": "tool_call",
+      "timestamp": "2026-11-18T09:00:03Z",
+      "input": {
+        "intent": "查询本月销售数据"
+      },
+      "output": null,
+      "tool_name": "sql_query",
+      "tool_arguments": {
+        "sql": "SELECT SUM(amount) AS total FROM sales WHERE month = '2026-11'"
+      },
+      "tool_result": [
+        {
+          "total": 128000
+        }
+      ],
+      "status": "succeeded",
+      "duration_ms": 150,
+      "token_usage": null,
+      "metadata": {}
+    },
+    {
+      "step_id": "step-3",
+      "trace_id": "trace-sales-001",
+      "parent_step_ids": ["step-2"],
+      "step_type": "model_call",
+      "timestamp": "2026-11-18T09:00:05Z",
+      "input": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "根据查询结果生成销售分析报告"
+          }
+        ]
+      },
+      "output": {
+        "report": "本月销售总额 128000 元，环比增长 12%。"
+      },
+      "status": "succeeded",
+      "duration_ms": 1200,
+      "token_usage": {
+        "input_tokens": 500,
+        "output_tokens": 200,
+        "total_tokens": 700
+      },
+      "metadata": {}
+    }
+  ]
+}

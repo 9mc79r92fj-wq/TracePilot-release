@@ -1,0 +1,48 @@
+{
+  "rubric_id": "tool_usage",
+  "version": "1.0.0",
+  "title": "工具使用 Rubric",
+  "description": "仅依据 Trace 中可观察的工具调用步骤，评估工具选择、参数与结果使用是否合理。",
+  "scale": { "min": 1, "max": 5 },
+  "dimensions": [
+    {
+      "key": "task_relevance",
+      "label": "Tool Choice Relevance",
+      "description": "所选工具是否与任务目标匹配（是否选对工具类型）。",
+      "weight": 0.3
+    },
+    {
+      "key": "instruction_following",
+      "label": "Argument Validity",
+      "description": "工具参数是否符合工具签名与任务约束（是否可被工具接受）。",
+      "weight": 0.25
+    },
+    {
+      "key": "factual_consistency",
+      "label": "Result Usage Consistency",
+      "description": "后续回答是否正确使用了工具返回结果，未曲解或忽略关键返回值。",
+      "weight": 0.25
+    },
+    {
+      "key": "reasoning_quality",
+      "label": "Tool Chain Soundness",
+      "description": "工具调用链是否自洽（前一步结果被后一步合理依赖）；仅依据可观察的调用顺序与参数判断。",
+      "weight": 0.2
+    }
+  ],
+  "scoring_rules": {
+    "1": "工具使用完全错误或缺失",
+    "2": "工具选择错误但存在尝试",
+    "3": "工具正确但参数或结果使用有明显缺陷",
+    "4": "工具与参数基本正确，结果使用基本合理",
+    "5": "工具选择、参数、结果使用均正确且可被证据直接支撑"
+  },
+  "evidence_requirements": [
+    "必须引用具体的 tool_name、tool_arguments 或 tool_result 片段",
+    "必须指出对应的 step_id"
+  ],
+  "unknown_conditions": [
+    "Trace 中不存在任何 tool_call 步骤",
+    "工具结果被脱敏或缺失，无法判断使用是否合理"
+  ]
+}

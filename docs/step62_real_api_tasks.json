@@ -1,0 +1,201 @@
+{
+  "step": "62",
+  "title": "真实 Agent 执行与评测闭环验证（离线准备，未执行真实调用）",
+  "created_at": "2026-11-20T08:55:00+08:00",
+  "paid_api_called": false,
+  "offline_only": true,
+  "authorization_required": {
+    "server_env": "TRACEPILOT_ALLOW_REAL_API=1",
+    "request_flag": "confirm_real=true",
+    "model": "deepseek-chat",
+    "note": "双重门禁缺一不可；未授权时 API 必须返回 403 且零付费调用。本文件只是执行计划，不包含任何真实执行结果。"
+  },
+  "tasks": [
+    {
+      "id": "A",
+      "name": "确定性数值计算",
+      "category": "determinism_calculation",
+      "task_text": "请必须调用 calculator 工具计算 37*89，并在最终回答中只写出精确乘积数字。",
+      "documents": [],
+      "expected_result": {
+        "answer_number": 3293,
+        "required_tool_calls": [
+          {
+            "tool_name": "calculator",
+            "tool_arguments.expression": "37*89",
+            "tool_result.result": 3293
+          }
+        ]
+      },
+      "verification_conditions": [
+        "POST /api/agent/runs 返回 200，run.mode == real_api，run.status == succeeded",
+        "run.trace_id 非空，run.trace_path 指向 data/traces/<trace_id>.json 且文件真实存在",
+        "trace.metadata.data_source == real_api、simulated == false、real_api_verified == true",
+        "至少 1 个 model_call 步骤 token_usage.total_tokens > 0，且 step.metadata.usage_meta.usage_source == PROVIDER_REPORTED",
+        "恰有（至少 1 个）tool_call 步骤 tool_name == calculator，tool_arguments.expression == 37*89，tool_result.result == 3293",
+        "final_answer 包含 3293；started_at/ended_at/elapsed_ms 均为真实值（非占位 0/空）",
+        "GET /api/traces/{trace_id}/dag 返回 nodes >= 3 且 root_nodes >= 1；前端 /dag/{trace_id} 能渲染节点",
+        "GET /api/governance/traces/{trace_id} 的 source_class == REAL_API",
+        "GET /api/cost/traces/{trace_id} 的 tokens.usage_sources.PROVIDER_REPORTED >= 1；cost.status == PRICE_UNKNOWN（未配置官方价格时不得显示金额 0 或账单）"
+      ],
+      "limits": {
+        "max_model_calls": 4,
+        "max_total_tokens": 4000,
+        "max_tool_calls": 3,
+        "max_wall_seconds": 90,
+        "max_tool_rounds": 2,
+        "max_tokens_per_call": 512,
+        "api_max_retries": 0
+      },
+      "expected_model_calls": "4（下限 3 / 上限 5）",
+      "token_estimate": "约 1600-2200（参照历史真实样本 1852 tokens）"
+    },
+    {
+      "id": "B",
+      "name": "文档引用分析",
+      "category": "document_reference_analysis",
+      "task_text": "请参考随任务附带的参考文档，必须调用 text_analyzer 工具统计文档正文的词数（word_count），并在最终回答中只写出该数字。text 参数必须只包含文档正文，不要包含 [REFERENCE_DOCUMENT] 标记行。",
+      "documents": [
+        {
+          "file": "docs/step62_task_b_reference.txt",
+          "upload_via": "前端 Agent 运行页 DocumentPanel 上传，或 POST /api/documents",
+          "expected_word_count": 40
+        }
+      ],
+      "expected_result": {
+        "answer_number": 40,
+        "required_tool_calls": [
+          {
+            "tool_name": "text_analyzer",
+            "tool_result.word_count": 40
+          }
+        ]
+      },
+      "verification_conditions": [
+        "上传返回 document_id；Agent 请求 document_ids 包含该 ID，且服务端校验通过（不存在则 400）",
+        "trace.steps[0].metadata.referenced_documents 含该文档 id/filename/format（文档出处证据，不代表模型已理解）",
+        "至少 1 个 model_call 步骤 token_usage.total_tokens > 0 且 usage_meta.usage_source == PROVIDER_REPORTED",
+        "tool_call 步骤 tool_name == text_analyzer 且 tool_result.word_count == 40；final_answer 包含 40",
+        "trace.metadata.data_source == real_api、simulated == false、real_api_verified == true",
+        "GET /api/traces/{trace_id}/dag 可解析；GET /api/governance/traces/{trace_id} 的 source_class == REAL_API",
+        "若模型未调用工具或计数不等于 40：如实记录 FAIL，不得修改期望值或结果"
+      ],
+      "limits": {
+        "max_model_calls": 4,
+        "max_total_tokens": 4000,
+        "max_tool_calls": 3,
+        "max_wall_seconds": 90,
+        "max_tool_rounds": 2,
+        "max_tokens_per_call": 512,
+        "api_max_retries": 0
+      },
+      "expected_model_calls": "4（下限 3 / 上限 5）",
+      "token_estimate": "约 1700-2400（含最多 1800 字符文档片段作为任务数据）"
+    },
+    {
+      "id": "C",
+      "name": "工具多步推理",
+      "category": "multi_step_tool_reasoning",
+      "task_text": "请分两步调用 calculator 工具：第一步计算 12+8 得到中间值，第二步基于该中间值计算乘以 5 的结果（可用表达式 (12+8)*5 或 20*5）。最终回答只写出最后结果 100。",
+      "documents": [],
+      "expected_result": {
+        "answer_number": 100,
+        "required_tool_calls": [
+          {
+            "tool_name": "calculator",
+            "tool_arguments.expression": "12+8",
+            "tool_result.result": 20
+          },
+          {
+            "tool_name": "calculator",
+            "tool_arguments.expression": "(12+8)*5 或 20*5",
+            "tool_result.result": 100
+          }
+        ]
+      },
+      "verification_conditions": [
+        "tool_call 步骤中 tool_name == calculator 的步骤 >= 2（多步依赖证据）",
+        "第一步 tool_result.result == 20；最后一步 tool_result.result == 100",
+        "final_answer 包含 100；run.status == succeeded",
+        "至少 1 个 model_call 步骤 token_usage.total_tokens > 0 且 usage_meta.usage_source == PROVIDER_REPORTED",
+        "trace.metadata.data_source == real_api、simulated == false、real_api_verified == true",
+        "GET /api/traces/{trace_id}/dag 的节点/边包含两次工具调用；前端 /dag/{trace_id} 可渲染",
+        "GET /api/governance/traces/{trace_id} 的 source_class == REAL_API"
+      ],
+      "limits": {
+        "max_model_calls": 4,
+        "max_total_tokens": 4000,
+        "max_tool_calls": 3,
+        "max_wall_seconds": 90,
+        "max_tool_rounds": 2,
+        "max_tokens_per_call": 512,
+        "api_max_retries": 0
+      },
+      "expected_model_calls": "5（下限 4 / 上限 5）",
+      "token_estimate": "约 1800-2500（参照历史真实样本 1852 tokens + 额外工具轮）"
+    }
+  ],
+  "batch_budget": {
+    "phase1_agent_runs": {
+      "execution_entry": "前端 /runs 或 POST /api/agent/runs",
+      "task_count": 3,
+      "expected_calls": "11-15（规划值 13）",
+      "call_ceiling": 15,
+      "expected_tokens": "约 5100-7100",
+      "token_audit_ceiling": 12000,
+      "hard_precontrols": [
+        "单次模型调用输出 <= 512 tokens",
+        "工具循环 <= 2 轮（模型调用最多 5 次/任务）",
+        "单任务墙钟 <= 90s",
+        "api_max_retries=0（失败不自动重试，不产生额外费用）",
+        "工具调用 <= 3 次/任务"
+      ],
+      "note": "max_total_tokens/max_model_calls 为事后审计上限：超限会标记 limit_exceeded，但费用已发生，因此以硬预控为准"
+    },
+    "phase2_pipeline_real_evaluation_optional": {
+      "purpose": "验证「评测读取真实 Trace → 归因 → 质量门禁 → 报告」链路（当前评测中心不支持按 trace_id 评测任意 Trace，唯一产品级真实评测路径是 evaluation pipeline 的 real_api 模式）",
+      "execution_entry": "POST /api/pipelines（dataset_id=tracepilot-eval-v1, max_cases=1, execution_mode=real_api, confirm_real=true）",
+      "expected_calls": "3-4（下限 3 / 上限 6，流水线使用默认 RunLimits：工具轮上限 3）",
+      "expected_tokens": "约 1600-2200",
+      "token_audit_ceiling": 4000,
+      "note": "该数据集案例为合成场景（case-01：使用计算器计算 1+1），evaluation_rules.max_duration_ms=10000 可能使真实运行 efficiency 维度 FAIL；这是真实结果，不修改数据集、不伪造通过"
+    },
+    "total": {
+      "expected_calls": "14-21（规划值 17）",
+      "call_ceiling": 21,
+      "expected_tokens": "约 6700-9300",
+      "token_audit_ceiling": 16000,
+      "cost": "PRICE_UNKNOWN：config/model_pricing.yaml 中 DeepSeek 输入/输出价格均为 null，未配置可信官方价格，禁止估算金额；成本公式（待用户提供官方价格+生效日期后可用）：prompt_tokens/1e6*input_price + completion_tokens/1e6*output_price"
+    }
+  },
+  "result_recording_template": {
+    "note": "真实执行后才允许填写；未执行为 null，绝不预先填写，绝不把 mock/simulated 结果填入",
+    "fields": {
+      "executed_at": null,
+      "task_id": null,
+      "run_id": null,
+      "trace_id": null,
+      "status": null,
+      "elapsed_ms": null,
+      "model_calls": null,
+      "tool_calls": null,
+      "token_usage": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "total_tokens": null
+      },
+      "limit_violations": null,
+      "real_api_verified": null,
+      "governance_source_class": null,
+      "cost_status": null,
+      "dag_nodes": null,
+      "verification_checks": null,
+      "notes": null
+    }
+  },
+  "artifacts": [
+    "docs/STEP62_REAL_API_OFFLINE_CHECK.md",
+    "docs/step62_task_b_reference.txt",
+    "docs/step62_evidence/"
+  ]
+}

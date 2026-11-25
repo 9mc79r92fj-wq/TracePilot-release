@@ -1,0 +1,25 @@
+.git/
+.venv/
+node_modules/
+frontend/
+tests/
+docs/
+backups/
+.pytest_cache/
+*.log
+.env
+.env.*
+backend/.env
+backend/data/
+docker-compose.yml
+Dockerfile
+
+# 运行数据不进入镜像；只保留后端启动所需的静态数据集/演示 Trace
+data/*
+!data/evaluation
+!data/knowledge
+!data/traces
+data/evaluation/traces/
+data/traces/*
+!data/traces/trace-bf1f2e2690f743379fadc80d22e03adf.json
+!data/traces/trace-3071fea861694ee1b70731a400f28000.json

@@ -1,0 +1,371 @@
+{
+  "calibration_id": "judge-calibration-v1",
+  "version": "1.0.0",
+  "rubric_id": "answer_quality",
+  "created_at": "2026-11-18T00:00:00Z",
+  "annotation_source": "synthetic_reference",
+  "annotation_note": "本校准集的 human_score 由项目开发者依据 Rubric 规则人工给出的**参考标注**，但并非独立第三方标注、也不是真实用户/专家双盲标注流程产物。因此统一标记为 synthetic_reference：可用于检验 Judge 与参考标准的一致性与稳定性，但**不得**对外声明为真实人工标注的一致率。",
+  "categories": [
+    "correct_answer",
+    "partially_correct",
+    "factual_error",
+    "missing_information",
+    "instruction_violation",
+    "unreasonable_tool_use",
+    "insufficient_evidence",
+    "ambiguous_boundary"
+  ],
+  "cases": [
+    {
+      "case_id": "cal-001-correct-calc",
+      "category": "correct_answer",
+      "task": "使用计算器计算 (12+8)*5 并给出结果",
+      "candidate_answer": "计算结果为 100",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "(12+8)*5" },
+        "tool_result": { "expression": "(12+8)*5", "result": 100 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 5,
+      "human_status": "SCORED",
+      "annotation_rationale": "回答直接命中任务要求，数值 100 与工具返回完全一致，无多余或矛盾陈述。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-002-correct-sql",
+      "category": "correct_answer",
+      "task": "以只读方式查询 sales 表行数并给出结果",
+      "candidate_answer": "查询结果为 3",
+      "reference_material": {
+        "tool_name": "sqlite_query",
+        "tool_arguments": { "query": "SELECT COUNT(*) FROM sales" },
+        "tool_result": { "columns": ["COUNT(*)"], "rows": [[3]], "row_count": 1 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 5,
+      "human_status": "SCORED",
+      "annotation_rationale": "回答数值与 SQL 返回一致（3 行），且未越权执行写操作。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-003-partial-numeric",
+      "category": "partially_correct",
+      "task": "计算 12+8 并说明计算过程",
+      "candidate_answer": "结果是 20",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "12+8" },
+        "tool_result": { "expression": "12+8", "result": 20 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 4,
+      "human_status": "SCORED",
+      "annotation_rationale": "数值正确，但任务要求说明计算过程，回答只有结果，完整性略欠。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-004-partial-text",
+      "category": "partially_correct",
+      "task": "统计文本 \"hello world hello\" 的词数与唯一词数",
+      "candidate_answer": "词数是 3",
+      "reference_material": {
+        "tool_name": "text_analyzer",
+        "tool_arguments": { "text": "hello world hello" },
+        "tool_result": { "word_count": 3, "unique_word_count": 2, "char_count": 17 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 3,
+      "human_status": "SCORED",
+      "annotation_rationale": "两个要求中只回答了词数，遗漏唯一词数（2），属明显部分完成。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-005-factual-wrong-number",
+      "category": "factual_error",
+      "task": "使用计算器计算 1+1 并给出结果",
+      "candidate_answer": "计算结果为 3",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "1+1" },
+        "tool_result": { "expression": "1+1", "result": 2 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 1,
+      "human_status": "SCORED",
+      "annotation_rationale": "工具返回 2，回答声称 3，构成直接事实矛盾。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-006-factual-contradiction",
+      "category": "factual_error",
+      "task": "查询 sales 表行数并说明结果是否为空",
+      "candidate_answer": "查询结果为 3，说明表是空的",
+      "reference_material": {
+        "tool_name": "sqlite_query",
+        "tool_arguments": { "query": "SELECT COUNT(*) FROM sales" },
+        "tool_result": { "rows": [[3]], "row_count": 1 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "annotation_rationale": "行数 3 正确，但结论「表是空的」与证据自相矛盾，属内部不一致。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-007-missing-key-requirement",
+      "category": "missing_information",
+      "task": "查询本月销售总额并给出环比变化",
+      "candidate_answer": "本月销售总额为 128000",
+      "reference_material": {
+        "tool_name": "sqlite_query",
+        "tool_arguments": { "query": "SELECT SUM(amount) FROM sales" },
+        "tool_result": { "rows": [[128000]] },
+        "notes": "环比数据需第二条查询，轨迹中未执行"
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "annotation_rationale": "总额正确但完全遗漏环比这一核心要求，且轨迹中也未取到该数据。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-008-missing-detail",
+      "category": "missing_information",
+      "task": "统计文本词数、字符数、行数",
+      "candidate_answer": "词数 5，字符数 43",
+      "reference_material": {
+        "tool_name": "text_analyzer",
+        "tool_arguments": { "text": "TracePilot failure replay sanity check" },
+        "tool_result": { "word_count": 5, "char_count": 43, "line_count": 1 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 3,
+      "human_status": "SCORED",
+      "annotation_rationale": "三项要求回答了前两项且数值正确，遗漏行数（1）。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-009-instruction-format-violation",
+      "category": "instruction_violation",
+      "task": "只输出最终数字，不要任何解释文字",
+      "candidate_answer": "好的，我来计算一下：最终结果应该是 100，计算过程是 (12+8)*5 先算括号再加，所以答案是 100。",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "(12+8)*5" },
+        "tool_result": { "result": 100 }
+      },
+      "rubric_id": "instruction_following",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "annotation_rationale": "任务明确要求只输出数字，回答包含大段解释，明显违反格式指令（但数值正确）。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-010-instruction-forbidden-tool",
+      "category": "instruction_violation",
+      "task": "不要调用任何工具，直接给出 1+1 的答案",
+      "candidate_answer": "结果为 2",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "1+1" },
+        "tool_result": { "result": 2 },
+        "notes": "任务明确禁止调用工具，但轨迹中发生了 calculator 调用"
+      },
+      "rubric_id": "instruction_following",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "annotation_rationale": "答案本身正确，但违反「不得调用工具」的显式约束，该维度应低分。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-011-tool-wrong-args",
+      "category": "unreasonable_tool_use",
+      "task": "计算 1+1",
+      "candidate_answer": "计算结果为 1",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "1*1" },
+        "tool_result": { "expression": "1*1", "result": 1 },
+        "notes": "工具参数应为 1+1，实际传入 1*1"
+      },
+      "rubric_id": "tool_usage",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "annotation_rationale": "工具参数与任务意图不符（乘法而非加法），虽结果自洽但工具使用不合理。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-012-tool-result-ignored",
+      "category": "unreasonable_tool_use",
+      "task": "查询 sales 表行数并据此说明",
+      "candidate_answer": "sales 表当前没有数据",
+      "reference_material": {
+        "tool_name": "sqlite_query",
+        "tool_arguments": { "query": "SELECT COUNT(*) FROM sales" },
+        "tool_result": { "rows": [[3]], "row_count": 1 },
+        "notes": "工具返回 3，但回答声称无数据，未使用工具结果"
+      },
+      "rubric_id": "tool_usage",
+      "human_score": 1,
+      "human_status": "SCORED",
+      "annotation_rationale": "工具返回被完全无视且结论相反，工具链路失效。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-013-no-tool-trace",
+      "category": "insufficient_evidence",
+      "task": "使用计算器计算 1+1",
+      "candidate_answer": "计算结果为 2",
+      "reference_material": {
+        "notes": "轨迹中没有任何 tool_call 记录，无法确认结果来源"
+      },
+      "rubric_id": "answer_quality",
+      "human_score": null,
+      "human_status": "UNKNOWN",
+      "annotation_rationale": "答案看似正确，但缺少工具执行证据，证据充分性维度应判 UNKNOWN；不应给高分。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-014-empty-answer",
+      "category": "insufficient_evidence",
+      "task": "分析本月销售数据",
+      "candidate_answer": "",
+      "reference_material": {
+        "tool_name": "sqlite_query",
+        "tool_result": { "rows": [[128000]] }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": null,
+      "human_status": "UNKNOWN",
+      "annotation_rationale": "最终回答为空，无法评估相关性/完整性等维度，应判 UNKNOWN 而非 1 分。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-015-no-material",
+      "category": "insufficient_evidence",
+      "task": "说明数据库中的销售趋势",
+      "candidate_answer": "销售趋势呈上升状态",
+      "reference_material": {
+        "notes": "无检索结果、无工具返回，材料为空"
+      },
+      "rubric_id": "factual_consistency",
+      "human_score": null,
+      "human_status": "UNKNOWN",
+      "annotation_rationale": "无任何可核对证据，事实一致性无法判定，应 UNKNOWN。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-016-boundary-brief",
+      "category": "ambiguous_boundary",
+      "task": "计算 1+1 并给出结果",
+      "candidate_answer": "2",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_result": { "result": 2 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 4,
+      "human_status": "SCORED",
+      "annotation_rationale": "极简但准确，满足核心要求；因缺少任何说明文字，完整性介于 4 与 5 之间，取 4。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-017-boundary-verbose",
+      "category": "ambiguous_boundary",
+      "task": "计算 1+1 并给出结果",
+      "candidate_answer": "根据数学基本运算规则，1 与 1 相加等于 2，因此最终结果为 2。",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_result": { "result": 2 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 4,
+      "human_status": "SCORED",
+      "annotation_rationale": "答案正确且自洽，但含与任务无关的冗余表述，相关性略打折。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-018-boundary-rounding",
+      "category": "ambiguous_boundary",
+      "task": "计算 0.1+0.2 并给出结果",
+      "candidate_answer": "结果为 0.3",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "0.1+0.2" },
+        "tool_result": { "result": 0.30000000000000004 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 5,
+      "human_status": "SCORED",
+      "annotation_rationale": "浮点误差下取 0.3 属正确合理的表达，不应视为事实错误。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-019-wrong-tool-choice",
+      "category": "unreasonable_tool_use",
+      "task": "统计文本词数",
+      "candidate_answer": "计算结果为 5",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "5" },
+        "tool_result": { "result": 5 },
+        "notes": "任务要求文本统计，应使用 text_analyzer，实际用了 calculator"
+      },
+      "rubric_id": "tool_usage",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "annotation_rationale": "工具类型与任务完全不匹配，答案数值虽巧合同为 5 但来源错误。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-020-multi-error",
+      "category": "factual_error",
+      "task": "查询 sales 表行数并给出行数",
+      "candidate_answer": "sales 表有 5 行数据",
+      "reference_material": {
+        "tool_name": "sqlite_query",
+        "tool_result": { "rows": [[3]], "row_count": 1 },
+        "notes": "实际为 3 行"
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "annotation_rationale": "数值错误（5 vs 3），但回答紧扣任务且格式正确，故非最低分。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-021-partial-then-correct",
+      "category": "partially_correct",
+      "task": "先计算 12+8，再乘以 5，给出最终结果",
+      "candidate_answer": "中间结果是 20，乘以 5 得 100",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "(12+8)*5" },
+        "tool_result": { "result": 100 }
+      },
+      "rubric_id": "answer_quality",
+      "human_score": 5,
+      "human_status": "SCORED",
+      "annotation_rationale": "两步结果均正确且交代了中间值，完整满足多步骤要求。",
+      "annotation_source": "synthetic_reference"
+    },
+    {
+      "case_id": "cal-022-instruction-extra-step",
+      "category": "instruction_violation",
+      "task": "只调用 calculator 一次，输出结果",
+      "candidate_answer": "结果为 2",
+      "reference_material": {
+        "tool_name": "calculator",
+        "tool_arguments": { "expression": "1+1" },
+        "tool_result": { "result": 2 },
+        "notes": "轨迹中 calculator 被调用了 3 次（重复调用）"
+      },
+      "rubric_id": "instruction_following",
+      "human_score": 3,
+      "human_status": "SCORED",
+      "annotation_rationale": "结果正确但违反「只调用一次」的约束，属部分违反。",
+      "annotation_source": "synthetic_reference"
+    }
+  ]
+}

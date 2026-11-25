@@ -1,0 +1,63 @@
+﻿.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+# 本地永久配置（含 DeepSeek Key / 真实 API 开关），显式忽略，禁止提交
+backend/.env
+node_modules/
+dist/
+build/
+.pytest_cache/
+.coverage
+*.db
+*.sqlite3
+
+# 运行时数据：SQLite、上传文件、Trace、报告等一律不入库
+backend/data/
+data/documents/
+*.log
+logs/
+
+# 部署平台本地状态
+.vercel/
+.render/
+
+# 本地开发临时/备份副本（不参与构建，也不提交）
+/install_step59.py
+/step59_backup_*/
+/DocumentPanel.tsx
+/document_store.py
+/document.css
+frontend/src/pages/AgentRuns\ copy.tsx
+frontend/src/components/Layout.backup.txt
+*.bak
+
+data/evaluation/traces/
+data/evaluation/*.db
+
+# 运行时 Trace（真实性整改后仅保留本次真实执行证据于本地/部署 seed，不入库）
+data/traces/*.json
+data/attribution/
+data/failure_patterns/
+data/version_comparison/
+data/regression/
+data/quality_gate/
+data/pipelines/
+data/pareto/
+data/hitl/
+data/rootcause_metrics/
+
+# 第 55-A 步：备份与数据治理产物（本地可回溯，不进入版本库）
+backups/
+data/governance/
+
+# 本地/CI 质量门禁报告输出（第 51 步）
+ci-reports/
+
+backend/.env
+data/agent_runs/
+data/evaluation/runs/
+data/evidence_manifest.json
+data/evidence_generation_report.json
