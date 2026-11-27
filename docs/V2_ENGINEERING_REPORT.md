@@ -24,7 +24,7 @@
   与旧 README 记录的"704 passed / 17 failed"相差 1 项（环境相关，未逐项归档），总量 721 一致；
   失败集中在缺失旧 fixture Trace、质量门禁依赖 git 元数据、真实模型/预算语义变更等。
 - 本轮没有删除测试、没有降低断言；修复的是测试 fixture 选择与真实模型/预算语义。
-- 升级后全量 pytest（同一 venv）：**848 passed / 0 failed**（143.52s），无 skip 掩盖、无 xfail 新增。
+- 升级后全量 pytest（同一 venv）：**848 passed / 0 failed**（最近一次 158.31s），无 skip 掩盖、无 xfail 新增。
 
 ## 3. 关键工程改动
 
@@ -102,12 +102,30 @@
 
 - 新增测试：AgentRx 适配 22 项、QueryForge 互操作 85 项（含运行时 schema 兜底）、预算/管理员 7 项、
   真实反事实 6 项、根因实验 4 项、同源部署静态托管 3 项等。
-- 升级后全量执行：**848 passed / 0 failed**（`.venv\Scripts\python.exe -m pytest -q`，143.52s）。
+- 升级后全量执行：**848 passed / 0 failed**（`.venv\Scripts\python.exe -m pytest -q`，最近一次 158.31s）。
   升级前基线 721 项 / 703 通过 / 18 失败，净增 127 项新测试。
 - 前端 `npm run build` 通过（tsc --noEmit + vite build，2,242 modules，953 kB JS / 57.9 kB CSS）。
 - E2E（Playwright + 系统 Edge）：修复第 74 步 UI 文案统一后与 spec 的漂移，并补齐两个受控 fixture
   Trace 生成前置（`frontend/e2e/README.md`）；最终整轮结果见第 8 节。
 - 未调用真实 API 的测试使用 fake client / mock executor，不依赖付费凭据；真实 API 验收以独立脚本执行并受预算保护。
+
+### 5.1 CI 门禁（GitHub Actions，实际运行）
+
+- 发布仓库：<https://github.com/9mc79r92fj-wq/TracePilot-release>（沿用原地址，`main` 历史 fast-forward，无强改）
+- 工作流 `agent-evaluation`：后端全量 pytest → 前端 `npm run build` → 确定性评测质量门禁
+  （固定数据集 + Mock 执行器，不调用付费 API）
+- 最近一次运行（commit `de2f784`）：**success**
+  - 后端：**848 passed**（17.74s）
+  - 前端：`tsc && vite build` 成功
+  - 质量门禁：`gate_status=PASS`、`exit_code=0`、无阻断规则命中
+  - 运行记录：<https://github.com/9mc79r92fj-wq/TracePilot-release/actions/runs/45934089157>
+- 本轮为让 CI 在 Ubuntu 上稳定，修复了三类**环境/可移植性**问题（不改变功能与断言强度）：
+  1. 演示 sales SQLite 库 `*.db` 不入库 → 新增 `scripts/init_demo_db.py`，CI 在测试前显式初始化；
+  2. 流水线并发测试存在线程清理窗口，偶发误报「并发已达上限」→ 测试等待/对账计数器（生产代码不变）；
+  3. Pareto 约束筛选用例依赖本机是否恰好落盘过门禁报告 → 加入确定性的不存在 `dataset_version` 约束。
+  另外去掉了 `scripts/generate_evidence_runs.py` 中硬编码的 Windows 绝对路径。
+- 真实 API 冒烟测试独立为 `.github/workflows/real-api-smoke.yml`：**仅 workflow_dispatch 手动触发**，
+  必须配置 `DEEPSEEK_API_KEY` Secret，工作流内硬限总调用 6 次；普通 CI / PR 永不调用付费接口。
 
 ## 6. 原 ModelScope 部署（实际执行）
 
