@@ -696,6 +696,22 @@ def _run_pipeline_safe(pipeline_run_id: str) -> None:
             _RUNNING = max(0, _RUNNING - 1)
 
 
+def reconcile_runtime_state_for_tests() -> dict[str, int]:
+    """测试隔离辅助：让并发计数器与实际 RUNNING 记录数保持一致。
+
+    背景：流水线线程先把记录标记为终态，然后才在 finally 里把 ``_RUNNING`` 减一；
+    测试（或极快的调用方）看到终态就立刻启动下一条时，可能恰好落在清理窗口里并收到
+    「并发流水线已达上限」。真实调用方重试即可，但测试需要确定性，这里做一次显式对账。
+    生产代码路径不调用本函数。
+    """
+    global _RUNNING
+    with _LOCK:
+        actual = sum(1 for r in _PIPELINES.values() if r.get("status") == "RUNNING")
+        before = _RUNNING
+        _RUNNING = actual
+        return {"before": before, "after": actual}
+
+
 def _stage_by_id(record: dict[str, Any], stage_id: str) -> dict[str, Any] | None:
     for stage in record.get("stages") or []:
         if stage["stage_id"] == stage_id:

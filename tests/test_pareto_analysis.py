@@ -503,18 +503,23 @@ def test_api_pareto_end_to_end():
     assert "definition" in dominance.json()
     assert dominance.json()["paid_api_called"] is False
 
-    # 约束重新筛选：质量 1.0 + 延迟 <=0.001ms + 必须 PASS 安全门禁
-    # （模拟评测运行没有已落盘门禁报告 → 不可能满足）
+    # 约束重新筛选：质量 1.0 + 延迟 <=0.001ms + 必须 PASS 安全门禁 + 指定一个不存在的
+    # dataset_version（保证任何环境、任何计时精度下都不可能满足）→ 必须全部不可行。
+    # 说明：仅靠 quality/latency/gate 三个约束会依赖本地是否恰好落盘过门禁报告，
+    # 在 CI 上曾因历史门禁产物让候选变为可行，这里加入确定性的数据集版本约束。
     filtered = client.post(
         f"/api/pareto/analyses/{analysis_id}/filter",
         json={
             "minimum_quality": 1.0,
             "maximum_latency_ms": 0.001,
             "required_safety_gate": "PASS",
+            "dataset_version": "tracepilot-eval-v1-nonexistent",
         },
     )
     assert filtered.status_code == 200, filtered.text
-    assert filtered.json()["status"] == "NO_FEASIBLE_CANDIDATE"
+    # 存在不可比候选时接口返回 NO_COMPARABLE_CANDIDATE，否则 NO_FEASIBLE_CANDIDATE；
+    # 两者都表示"没有可行候选"，本用例验证的是约束不可满足而不是具体状态文案。
+    assert filtered.json()["status"] in {"NO_FEASIBLE_CANDIDATE", "NO_COMPARABLE_CANDIDATE"}
     assert filtered.json()["feasible_count"] == 0
     assert filtered.json()["view_of"] == analysis_id
 

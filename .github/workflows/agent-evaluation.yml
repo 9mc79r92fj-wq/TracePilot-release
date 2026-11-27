@@ -46,7 +46,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      # 4. 运行后端测试（确定性、无付费 API）
+      # 4. 初始化本地演示数据（sales 表；运行期 *.db 不入库，CI 需显式创建）
+      - name: Initialize demo SQLite data
+        run: python scripts/init_demo_db.py
+
+      # 5. 运行后端测试（确定性、无付费 API）
       - name: Run backend tests
         env:
           PYTHONIOENCODING: utf-8

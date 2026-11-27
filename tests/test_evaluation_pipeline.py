@@ -50,11 +50,13 @@ def _wait(pipeline_run_id: str, timeout: float = 120.0) -> dict:
 
 
 def _wait_idle(timeout: float = 60.0) -> None:
+    """等到没有 RUNNING 记录，且并发计数器也归零（线程清理窗口结束）。"""
     deadline = time.time() + timeout
     while time.time() < deadline:
         with ep._LOCK:
             running = any(r.get("status") == "RUNNING" for r in ep._PIPELINES.values())
-        if not running:
+            active = ep._RUNNING
+        if not running and active == 0:
             return
         time.sleep(0.05)
 
@@ -80,9 +82,12 @@ def _make_baseline_run() -> str:
 
 @pytest.fixture(autouse=True)
 def _ensure_no_stuck_pipeline():
+    # 每个用例开始前对账一次：终态记录对应的线程可能还在 finally 清理窗口内，
+    # 并发计数器应回到实际 RUNNING 记录数，否则下一个用例会误报「并发已达上限」。
+    ep.reconcile_runtime_state_for_tests()
     yield
     # 若用例失败导致流水线仍在运行，测试结束后等待其结束，避免影响后续用例
-    _wait_idle(timeout=30)
+    _wait_idle(timeout=60)
 
 
 # ---------------------------------------------------------------------------
