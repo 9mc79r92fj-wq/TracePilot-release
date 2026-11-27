@@ -1,0 +1,531 @@
+{
+  "benchmark": "agentrx",
+  "display_name": "Microsoft AgentRx failure benchmark - public GitHub subset",
+  "description": "TracePilot V2 adapter subset of Microsoft AgentRx (MIT). Only the public GitHub data/ files required for tau and Magentic-One failure-diagnosis evaluation are copied; the gated Hugging Face release is NOT used and the complete 170-case HF benchmark is NOT included.",
+  "upstream": {
+    "repo": "https://github.com/microsoft/AgentRx",
+    "repo_api": "https://api.github.com/repos/microsoft/AgentRx",
+    "commit": "7a18c79708e7671be15124460f4f7296107c2a55",
+    "commit_short": "7a18c79",
+    "commit_date": "2026-09-14T22:18:36Z",
+    "commit_subject": "Merge pull request #38 from danfiedler-msft/danfiedler/pin-actions",
+    "retrieved_from": "https://github.com/microsoft/AgentRx/archive/refs/heads/main.zip",
+    "snapshot_commit_verified": true,
+    "license": "MIT",
+    "license_file": "LICENSE.txt",
+    "license_url": "https://github.com/microsoft/AgentRx/blob/7a18c79708e7671be15124460f4f7296107c2a55/LICENSE.txt",
+    "copyright": "Copyright (c) Microsoft Corporation",
+    "paper": {
+      "arxiv_id": "2602.02475",
+      "title": "AgentRx: Diagnosing AI Agent Failures from Execution Trajectories",
+      "authors": [
+        "Shraddha Barke",
+        "Arnav Goyal",
+        "Alind Khare",
+        "Avaljot Singh",
+        "Suman Nath",
+        "Chetan Bansal"
+      ],
+      "url": "https://arxiv.org/abs/2602.02475"
+    },
+    "huggingface": {
+      "url": "https://huggingface.co/datasets/microsoft/AgentRx",
+      "gated": true,
+      "downloaded_for_this_subset": false,
+      "note": "The Hugging Face dataset is gated. This environment cannot download it; all data here comes from the public MIT-licensed GitHub repository."
+    }
+  },
+  "subset": {
+    "scope": "Public GitHub data/ files only: tau ground truth + failed trajectories, Magentic-One ground truth + the 44 annotated trajectory JSON files.",
+    "counts": {
+      "tau_cases": 29,
+      "magentic_cases": 44,
+      "total_cases": 73,
+      "trajectory_files": 45,
+      "copied_files": 48,
+      "copied_bytes": 4202338,
+      "trajectory_json_files": 45,
+      "tau_trajectory_files": 1,
+      "magentic_trajectory_files": 44
+    },
+    "step_number_convention": "ground_truth failures[].step_number and root_cause.failure_id map to 1-based message indices: tau -> traj[step_number-1] (traj.index agrees); magentic -> <uuid>.json[step_number-1].",
+    "files": [
+      {
+        "local_path": "LICENSE.txt",
+        "upstream_path": "LICENSE.txt",
+        "bytes": 1141,
+        "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+        "git_blob_sha1": "9e841e7a26e4eb057b24511e7b92d42b257a80e5",
+        "upstream_blob_sha1_at_commit": "9e841e7a26e4eb057b24511e7b92d42b257a80e5"
+      },
+      {
+        "local_path": "ground_truth/magentic_one_ground_truth.json",
+        "upstream_path": "data/ground_truth/magentic_one_ground_truth.json",
+        "bytes": 174086,
+        "sha256": "d10edefb004a2f1e59e8f487a0f0de5f4e6a60c1f2f713b49e6a422402019eae",
+        "git_blob_sha1": "08a75d31d2811c56e9b0ecd6bda56bb217759d0f",
+        "upstream_blob_sha1_at_commit": "08a75d31d2811c56e9b0ecd6bda56bb217759d0f"
+      },
+      {
+        "local_path": "ground_truth/tau_ground_truth.json",
+        "upstream_path": "data/ground_truth/tau_ground_truth.json",
+        "bytes": 33335,
+        "sha256": "58067689b2ec42f9cbfec2a84ec08d39cea4d8270617b55d0185862753642d16",
+        "git_blob_sha1": "75d9c531d6daeb544b9a364f1e2077f3991029b0",
+        "upstream_blob_sha1_at_commit": "75d9c531d6daeb544b9a364f1e2077f3991029b0"
+      },
+      {
+        "local_path": "magentic_dataset/08cae58d-4084-4616-b6dd-dd6534e4825b.json",
+        "upstream_path": "data/magentic_dataset/08cae58d-4084-4616-b6dd-dd6534e4825b.json",
+        "bytes": 184438,
+        "sha256": "fe66492b3f9e72d900ccd6e97579c4ab98897cea483d3e1a0a27f28344321340",
+        "git_blob_sha1": "2cdf46c3ef6ee7354c5bb87ea6ac975b5d7f65f4",
+        "upstream_blob_sha1_at_commit": "2cdf46c3ef6ee7354c5bb87ea6ac975b5d7f65f4"
+      },
+      {
+        "local_path": "magentic_dataset/0a65cb96-cb6e-4a6a-8aae-c1084f613456.json",
+        "upstream_path": "data/magentic_dataset/0a65cb96-cb6e-4a6a-8aae-c1084f613456.json",
+        "bytes": 115563,
+        "sha256": "765869d342883c30d67ebeccd3d3cecb2ce0bcafe4b41560d078696c259afffc",
+        "git_blob_sha1": "a8a880a72a217e1602ad8631596063d4a029e2e6",
+        "upstream_blob_sha1_at_commit": "a8a880a72a217e1602ad8631596063d4a029e2e6"
+      },
+      {
+        "local_path": "magentic_dataset/0ec4371851b96837b0a81b3dd3df401415061bb532fbafeb4609f3337c358508.json",
+        "upstream_path": "data/magentic_dataset/0ec4371851b96837b0a81b3dd3df401415061bb532fbafeb4609f3337c358508.json",
+        "bytes": 33056,
+        "sha256": "fac852e03b997fe7b2d3df23242ddf1d73d946ab4d679dd24731e931be0749fc",
+        "git_blob_sha1": "7940dfb5b613340565a00fadaf63ec67e7eb70de",
+        "upstream_blob_sha1_at_commit": "7940dfb5b613340565a00fadaf63ec67e7eb70de"
+      },
+      {
+        "local_path": "magentic_dataset/114d5fd0-e2ae-4b6d-a65a-870da2d19c08.json",
+        "upstream_path": "data/magentic_dataset/114d5fd0-e2ae-4b6d-a65a-870da2d19c08.json",
+        "bytes": 30584,
+        "sha256": "5d366977020dfd3f7905ae2b7bfaa47159a6185b2478ebd4a8fd4e9784272ef6",
+        "git_blob_sha1": "efc3c93a1baaac40efd27ba2a41b0dd654f03862",
+        "upstream_blob_sha1_at_commit": "efc3c93a1baaac40efd27ba2a41b0dd654f03862"
+      },
+      {
+        "local_path": "magentic_dataset/14569e28-c88c-43e4-8c32-097d35b9a67d.json",
+        "upstream_path": "data/magentic_dataset/14569e28-c88c-43e4-8c32-097d35b9a67d.json",
+        "bytes": 43743,
+        "sha256": "00d20295258e64a086b6336051c8095e538a6d187b83d916b140fb304029831e",
+        "git_blob_sha1": "834953aa58004f7b5eadfc479d760893b4dfb766",
+        "upstream_blob_sha1_at_commit": "834953aa58004f7b5eadfc479d760893b4dfb766"
+      },
+      {
+        "local_path": "magentic_dataset/16d825ff-1623-4176-a5b5-42e0f5c2b0ac.json",
+        "upstream_path": "data/magentic_dataset/16d825ff-1623-4176-a5b5-42e0f5c2b0ac.json",
+        "bytes": 168927,
+        "sha256": "26e909b769dd9e1c1c09b18ea1d40e0f69868794d3b62d68ceff591f13271119",
+        "git_blob_sha1": "6331319ec1815dfc83677d08903ec66be384b262",
+        "upstream_blob_sha1_at_commit": "6331319ec1815dfc83677d08903ec66be384b262"
+      },
+      {
+        "local_path": "magentic_dataset/1f975693-876d-457b-a649-393859e79bf3.json",
+        "upstream_path": "data/magentic_dataset/1f975693-876d-457b-a649-393859e79bf3.json",
+        "bytes": 182342,
+        "sha256": "b569564ec9fe4d82376b2c75dd24beff876573a07cadd0b44bce56512fb36268",
+        "git_blob_sha1": "6bd1bfcbd80f7abd9ea2ada1d8f827948d83af62",
+        "upstream_blob_sha1_at_commit": "6bd1bfcbd80f7abd9ea2ada1d8f827948d83af62"
+      },
+      {
+        "local_path": "magentic_dataset/2aa5dd83fbcd0dce9a3dd4592106e5b5edf738008d932e357d477bba80e59ccf.json",
+        "upstream_path": "data/magentic_dataset/2aa5dd83fbcd0dce9a3dd4592106e5b5edf738008d932e357d477bba80e59ccf.json",
+        "bytes": 12608,
+        "sha256": "949257c3ea5c6161c7720871375f7915d66bd516f3cafe268a60978455fc415a",
+        "git_blob_sha1": "657ae667de12b9d234b0c84c5f1c18d605d8a087",
+        "upstream_blob_sha1_at_commit": "657ae667de12b9d234b0c84c5f1c18d605d8a087"
+      },
+      {
+        "local_path": "magentic_dataset/2ddae3b7a208e3c25f14d82d7a1faaaa1832fbf950b4dac345e755c4c361f294.json",
+        "upstream_path": "data/magentic_dataset/2ddae3b7a208e3c25f14d82d7a1faaaa1832fbf950b4dac345e755c4c361f294.json",
+        "bytes": 330993,
+        "sha256": "aa69dec3309224970978405ac95a3a05b4439881584cb9e7699d5ef6362cd0e0",
+        "git_blob_sha1": "90cc58f2b828d6404d95dbcfc9cc2a1390b66db8",
+        "upstream_blob_sha1_at_commit": "90cc58f2b828d6404d95dbcfc9cc2a1390b66db8"
+      },
+      {
+        "local_path": "magentic_dataset/2dfc4c37-fec1-4518-84a7-10095d30ad75.json",
+        "upstream_path": "data/magentic_dataset/2dfc4c37-fec1-4518-84a7-10095d30ad75.json",
+        "bytes": 20809,
+        "sha256": "ce8e4379a1c803c001ea87ce6915c7595b1e912227ee4da6f78bf27da3154529",
+        "git_blob_sha1": "9b7031b82c0545e90d86798c6a01632a2f0a170f",
+        "upstream_blob_sha1_at_commit": "9b7031b82c0545e90d86798c6a01632a2f0a170f"
+      },
+      {
+        "local_path": "magentic_dataset/3af8028c2a59e28ca88baff0e6d91f2a9f170c5ef91003f1c8406755a2760ad4.json",
+        "upstream_path": "data/magentic_dataset/3af8028c2a59e28ca88baff0e6d91f2a9f170c5ef91003f1c8406755a2760ad4.json",
+        "bytes": 20682,
+        "sha256": "23fb14f3e4c896e96f8edd8317098efa418d133262f44ed68e9cb9909bc7c932",
+        "git_blob_sha1": "6b229c6b9e74ed903139a52edb5643951f4a6835",
+        "upstream_blob_sha1_at_commit": "6b229c6b9e74ed903139a52edb5643951f4a6835"
+      },
+      {
+        "local_path": "magentic_dataset/42576abe-0deb-4869-8c63-225c2d75a95a.json",
+        "upstream_path": "data/magentic_dataset/42576abe-0deb-4869-8c63-225c2d75a95a.json",
+        "bytes": 6776,
+        "sha256": "f976306e8626ddbcd6f2bbc416b9b76c06d31f2c6bc788cf49ff5eb17591fe30",
+        "git_blob_sha1": "a03c2c504d483d38d7dd50e660ecd801372a857f",
+        "upstream_blob_sha1_at_commit": "a03c2c504d483d38d7dd50e660ecd801372a857f"
+      },
+      {
+        "local_path": "magentic_dataset/42d4198c-5895-4f0a-b0c0-424a66465d83.json",
+        "upstream_path": "data/magentic_dataset/42d4198c-5895-4f0a-b0c0-424a66465d83.json",
+        "bytes": 28300,
+        "sha256": "bd0beb90a08cfd5bc0ce251f7582677a414544cbb34013a7ef08b0c2b9920bd7",
+        "git_blob_sha1": "60d116e05eda1a5cea058e21d5d75d59e3bc1b6b",
+        "upstream_blob_sha1_at_commit": "60d116e05eda1a5cea058e21d5d75d59e3bc1b6b"
+      },
+      {
+        "local_path": "magentic_dataset/52f7224e9c79431e7926afe317782711a0028750693e7456cde22ef6f4bd8bd5.json",
+        "upstream_path": "data/magentic_dataset/52f7224e9c79431e7926afe317782711a0028750693e7456cde22ef6f4bd8bd5.json",
+        "bytes": 33378,
+        "sha256": "e86b0d2263ddc184665f180a202bae7924f4a950681e78be74abb4965df0edda",
+        "git_blob_sha1": "082687939e4c7594f48fed987264e5168ca58381",
+        "upstream_blob_sha1_at_commit": "082687939e4c7594f48fed987264e5168ca58381"
+      },
+      {
+        "local_path": "magentic_dataset/557e78eceec08ca8b0da5f9fdaca6e1c7ec6140a8ce600983ee716327dab005e.json",
+        "upstream_path": "data/magentic_dataset/557e78eceec08ca8b0da5f9fdaca6e1c7ec6140a8ce600983ee716327dab005e.json",
+        "bytes": 38650,
+        "sha256": "705a14266fa44aa6dc546933ee9f69f59771d57fac983c0fad01478712cc7779",
+        "git_blob_sha1": "d9a950e3dbd265452e27a8b30dd26ae0b72394fe",
+        "upstream_blob_sha1_at_commit": "d9a950e3dbd265452e27a8b30dd26ae0b72394fe"
+      },
+      {
+        "local_path": "magentic_dataset/55f4258484c5b398956133128a50462a767da211f8f72aa5ac5bbffb9bcbba1a.json",
+        "upstream_path": "data/magentic_dataset/55f4258484c5b398956133128a50462a767da211f8f72aa5ac5bbffb9bcbba1a.json",
+        "bytes": 100098,
+        "sha256": "a35e8e1d96c3ba5cdf3fbf26a39822afaa63440f12453acbff9bad7cc9f0f24e",
+        "git_blob_sha1": "fbf3d6ed6a57651908a7165dbd2ebe5e86d898a1",
+        "upstream_blob_sha1_at_commit": "fbf3d6ed6a57651908a7165dbd2ebe5e86d898a1"
+      },
+      {
+        "local_path": "magentic_dataset/56137764-b4e0-45b8-9c52-1866420c3df5.json",
+        "upstream_path": "data/magentic_dataset/56137764-b4e0-45b8-9c52-1866420c3df5.json",
+        "bytes": 13948,
+        "sha256": "95959abfdb6a6a1b306b6ceae20f344035d553f9a4924c4371ec25d6363c610c",
+        "git_blob_sha1": "192c284f78ef0f6e74224b42571ce9aad4bbbf70",
+        "upstream_blob_sha1_at_commit": "192c284f78ef0f6e74224b42571ce9aad4bbbf70"
+      },
+      {
+        "local_path": "magentic_dataset/57d9dc6935e8a40b02e7f8ec81768fe70e68a0c05f6866927c9fda38db38a486.json",
+        "upstream_path": "data/magentic_dataset/57d9dc6935e8a40b02e7f8ec81768fe70e68a0c05f6866927c9fda38db38a486.json",
+        "bytes": 43311,
+        "sha256": "0ae3bfd88b85ee9c30bf7dd2bfd5571368a01298d6781e9c809750bb97bc350f",
+        "git_blob_sha1": "fc71a73a396f37309124159ae1cb72a300480b92",
+        "upstream_blob_sha1_at_commit": "fc71a73a396f37309124159ae1cb72a300480b92"
+      },
+      {
+        "local_path": "magentic_dataset/5d0080cb-90d7-4712-bc33-848150e917d3.json",
+        "upstream_path": "data/magentic_dataset/5d0080cb-90d7-4712-bc33-848150e917d3.json",
+        "bytes": 64791,
+        "sha256": "636f1290fdd65628513d604687b22d9d7a0df006459919c2f17d28863e0f66b8",
+        "git_blob_sha1": "0dcfb92e9452e0e03ba4cfa0631a50a5bcea72b6",
+        "upstream_blob_sha1_at_commit": "0dcfb92e9452e0e03ba4cfa0631a50a5bcea72b6"
+      },
+      {
+        "local_path": "magentic_dataset/5f982798-16b9-4051-ab57-cfc7ebdb2a91.json",
+        "upstream_path": "data/magentic_dataset/5f982798-16b9-4051-ab57-cfc7ebdb2a91.json",
+        "bytes": 132955,
+        "sha256": "0e7348c1f168477fb74f513207d996028314d8a4e6ab64aeed2da491b22840bc",
+        "git_blob_sha1": "3f431117bda2285f1c17f509d12f373926d6c74a",
+        "upstream_blob_sha1_at_commit": "3f431117bda2285f1c17f509d12f373926d6c74a"
+      },
+      {
+        "local_path": "magentic_dataset/624cbf11-6a41-4692-af9c-36b3e5ca3130.json",
+        "upstream_path": "data/magentic_dataset/624cbf11-6a41-4692-af9c-36b3e5ca3130.json",
+        "bytes": 119832,
+        "sha256": "5226eacf9d07aceff30889bed1076ee9df528753cb11faaddc9d2ff550b544e5",
+        "git_blob_sha1": "ad95f0609b8d7a4db28b76b82fc0b19e3f0fed6b",
+        "upstream_blob_sha1_at_commit": "ad95f0609b8d7a4db28b76b82fc0b19e3f0fed6b"
+      },
+      {
+        "local_path": "magentic_dataset/6b06d186921b8b390c65aebd0d16f09f60a47d2f1288ebe36953f734e84c0a3c.json",
+        "upstream_path": "data/magentic_dataset/6b06d186921b8b390c65aebd0d16f09f60a47d2f1288ebe36953f734e84c0a3c.json",
+        "bytes": 31197,
+        "sha256": "343c2ad9922a5ef7a24884b0a0324e778324446abe993f45bdf70001b5e4fc39",
+        "git_blob_sha1": "62fc75b51d76cb4bece885e09d5870120c1ed36a",
+        "upstream_blob_sha1_at_commit": "62fc75b51d76cb4bece885e09d5870120c1ed36a"
+      },
+      {
+        "local_path": "magentic_dataset/6e3be83d1949fa52cba03fb1ce4b5b3bf7e37a83fd7d67694b10b2e439d90cf8.json",
+        "upstream_path": "data/magentic_dataset/6e3be83d1949fa52cba03fb1ce4b5b3bf7e37a83fd7d67694b10b2e439d90cf8.json",
+        "bytes": 32851,
+        "sha256": "a289f6aa7098b0d6d3dfa9b6c522e1e0a073e2ac9f4ef97b54be3e8c6c2e2951",
+        "git_blob_sha1": "739c45f3427303d938d1daa367ac2ff44bbc6ecd",
+        "upstream_blob_sha1_at_commit": "739c45f3427303d938d1daa367ac2ff44bbc6ecd"
+      },
+      {
+        "local_path": "magentic_dataset/72c06643-a2fa-4186-aa5c-9ec33ae9b445.json",
+        "upstream_path": "data/magentic_dataset/72c06643-a2fa-4186-aa5c-9ec33ae9b445.json",
+        "bytes": 30437,
+        "sha256": "84f9fd02d2ae1e289fca1cca61f92ac51920ade5dbb124293b24aa4a25d67035",
+        "git_blob_sha1": "5ad562fb4471b6c2dadae5ea11add69984775389",
+        "upstream_blob_sha1_at_commit": "5ad562fb4471b6c2dadae5ea11add69984775389"
+      },
+      {
+        "local_path": "magentic_dataset/72e110e7-464c-453c-a309-90a95aed6538.json",
+        "upstream_path": "data/magentic_dataset/72e110e7-464c-453c-a309-90a95aed6538.json",
+        "bytes": 16079,
+        "sha256": "f13c4db51196f41a28172709c7761e4ae42201d51aa207eb254cd3891ec5d90a",
+        "git_blob_sha1": "f0462aea3551776b2c83bf4d1402aa1b0e7c9c10",
+        "upstream_blob_sha1_at_commit": "f0462aea3551776b2c83bf4d1402aa1b0e7c9c10"
+      },
+      {
+        "local_path": "magentic_dataset/73c1b9fe-ee1d-4cf4-96ca-35c08f97b054.json",
+        "upstream_path": "data/magentic_dataset/73c1b9fe-ee1d-4cf4-96ca-35c08f97b054.json",
+        "bytes": 21862,
+        "sha256": "5fa20abb78c48ed90a6343130d88abdc094ccbbdf8de1006272aa513e9158d49",
+        "git_blob_sha1": "dd682ce52c3ca7620017ca890046c7cbdd3d0b18",
+        "upstream_blob_sha1_at_commit": "dd682ce52c3ca7620017ca890046c7cbdd3d0b18"
+      },
+      {
+        "local_path": "magentic_dataset/748899d9d70c09beb3bd48ac8a3658bdcfd2f9114fe6dc4c4b8d2f9541ef4607.json",
+        "upstream_path": "data/magentic_dataset/748899d9d70c09beb3bd48ac8a3658bdcfd2f9114fe6dc4c4b8d2f9541ef4607.json",
+        "bytes": 130556,
+        "sha256": "e3bc50f6868626b2b0ab362c1ac66f76f7aacff50d55fc25888a74341bebdfb4",
+        "git_blob_sha1": "4fd2fd1fdab2a06fef061eea58a15c57f653f004",
+        "upstream_blob_sha1_at_commit": "4fd2fd1fdab2a06fef061eea58a15c57f653f004"
+      },
+      {
+        "local_path": "magentic_dataset/797f7a5b65ca28b7e7156e7db1e9f117bd4a021de0cd512bfdbb0be897d89eab.json",
+        "upstream_path": "data/magentic_dataset/797f7a5b65ca28b7e7156e7db1e9f117bd4a021de0cd512bfdbb0be897d89eab.json",
+        "bytes": 140147,
+        "sha256": "a5db373ee6cc836be8659023c262a4790759c6896c8a662a53a553e061b93631",
+        "git_blob_sha1": "5126d4991498780a5657a103e64004e6533539c0",
+        "upstream_blob_sha1_at_commit": "5126d4991498780a5657a103e64004e6533539c0"
+      },
+      {
+        "local_path": "magentic_dataset/840bfca7-4f7b-481a-8794-c560c340185d.json",
+        "upstream_path": "data/magentic_dataset/840bfca7-4f7b-481a-8794-c560c340185d.json",
+        "bytes": 34202,
+        "sha256": "d64df13d285cfa2b53d8e1881569f3fd25ad29311aa261fb673ff21ed3debe73",
+        "git_blob_sha1": "ed33019c02ebe3bf17ee78946002def29fcc4443",
+        "upstream_blob_sha1_at_commit": "ed33019c02ebe3bf17ee78946002def29fcc4443"
+      },
+      {
+        "local_path": "magentic_dataset/8ad84bd6fe38481ba49e7ad1f6fbd43219a999074e5c6fc940003281f55ec65b.json",
+        "upstream_path": "data/magentic_dataset/8ad84bd6fe38481ba49e7ad1f6fbd43219a999074e5c6fc940003281f55ec65b.json",
+        "bytes": 60392,
+        "sha256": "b22f5b9b401c141de56357b3f2b75c4c000a72a666bab524e8def759628d76ca",
+        "git_blob_sha1": "2eac342c07b5285ee420ff9bc1136086e12e8bef",
+        "upstream_blob_sha1_at_commit": "2eac342c07b5285ee420ff9bc1136086e12e8bef"
+      },
+      {
+        "local_path": "magentic_dataset/8b3379c0-0981-4f5b-8407-6444610cb212.json",
+        "upstream_path": "data/magentic_dataset/8b3379c0-0981-4f5b-8407-6444610cb212.json",
+        "bytes": 67509,
+        "sha256": "70aba5dbf730356f603279fd53355d32a64368c39cf96373036bfe0ba1a08048",
+        "git_blob_sha1": "9814b08efc20b56b547109292ea0ae28f2baa4c7",
+        "upstream_blob_sha1_at_commit": "9814b08efc20b56b547109292ea0ae28f2baa4c7"
+      },
+      {
+        "local_path": "magentic_dataset/929b45f34805280d77c61d1e093e3d4e551d77ddb6ecd73552b12b1af286388d.json",
+        "upstream_path": "data/magentic_dataset/929b45f34805280d77c61d1e093e3d4e551d77ddb6ecd73552b12b1af286388d.json",
+        "bytes": 15175,
+        "sha256": "8fdb1a83be3dd05a4c1499ef73f49c4c3c1dcd6e3877af9eb61caee3b282b8ac",
+        "git_blob_sha1": "4926c5c193053a5f45faf431443c89bc970da49a",
+        "upstream_blob_sha1_at_commit": "4926c5c193053a5f45faf431443c89bc970da49a"
+      },
+      {
+        "local_path": "magentic_dataset/9baaa267c95f9d8b75741ee9169c50563d297cfa592c20deaffd30dbc5984c74.json",
+        "upstream_path": "data/magentic_dataset/9baaa267c95f9d8b75741ee9169c50563d297cfa592c20deaffd30dbc5984c74.json",
+        "bytes": 57438,
+        "sha256": "563aa312b0f60fdfecff535892cd72a1d3401f7058563bdd12eb6f8e34248542",
+        "git_blob_sha1": "b401d2c9b6ba1c600fa16d87a006c0967ae7df82",
+        "upstream_blob_sha1_at_commit": "b401d2c9b6ba1c600fa16d87a006c0967ae7df82"
+      },
+      {
+        "local_path": "magentic_dataset/9e31099fffa6a3891c94934fd4fc2f3f522d51c1904ff3561f3a10e4bf245821.json",
+        "upstream_path": "data/magentic_dataset/9e31099fffa6a3891c94934fd4fc2f3f522d51c1904ff3561f3a10e4bf245821.json",
+        "bytes": 182206,
+        "sha256": "24d28ee132903fd2e34aef9942d73aec1cf3fd993a2d1a70935b7e2dbfa4c429",
+        "git_blob_sha1": "2e879f161ece92ee542433b1a69eaa2981f4e414",
+        "upstream_blob_sha1_at_commit": "2e879f161ece92ee542433b1a69eaa2981f4e414"
+      },
+      {
+        "local_path": "magentic_dataset/a1e91b78-d3d8-4675-bb8d-62741b4b68a6.json",
+        "upstream_path": "data/magentic_dataset/a1e91b78-d3d8-4675-bb8d-62741b4b68a6.json",
+        "bytes": 38344,
+        "sha256": "08e6358f4069c90c54beb01b188c1c5f2eb185a970fc49a05c20cca3b6e1f327",
+        "git_blob_sha1": "187b71df7331146a1dfc3617ab9b04e6d5b44cea",
+        "upstream_blob_sha1_at_commit": "187b71df7331146a1dfc3617ab9b04e6d5b44cea"
+      },
+      {
+        "local_path": "magentic_dataset/a3fbeb63-0e8c-4a11-bff6-0e3b484c3e9c.json",
+        "upstream_path": "data/magentic_dataset/a3fbeb63-0e8c-4a11-bff6-0e3b484c3e9c.json",
+        "bytes": 25315,
+        "sha256": "2e0979cbf8b4c77362b9a111a5e9c1c9f3fd059ae6aea80f48f949ef20a72c7c",
+        "git_blob_sha1": "4bbaddc1048e1081824ee76951496df9164850fc",
+        "upstream_blob_sha1_at_commit": "4bbaddc1048e1081824ee76951496df9164850fc"
+      },
+      {
+        "local_path": "magentic_dataset/a9074997e698f912b9e751779ea19c1e92fa148404e90e0ae997acea3f9559b0.json",
+        "upstream_path": "data/magentic_dataset/a9074997e698f912b9e751779ea19c1e92fa148404e90e0ae997acea3f9559b0.json",
+        "bytes": 102860,
+        "sha256": "9b035aca5b89d6624b90b850e7be91b4c82d78a355520d143aeead3c84a2de91",
+        "git_blob_sha1": "629b5e2a3aba9f78866ab1cbecd32e43edcb1d35",
+        "upstream_blob_sha1_at_commit": "629b5e2a3aba9f78866ab1cbecd32e43edcb1d35"
+      },
+      {
+        "local_path": "magentic_dataset/b36ef2d8f2643b80e74a44ce3403f674ecb2aed7fd36afeaa289061a59feef92.json",
+        "upstream_path": "data/magentic_dataset/b36ef2d8f2643b80e74a44ce3403f674ecb2aed7fd36afeaa289061a59feef92.json",
+        "bytes": 26948,
+        "sha256": "adb7d25b36c9429481255e3dd1e134ea38e4c3b958a892b1f8dfc9f937f326c8",
+        "git_blob_sha1": "87728176b8a47681b7d687d823e72ee8c1954272",
+        "upstream_blob_sha1_at_commit": "87728176b8a47681b7d687d823e72ee8c1954272"
+      },
+      {
+        "local_path": "magentic_dataset/b816bfce-3d80-4913-a07d-69b752ce6377.json",
+        "upstream_path": "data/magentic_dataset/b816bfce-3d80-4913-a07d-69b752ce6377.json",
+        "bytes": 28904,
+        "sha256": "5feebd5d4f64a205eeac881d4bca31a5416533301e510639ef2cd99c183e5233",
+        "git_blob_sha1": "552f0ffd35f7347e1d65d737618fa92754455c7b",
+        "upstream_blob_sha1_at_commit": "552f0ffd35f7347e1d65d737618fa92754455c7b"
+      },
+      {
+        "local_path": "magentic_dataset/c7afe00869f98cf363fd83677ac41757ed5e57f03eacc3d1304feb0a92084bd1.json",
+        "upstream_path": "data/magentic_dataset/c7afe00869f98cf363fd83677ac41757ed5e57f03eacc3d1304feb0a92084bd1.json",
+        "bytes": 134246,
+        "sha256": "06964e63799784640839c733cc76ada32690694ce16eaa1acc0a316e026ce72e",
+        "git_blob_sha1": "00576c28f348be6afe483c3937b651852039ff50",
+        "upstream_blob_sha1_at_commit": "00576c28f348be6afe483c3937b651852039ff50"
+      },
+      {
+        "local_path": "magentic_dataset/ccec2229ced20a4b0cb4897e3a99120a3017ea030903e01c9bda6b13d40b0b14.json",
+        "upstream_path": "data/magentic_dataset/ccec2229ced20a4b0cb4897e3a99120a3017ea030903e01c9bda6b13d40b0b14.json",
+        "bytes": 51573,
+        "sha256": "fe8d9abd858d80cd980d9c2300d4af08dffb95e1608dd12e71d4c0a48a232b94",
+        "git_blob_sha1": "93ea709c0fe73fd37877eb023c10c14ffdf16bf0",
+        "upstream_blob_sha1_at_commit": "93ea709c0fe73fd37877eb023c10c14ffdf16bf0"
+      },
+      {
+        "local_path": "magentic_dataset/e6bc98089608217e45b6956a46518fe3cce64a799b3ac43c6974c449ae14c408.json",
+        "upstream_path": "data/magentic_dataset/e6bc98089608217e45b6956a46518fe3cce64a799b3ac43c6974c449ae14c408.json",
+        "bytes": 10027,
+        "sha256": "8da001786a7ec67b75a8b48e249f323f10a48783e18e42d35655b46d82609464",
+        "git_blob_sha1": "f417a552d6f9d2970c23ecee690bd7532324f6d2",
+        "upstream_blob_sha1_at_commit": "f417a552d6f9d2970c23ecee690bd7532324f6d2"
+      },
+      {
+        "local_path": "magentic_dataset/ebbc1f13-d24d-40df-9068-adcf735b4240.json",
+        "upstream_path": "data/magentic_dataset/ebbc1f13-d24d-40df-9068-adcf735b4240.json",
+        "bytes": 105662,
+        "sha256": "87ec92a1f1a247184cc2dc2e51c67e4f9829765d4499f0e29caefa8845031e29",
+        "git_blob_sha1": "8fb35a47143b13e99bdbebb05422da4b37d1d98e",
+        "upstream_blob_sha1_at_commit": "8fb35a47143b13e99bdbebb05422da4b37d1d98e"
+      },
+      {
+        "local_path": "magentic_dataset/f88066d274e265edd6cd9d61cd80a41accb3a14baf2297652fdd05cdf716d455.json",
+        "upstream_path": "data/magentic_dataset/f88066d274e265edd6cd9d61cd80a41accb3a14baf2297652fdd05cdf716d455.json",
+        "bytes": 24048,
+        "sha256": "ffc79ed787afb56063028af97dc59c9fde7ef675b22cb77e57c8793321fe05a0",
+        "git_blob_sha1": "2af3852a413d44032d878e7734a484f46dcda439",
+        "upstream_blob_sha1_at_commit": "2af3852a413d44032d878e7734a484f46dcda439"
+      },
+      {
+        "local_path": "tau_retail/tau_dataset_failed.json",
+        "upstream_path": "data/tau_retail/tau_dataset_failed.json",
+        "bytes": 900014,
+        "sha256": "17f8b3356d1124274cc7ed0215b5ff696970073dbed57394c60e775d5f85d717",
+        "git_blob_sha1": "8b74aa1a37f813daaafce10e2a4d8f4c584cecef",
+        "upstream_blob_sha1_at_commit": "8b74aa1a37f813daaafce10e2a4d8f4c584cecef"
+      }
+    ],
+    "not_copied": [
+      "data/policies/*.txt (agent policies; not needed for label/step loading)",
+      "data/tool_schemas/tools_structure.json (not needed for loading/step mapping)",
+      "data/failure_timelines.pdf (large PDF; not needed)",
+      "data/ground_truth/tau_retail.json (24-case partial annotation file; the 29-case tau_ground_truth.json is used instead)",
+      "data/magentic_dataset/{count.py,magentic_count.jsonl,steps_by_id.json}",
+      "14 Magentic-One trajectory JSON files that have no ground-truth annotation entry",
+      "data/magentic_dataset_whowhen/* (auxiliary files; not used)",
+      "trajectories/, agentrx/ code, tests (code not needed for the benchmark adapter)"
+    ],
+    "excluded_annotation_file": "data/ground_truth/tau_retail.json"
+  },
+  "labels": {
+    "source_fields": [
+      "trajectory_id",
+      "failures[]",
+      "root_cause",
+      "failure_summary"
+    ],
+    "failure_fields": [
+      "failure_id",
+      "step_number",
+      "step_reason",
+      "failure_category",
+      "category_reason",
+      "failed_agent"
+    ],
+    "root_cause_fields": [
+      "failure_id",
+      "reason_for_root_cause"
+    ],
+    "adapter_label_fields": [
+      "root_cause_step",
+      "root_cause_failure_id",
+      "root_cause_category",
+      "root_cause_reason",
+      "failure_steps",
+      "failure_categories",
+      "failure_ids",
+      "failure_agents",
+      "failed_agent",
+      "failure_summary"
+    ],
+    "policy": "Labels are evaluation-only. case_without_labels() and to_trace_record() exclude every annotation field; labels are exposed only via case_labels()/BenchmarkCase for scoring.",
+    "known_data_quirks": [
+      "One Magentic-One case (08cae58d-4084-4616-b6dd-dd6534e4825b) stores root_cause.failure_id as the string \"1\" while failures[].failure_id is the integer 1; the adapter matches by str() and preserves the raw value.",
+      "274 tau assistant messages have content=null when they only carry tool_calls; the adapter allows empty assistant content and preserves the raw message.",
+      "Magentic-One failure annotations contain two failed_agent/role spelling mismatches (FileSurfer vs Orchestrator, Assistant vs Orchestrator); the adapter keeps raw values and normalises agent names only for comparison.",
+      "Some Magentic-One ground-truth failed_agent values use 'Websurfer' while trajectory roles use 'WebSurfer'; alignment checks are case-insensitive."
+    ]
+  },
+  "split": {
+    "method": "sha256(case_id + '|' + str(seed)) 的前 8 个十六进制字符视为 uint32；< 2^31 划入 dev，否则划入 test。seed 默认 42，按 case_id 稳定、互斥。",
+    "default_seed": 42,
+    "counts_seed_42": {
+      "dev": 38,
+      "test": 35
+    },
+    "counts_seed_42_by_source": {
+      "tau": {
+        "dev": 15,
+        "test": 14
+      },
+      "magentic": {
+        "dev": 23,
+        "test": 21
+      }
+    },
+    "strict_isolation": true,
+    "note": "dev and test are disjoint; the same case_id+seed always lands in the same split. dev is the development/calibration partition and test is held out (train/test isolation)."
+  },
+  "generation": {
+    "generated_at": "2026-11-27T01:32:00.827192+00:00",
+    "generator": "TracePilot V2 agentrx_benchmark data-subset preparation",
+    "copy_mode": "byte-for-byte copy of the upstream files; no content modification",
+    "checksum_algorithm": "sha256",
+    "verification": {
+      "files_checked": 48,
+      "sha256_checked": 48,
+      "git_blob_sha1_match_upstream_commit": 48,
+      "verified_against_github_tree_at_commit": true
+    }
+  },
+  "limitations": [
+    "Only the public MIT-licensed GitHub data/ subset is used; this is NOT the complete Hugging Face benchmark (reported 170 cases).",
+    "The Hugging Face release is gated and was not downloaded; no claim is made that the 73 cases here equal the official full evaluation set.",
+    "Subset covers 2 of 3 domains: tau-bench retail (29) and Magentic-One (44); the Flash domain ground truth is not present in the public GitHub data/ directory used here.",
+    "Failure/root-cause labels are human/LLM adjudicated annotations from AgentRx; they are used only as evaluation labels and never enter the diagnostic model input.",
+    "Trajectories provide no per-message timestamps; TraceRecord conversion uses deterministic synthetic timestamps to satisfy the Trace schema.",
+    "The adapter does not access the network at runtime and does not write to production data/traces.",
+    "Redistribution must retain the MIT license notice (LICENSE.txt copied verbatim)."
+  ],
+  "provenance_note": "This manifest was generated from the pinned commit snapshot; 48 copied files were verified byte-for-byte against that commit (GitHub git-tree blob SHA-1)."
+}

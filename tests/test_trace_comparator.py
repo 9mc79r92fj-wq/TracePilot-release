@@ -19,7 +19,7 @@ from backend.app.services.trace_comparator import (  # noqa: E402
     compare_trace_files,
 )
 
-DATA_TRACES = PROJECT_ROOT / "data" / "traces"
+DATA_TRACES = Path(__file__).resolve().parent / "fixtures" / "traces"
 
 
 # 第 21 步固定 fixture Trace（显式指定，避免被 data/traces 中新增运行记录干扰）

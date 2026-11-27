@@ -25,7 +25,7 @@ def test_agent_status():
     modes = {m["mode"]: m for m in s["modes"]}
     assert modes["mock"]["available"] is True
     assert modes["mock"]["simulated"] is True
-    assert s["allowed_models"] == ["deepseek-chat", "deepseek-reasoner"]
+    assert s["allowed_models"] == ["deepseek-flash", "deepseek-v4-pro"]
     assert set(s["data_sources"]) == {"real_api", "mock", "simulated"}
     # 工具白名单必须覆盖实际可用的本地安全工具，且不得包含系统命令/任意代码执行工具
     assert {"calculator", "text_analyzer", "sqlite_query"}.issubset(set(s["tool_whitelist"]))

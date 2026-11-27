@@ -160,7 +160,7 @@ def test_invalid_model_rejected(monkeypatch):
 
 
 def test_model_allowlist():
-    assert ALLOWED_MODELS == ("deepseek-chat", "deepseek-reasoner")
+    assert ALLOWED_MODELS == ("deepseek-flash", "deepseek-v4-pro")
 
 
 # ---------- 6. 错误处理 ----------
@@ -288,7 +288,7 @@ def test_real_path_normalizes_run_id(monkeypatch):
     assert run.status == "succeeded"
     assert run.data_source == "real_api"
     assert run.simulated is False
-    assert run.model == "deepseek-chat"
+    assert run.model == "deepseek-flash"
     # Token 来自 Trace 真实记录（桩里是 120）
     assert run.token_usage["total_tokens"] == 120
 

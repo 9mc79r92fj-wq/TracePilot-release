@@ -105,6 +105,10 @@ class ModelCallError(AgentError):
     """模型调用失败（网络 / HTTP / 响应解析错误）。"""
 
 
+class AgentBudgetError(AgentError):
+    """真实模型调用预算不足（未发出上游请求）。"""
+
+
 class AgentTimeoutError(AgentError):
     """模型调用或整体执行超时。"""
 
@@ -223,6 +227,22 @@ async def _chat(
         kwargs["tools"] = tools
         kwargs["tool_choice"] = "auto"
 
+    base_url = str(getattr(client, "base_url", "") or "")
+    local_model = "api.deepseek.com" not in base_url
+    if not local_model:
+        # 每次真实上游调用前扣减一次持久化预算；不足时直接拒绝，不发出请求。
+        from backend.app.services.real_api_budget import RealCallBudgetExceeded, reserve_real_call
+        from backend.app.services.request_context import get_client_key
+
+        try:
+            reserve_real_call(
+                kind="agent_model_call",
+                model=model,
+                visitor_key=get_client_key(),
+            )
+        except RealCallBudgetExceeded as exc:
+            raise AgentBudgetError(f"真实模型调用预算不足：{exc}") from exc
+
     try:
         response = await client.chat.completions.create(**kwargs)
     except APITimeoutError as exc:
@@ -237,8 +257,6 @@ async def _chat(
 
     # Provider 标识按实际 base_url 判定：本地脚本化服务（验收/离线回放）不能被
     # 标注成 deepseek，否则前端成本与来源展示会把模拟模型误认为真实付费 Provider。
-    base_url = str(getattr(client, "base_url", "") or "")
-    local_model = "api.deepseek.com" not in base_url
     usage_meta: dict[str, Any] = {
         "provider": "local-scripted-llm" if local_model else "deepseek",
         "model": model,
@@ -261,6 +279,17 @@ async def _chat(
             raw_usage = None
         usage_meta["usage_source"] = "SIMULATED" if local_model else "PROVIDER_REPORTED"
         usage_meta["raw_usage"] = raw_usage
+        if not local_model:
+            from backend.app.services.real_api_budget import record_real_usage
+            from backend.app.services.request_context import get_client_key
+
+            record_real_usage(
+                kind="agent_model_call",
+                model=model,
+                input_tokens=usage.get("input_tokens"),
+                output_tokens=usage.get("output_tokens"),
+                visitor_key=get_client_key(),
+            )
     return message, usage, usage_meta
 
 # ---------------------------------------------------------------------------

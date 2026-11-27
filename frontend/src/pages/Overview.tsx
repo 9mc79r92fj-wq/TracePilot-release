@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RefreshCw } from 'lucide-react'
+import { ArrowRight, RefreshCw } from 'lucide-react'
 import {
   apiErrorMessage,
   fetchFailedSummary,
@@ -8,6 +8,8 @@ import {
   fetchHealth,
   fetchTraces,
 } from '../api'
+import { fetchV2Status, readableReadiness } from '../v2api'
+import type { V2Status } from '../v2api'
 import type { FailedSummaryResponse, GovernanceSourcesResponse, Health, TraceSummary } from '../types'
 import { Card, EmptyState, ErrorBox, Spinner, StatCard, StatusBadge } from '../components/ui'
 
@@ -26,6 +28,7 @@ export default function Overview() {
   const [traces, setTraces] = useState<TraceSummary[]>([])
   const [sources, setSources] = useState<GovernanceSourcesResponse | null>(null)
   const [failed, setFailed] = useState<FailedSummaryResponse | null>(null)
+  const [v2, setV2] = useState<V2Status | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,17 +36,20 @@ export default function Overview() {
     setLoading(true)
     setError(null)
     // Trace 列表是首屏核心数据；健康检查/来源统计为辅助信息，单项失败不应让整页报错。
-    const [healthResult, tracesResult, sourcesResult, failedResult] = await Promise.allSettled([
-      fetchHealth(),
-      fetchTraces(),
-      fetchGovernanceSources(),
-      fetchFailedSummary(6),
-    ])
+    const [healthResult, tracesResult, sourcesResult, failedResult, v2Result] =
+      await Promise.allSettled([
+        fetchHealth(),
+        fetchTraces(),
+        fetchGovernanceSources(),
+        fetchFailedSummary(6),
+        fetchV2Status(),
+      ])
     if (tracesResult.status === 'fulfilled') setTraces(tracesResult.value.traces)
     else setError(apiErrorMessage(tracesResult.reason))
     setHealth(healthResult.status === 'fulfilled' ? healthResult.value : null)
     if (sourcesResult.status === 'fulfilled') setSources(sourcesResult.value)
     if (failedResult.status === 'fulfilled') setFailed(failedResult.value)
+    setV2(v2Result.status === 'fulfilled' ? v2Result.value : null)
     setLoading(false)
   }, [])
 
@@ -73,6 +79,47 @@ export default function Overview() {
 
       {error && <ErrorBox message={error} />}
       {loading && <Spinner />}
+
+      {v2 && (
+        <div
+          className="row"
+          style={{
+            gap: 10,
+            padding: '10px 14px',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            boxShadow: 'var(--shadow)',
+          }}
+        >
+          <span className="badge blue">V2</span>
+          <span className="small muted">真实 API</span>
+          <span className={'badge ' + (v2.real_api.available ? 'success' : 'muted')}>
+            {v2.real_api.available ? '可用' : '不可用'}
+          </span>
+          {!v2.real_api.available && (
+            <span
+              className="small muted"
+              title={readableReadiness(v2.real_api.blocking_reasons).join('；') || undefined}
+            >
+              原因见 V2 实验页
+            </span>
+          )}
+          <span className="small muted">
+            预算剩余 {v2.budget.total_calls_remaining} / {v2.budget.total_calls_limit}
+          </span>
+          <span className="small muted">
+            估算费用 ¥{(v2.budget.estimated_cost_cny ?? 0).toFixed(4)}（估算，非 Provider 账单）
+          </span>
+          <span className="small muted">
+            公开 Benchmark {v2.benchmark.available ? `已生成 · ${v2.benchmark.case_count ?? '—'} 例` : '尚未生成'}
+          </span>
+          <div style={{ flex: 1 }} />
+          <button className="btn" onClick={() => navigate('/v2')}>
+            V2 实验 <ArrowRight size={14} />
+          </button>
+        </div>
+      )}
 
       {!loading && !error && (
         <>

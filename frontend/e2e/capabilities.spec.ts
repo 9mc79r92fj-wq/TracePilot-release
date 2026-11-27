@@ -13,7 +13,19 @@ import { expect, test, type APIRequestContext, type Page } from '@playwright/tes
  */
 
 const API = 'http://127.0.0.1:8000'
-const REAL_TRACE_ID = 'trace-4d3d82dc7a67496dbc2842cd3b31aa47'
+
+/**
+ * 决策解释使用一条真实的本地 MOCK Trace（当前数据没有已验证的 REAL_API Trace，
+ * REAL_API 全库 0，不假设存在真实调用）；trace_id 从 API 动态发现，避免数据重建后失效。
+ */
+async function resolveMockTraceId(request: APIRequestContext): Promise<string> {
+  const resp = await request.get(`${API}/api/traces?source_class=MOCK`)
+  expect(resp.ok(), await resp.text()).toBeTruthy()
+  const body = (await resp.json()) as { traces: { trace_id: string; step_count: number }[] }
+  const hit = body.traces.find((t) => t.step_count >= 4) ?? body.traces[0]
+  expect(hit, '应存在 MOCK Trace 用于决策解释验收').toBeTruthy()
+  return hit.trace_id
+}
 
 async function waitRun(request: APIRequestContext, runId: string) {
   await expect
@@ -69,18 +81,19 @@ test('Evaluation Center：根因 Top-1/Top-3 指标（真实运行 + 受控金�
   await expect(card.getByText('Top-1 准确率')).toBeVisible()
   await expect(card.getByText('Top-3 覆盖率')).toBeVisible()
   await expect(card.getByText(/模拟执行，非真实计费/)).toBeVisible()
-  await expect(card.getByText(/合成数据/)).toBeVisible()
+  await expect(card.getByText(/合成故障评测集/)).toBeVisible()
   await expect(card.getByText(/未验证（不按 0 或 100% 处理）/)).toBeVisible()
   const rows = card.locator('.rca-case-row')
   expect(await rows.count()).toBeGreaterThanOrEqual(1)
 })
 
-test('Trace 详情：决策解释（证据化理由，不是思维链）', async ({ page }) => {
-  await page.goto(`/traces/${REAL_TRACE_ID}`, { waitUntil: 'domcontentloaded' })
+test('Trace 详情：决策解释（证据化理由，不是思维链）', async ({ page, request }) => {
+  const mockTraceId = await resolveMockTraceId(request)
+  await page.goto(`/traces/${mockTraceId}`, { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: /Trace 详情/ })).toBeVisible()
   const card = page.locator('.card', { hasText: '决策解释' })
   await expect(card).toBeVisible({ timeout: 60_000 })
-  await expect(card.getByText('不是思维链，仅为证据化理由')).toBeVisible()
+  await expect(card.getByText('证据化理由（非思维链）')).toBeVisible()
   await expect(card.locator('tbody tr').first()).toBeVisible()
   await expect(card.getByText(/不保存也不推断模型内部思维链/)).toBeVisible()
 })

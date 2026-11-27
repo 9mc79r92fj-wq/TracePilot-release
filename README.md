@@ -1,34 +1,40 @@
 # TracePilot
 
-TracePilot 是一个面向 AI Agent 的可观测性与可靠性实验平台：采集 Agent 执行轨迹、把异构日志标准化为可比较的 Trace、用 DAG 还原执行链路，并在可控的故障注入下分析故障传播、定位根因、做反事实推演与最小修复验证。
+TracePilot 是一个面向真实长程 Agent 的**过程评测、故障归因与反事实修复验证平台**。
 
-它解决的问题是：Agent 出错时，开发者通常只能看到一段"最终回答不对"的日志。TracePilot 把一次执行拆成可回放、可对比、可干预的结构化轨迹，让"为什么错、错在哪、改哪一步最有效"变成可以实验的问题。
+它解决的问题是：Agent 失败时，开发者通常只能看到一段"最终回答不对"的日志。TracePilot 把一次执行拆成
+可回放、可对比、可干预的结构化 Trace，在此基础上回答三个工程问题——
 
-## 核心功能
+1. **过程好不好**：每一步的工具调用、模型决策、证据链是否符合任务与策略要求；
+2. **错在哪一步、为什么错**：故障传播路径、根因候选排序、证据血缘；
+3. **改哪一步最有效**：受控反事实重放与最小修复验证，用真实重放结果而不是模型自述来判定是否修好。
+
+在线演示：<https://www.modelscope.cn/studios/luis123XI394/TracePilot>
+（ModelScope 创空间，免费 CPU 环境；真实模型调用受持久预算限制，详见下文"真实/模拟边界"）
+
+## 核心能力
 
 | 能力 | 说明 |
 |---|---|
-| Agent 执行轨迹采集 | 记录每一步工具调用、提示词、模型输出、耗时与 Token |
-| Trace 标准化 | 统一为带节点/边的 schema，支持派生轨迹与证据血缘 |
-| DAG 执行链路可视化 | 前端以节点图展示调用链与耗时、状态 |
-| 故障注入 | 在指定步骤注入超时、异常、错误参数等故障 |
-| 故障传播分析 | 分析故障沿调用链的扩散路径与影响面 |
-| 根因定位 | 基于传播路径与证据血缘给出候选根因 |
-| 反事实分析 | 假设某一步不同，重新推演结果差异 |
-| 最小修复搜索 | 搜索改动最小的修复方案并验证 |
-| 修复验证 | 对修复前后轨迹做对比与回归检测 |
-| Bad Case 归因 | 把失败样本归因到具体能力与步骤 |
-| 评测中心 | 评测集、版本对比、判分与质量门禁 |
-| LLM Judge | 单/多评判器、校准与一致性分析 |
-| 数据治理 | 证据血缘、数据版本与质量门禁 |
+| Agent 真实执行 | DeepSeek Function Calling 多步执行，记录模型调用/工具调用/Token/延迟 |
+| Trace 标准化 | 统一 schema（节点 + 边 + 证据血缘），支持派生轨迹与外部 Trace 导入 |
+| DAG 执行链路 | 前端节点图展示调用链、耗时、状态、父节点关系 |
+| 过程评测 | 确定性规则 + LLM Judge + 多 Judge 一致性 + 版本对比，评的是过程不是最终答案 |
+| 故障注入与传播 | 在指定节点注入超时/异常/错误参数/结果污染，分析异常沿边的扩散 |
+| 根因归因 | 三组方法：确定性规则、LLM 直接诊断、规则+DAG+证据血缘+LLM 裁决 |
+| 反事实分析 | 干预某一步后重放，对比前后 Trace；区分 mock/replay 与真实 API 执行 |
+| 最小修复验证 | 候选修复（参数/重试/超时/上下文/节点重跑）在安全沙箱内真实重放验证 |
+| 公开 Benchmark | Microsoft AgentRx 公开子集接入，开发/测试集严格隔离，标签不进 Prompt |
+| Trace 互操作 | QueryForge Trace 协议 v1（JSON Schema + 校验 + 导入 + 可视化） |
+| 成本与预算 | 按每次上游调用扣减的持久化预算，Token/延迟/估算费用统计，超支保护 |
 
 ## 技术栈
 
-- **后端**：Python 3.11、FastAPI、SQLAlchemy + SQLite、Pydantic
-- **Agent 运行时**：LangGraph、LangChain、DeepSeek / OpenAI 兼容接口
-- **前端**：React 19、TypeScript、Vite、@xyflow/react（DAG 图）、Axios
-- **质量**：Pytest（49 个测试文件）、Playwright E2E、CI 质量门禁脚本
-- **部署**：Docker / Docker Compose、Nginx 静态托管
+- **后端**：Python 3.11、FastAPI、SQLAlchemy + SQLite、Pydantic v2
+- **Agent 运行时**：LangGraph / LangChain、OpenAI 兼容 SDK（DeepSeek）
+- **前端**：React 19、TypeScript、Vite、@xyflow/react、Playwright
+- **质量**：Pytest（54 个测试文件）、CI 质量门禁脚本、真实 API Smoke（独立运行）
+- **部署**：Docker / docker-compose、ModelScope 创空间
 
 ## 系统架构
 
@@ -37,52 +43,73 @@ flowchart LR
     U[浏览器 / API 客户端] --> FE[React + Vite 前端]
     FE --> API[FastAPI 后端]
     API --> RUN[Agent Runner / LangGraph]
-    RUN --> LLM[DeepSeek 兼容接口]
+    RUN --> LLM[DeepSeek API]
     RUN --> TR[(Trace Store SQLite)]
     API --> SVC[分析服务层]
-    SVC --> FI[故障注入]
-    SVC --> FP[故障传播]
-    SVC --> RC[根因定位]
-    SVC --> CF[反事实推演]
-    SVC --> MR[最小修复搜索]
-    SVC --> EV[评测引擎 / Judge]
+    SVC --> FI[故障注入 / 传播]
+    SVC --> RC[根因归因 v2]
+    SVC --> CF[反事实重放]
+    SVC --> MR[最小修复验证]
+    SVC --> EV[过程评测 / Judge 校准]
+    SVC --> IO[Trace 互操作]
+    SVC --> BUD[真实 API 预算]
     TR --> SVC
+    BUD --> LLM
 ```
 
-## 核心技术实现
+## 真实 / 模拟边界（工程约束，不是宣传语）
 
-1. **Trace 标准化**：把不同来源的执行记录归一为节点（步骤、工具、模型调用）与边（调用关系、数据流），并保留原始证据的引用路径，便于反查。
-2. **DAG 还原**：以节点图重建一次执行的真实链路，支持按节点查看输入、输出、耗时与错误，前端用拓扑布局展示。
-3. **故障注入与传播**：在指定节点注入受控故障，比较注入前后的轨迹，观察异常如何沿边传播，输出受影响节点集合。
-4. **反事实与最小修复**：以"改变某一步"为前提重新执行或推演，比较结果差异；在候选修复中按改动范围排序并做回归验证。
-5. **评测与门禁**：评测集 + 版本对比 + 判分校准，配合 CI 质量门禁脚本，防止指标回退。
+真实模型调用按"每次上游调用"计量和扣减预算，状态持久化到磁盘，重启不清零：
 
-## 目录结构
+- 每条 Trace 带 `execution_mode`（`real_api` / `mock` / `simulated` / `replay`）与 `metadata.data_source`；
+- 真实调用记录 Provider 上报的 usage、模型名、延迟；拿不到 Token 时写 `null`/`unknown`，**不填 0**；
+- 反事实/修复模块在代码层**拒绝**非 `real_api` 结果参与"修复成功"判定；
+- 预算总量与访客日额度双限制，调用前 reserve、返回后记账；状态损坏时 fail-closed（拒绝调用）；
+- 普通测试全部使用 fake client，不依赖付费凭据；真实 API 测试独立运行并设预算上限。
 
+## 实验结果（全部来自实际运行）
+
+### 真实 API 全链路验收
+
+| 项目 | 实际结果 |
+|---|---|
+| 真实 Agent 多步执行 | 4 段 model_call，真实 calculator 工具调用，3,202 in / 628 out / 3,830 total tokens |
+| 真实受控反事实 | `remove_fault` 重放成功，3,626 tokens，7.3s，因果证据等级 `weak` |
+| 真实最小修复验证 | `INCREASE_TIMEOUT`、`LIMITED_RETRY` 两个候选真实重放通过 |
+| 真实 Judge 校准 | 16 案例（13 可评估）：exact 0.3077、MAE 0.9192、within-1 0.6154 |
+| 预算执行 | 142 次上游调用，369,830 in / 58,278 out tokens，按配置单价估算 ¥0.486（非 Provider 账单），无超支 |
+
+### AgentRx 公开 Benchmark 三组对照（25 条 test 案例，真实 DeepSeek 调用）
+
+| 指标 | Baseline B 规则 | Baseline A 直接 LLM | TracePilot V2 |
+|---|---:|---:|---:|
+| Root Cause Top-1 | 0.04 | **0.32** | 0.20 |
+| Root Cause Top-3 | 0.08 | 0.32 | **0.40** |
+| Failure Step Accuracy | 0.08 | **0.48** | 0.36 |
+| Category Macro-F1 | 0.0351 | 0.0873 | **0.0926** |
+| 平均延迟 | 0 ms | 1,293.9 ms | 1,596.6 ms |
+
+**如实结论**：V2 在当前样本上 **Top-1 没有超过直接 LLM 诊断**（0.20 vs 0.32），不宣称架构更优；
+Top-3 的提升部分来自输出格式差异（Baseline A 只给单答案），不作为独立优势；v2.1 Prompt 在同一批
+案例上调过，无独立验证集，存在过拟合风险。失败原因分析见 `docs/V2_BAD_CASE_ANALYSIS.md`。
+
+## 自动化测试
+
+```bash
+.venv/Scripts/python.exe -m pytest -q      # Windows；需项目 venv（Python 3.11）
 ```
-TracePilot/
-├── backend/
-│   └── app/
-│       ├── main.py            # FastAPI 入口与路由
-│       ├── agents/            # Agent 运行时
-│       ├── services/          # 轨迹、故障、根因、评测等领域服务
-│       ├── schemas/           # Pydantic 模型
-│       └── tools/             # 工具定义
-├── frontend/                  # React + Vite 工作台（含 e2e）
-├── tests/                     # Pytest 用例
-├── docs/                      # 架构、故障注入、评测等设计文档
-├── config/                    # 运行配置
-├── Dockerfile / docker-compose.yml
-└── requirements.txt
-```
+
+当前实测（2026-11-27，Python 3.11.5）：**848 passed**，0 failed。
+真实 API 测试不在默认套件中（避免付费），需显式配置 `.env` 与预算后单独运行。
+
+前端浏览器 E2E（Playwright + 系统 Edge，108 项）：**108 passed / 0 failed**（193.6s）。
+运行前置（后端 8000 + Vite 5173、两个受控 fixture Trace）见 `frontend/e2e/README.md`。
 
 ## 本地运行
 
-后端（Python 3.11）：
-
 ```bash
 python -m venv .venv
-. .venv/Scripts/activate        # Windows
+.venv/Scripts/activate                 # Windows
 pip install -r requirements.txt
 python -m uvicorn backend.app.main:app --reload --port 8000
 ```
@@ -92,48 +119,53 @@ python -m uvicorn backend.app.main:app --reload --port 8000
 ```bash
 cd frontend
 npm install
-npm run dev                     # http://localhost:5173
+npm run dev                            # http://localhost:5173
 ```
 
-真实模型调用需要自行在环境变量中提供 `DEEPSEEK_API_KEY`；不提供时相关功能保持关闭，不会产生费用。
+不配置 `DEEPSEEK_API_KEY` 时，真实模型相关功能保持关闭且不产生费用；模拟/回放功能仍可用。
+`.env.example` 列出全部可选配置（预算上限、访客额度、单价、管理员令牌等）。
 
 ## Docker 部署
 
 ```bash
-docker compose up --build       # 后端 8000，前端 8080
+docker compose up --build              # 后端 8000，前端 8080
 ```
 
-## API 说明
+ModelScope 创空间部署说明见 `docs/PUBLIC_DEPLOYMENT.md`。
 
-后端提供轨迹、故障、反事实、修复、评测等 REST 接口，启动后访问：
+## 项目结构
 
 ```
-http://127.0.0.1:8000/docs
+TracePilot/
+├── backend/app/
+│   ├── main.py                 # FastAPI 入口与路由（160 个接口）
+│   ├── agents/                 # Agent 运行时（LangGraph + 工具）
+│   ├── services/               # 轨迹/故障/归因/反事实/评测/预算/互操作
+│   ├── schemas/                # Pydantic 模型（含 QueryForge Trace 协议）
+│   └── security.py             # 管理员令牌 + HMAC 签名 Cookie
+├── frontend/src/               # React 工作台（22 个页面）
+├── tests/                      # 54 个测试文件，848 项用例
+├── data/benchmarks/agentrx/    # AgentRx 公开子集（含 LICENSE 与 manifest）
+├── docs/                       # 架构、评测、归因、协议、部署、V2 报告
+└── requirements.txt / Dockerfile / docker-compose.yml
 ```
 
-典型流程：创建/导入轨迹 → 查看 DAG → 注入故障 → 分析传播 → 定位根因 → 反事实对比 → 修复验证。
+## 文档
 
-## 实验结果
-
-本项目未发布公开 Benchmark。真实可复现的数据是自动化测试结果（见下节）；其余性能数据以本地运行日志为准，不做量化宣称。
-
-## 自动化测试
-
-```bash
-python -m pytest -q
-```
-
-当前本机实测（2026-11-25，Python 3.11）：**704 passed / 17 failed**。失败集中在回放、故障传播、Token 统计等依赖种子数据与真实模型接口的用例，属于需要补充 fixture/凭据的已知缺口，尚未修复，因此不作为"全部通过"对外描述。
-
-前端 E2E：`cd frontend && npm run test:e2e`（Playwright）。
-
-## 在线演示
-
-暂无公网部署。仓库内含 Docker 与 `render.yaml` 配置，可自行部署。
+| 文档 | 内容 |
+|---|---|
+| `docs/V2_ENGINEERING_REPORT.md` | V2 工程改动、真实 API 验收、回归结果 |
+| `docs/V2_BENCHMARK_REPORT.md` | AgentRx 数据来源、划分、三组对照完整数据 |
+| `docs/V2_BAD_CASE_ANALYSIS.md` | 归因失败样本逐例分析与诚实结论 |
+| `docs/TRACE_INTEROPERABILITY.md` | QueryForge Trace 协议 v1 与导入流程 |
+| `docs/INTERVIEW_GUIDE.md` | 项目讲解口径、高频问答、简历条目 |
+| `docs/ARCHITECTURE.md`、`docs/TRACE_SCHEMA.md` | 系统架构与 Trace 数据契约 |
+| `docs/AGENTRX_BENCHMARK.md` | Benchmark 适配与标签结构 |
 
 ## 已知局限
 
-- 17 项测试依赖真实模型接口与种子数据，本地未全部通过。
-- 评测指标与判分结果尚未做公开数据集上的对照实验。
-- 单机 SQLite 存储，未做多租户与水平扩展。
-- 前端 e2e 仅覆盖桌面视口。
+- 根因归因未在独立验证集上验证泛化；样本 25 条，无显著性检验；
+- Judge 校准的参考标签为开发者按 Rubric 给出的确定性参考（`synthetic_reference`），不是独立人工双盲标注；
+- 成本为 Token × 配置单价估算，不等于 Provider 账单；
+- AgentRx 仅使用公开 GitHub 子集 73 条（HF 完整版需授权，未使用）；
+- 单机 SQLite 存储，未做多租户与水平扩展；前端 E2E 仅覆盖桌面视口与一条移动端回归。

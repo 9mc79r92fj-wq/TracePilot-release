@@ -1,4 +1,4 @@
-﻿.venv/
+.venv/
 __pycache__/
 *.pyc
 .env
@@ -61,3 +61,11 @@ data/agent_runs/
 data/evaluation/runs/
 data/evidence_manifest.json
 data/evidence_generation_report.json
+
+# V2：真实调用预算为运行期状态（含访客哈希与事件），只在本机/持久卷，不随仓库发布
+data/real_api_budget.json
+# V2：真实实验的本地运行产物（归档副本见 docs/v2_results/，随仓库发布）
+data/v2_real_runs/
+# 本地数据快照（E2E 前后临时备份，不属于项目内容）
+data.polluted_backup/
+

@@ -55,6 +55,7 @@ __all__ = [
     "REAL_API_ENV_FLAG",
     "ALLOWED_MODELS",
     "DEFAULT_REAL_MODEL",
+    "LEGACY_MODEL_ALIASES",
     "real_api_readiness",
 ]
 
@@ -62,9 +63,15 @@ ENGINE_VERSION = "1.0.0"
 REAL_API_ENV_FLAG = "TRACEPILOT_ALLOW_REAL_API"
 DATA_SOURCES = ("real_api", "mock", "simulated")
 
-# api.deepseek.com 官方有效模型 ID（白名单）
-ALLOWED_MODELS = ("deepseek-chat", "deepseek-reasoner")
-DEFAULT_REAL_MODEL = "deepseek-chat"
+# api.deepseek.com 当前有效模型 ID（2026-11-27 实际 /models 核对）
+# 旧名 deepseek-chat / deepseek-reasoner 已不在官方 /models 列表中，
+# 仅作为兼容别名映射，不再对外宣称可用。
+ALLOWED_MODELS = ("deepseek-flash", "deepseek-v4-pro")
+LEGACY_MODEL_ALIASES = {
+    "deepseek-chat": "deepseek-flash",
+    "deepseek-reasoner": "deepseek-v4-pro",
+}
+DEFAULT_REAL_MODEL = "deepseek-flash"
 
 TS = "2026-01-01T00:00:00+00:00"
 MAX_STORED_RUNS = 60
@@ -277,10 +284,14 @@ def list_runs() -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 def _resolve_real_model(explicit: str | None) -> tuple[str, dict[str, Any]]:
-    """解析真实模式使用的模型，返回 (model, selection_meta)。
+    """解析真实模式使用的模型，返回 (selected_model, selection_meta)。
 
-    环境变量中的模型 ID 若不在官方白名单，回退到 deepseek-chat 并**明确记录回退原因**，
-    避免因无效模型 ID 直接失败浪费调用配额。
+    规则：
+    - 官方白名单直接使用；
+    - 旧别名（deepseek-chat / deepseek-reasoner）映射到当前模型并记录 alias，
+      不再对外宣称旧名可用；
+    - 其他显式模型 → InvalidModelError；
+    - 环境变量非法 → 回退默认模型并记录原因。
     """
     env_model = (os.environ.get("DEEPSEEK_MODEL") or "").strip()
     candidate = (explicit or env_model or DEFAULT_REAL_MODEL).strip()
@@ -288,10 +299,20 @@ def _resolve_real_model(explicit: str | None) -> tuple[str, dict[str, Any]]:
     if candidate in ALLOWED_MODELS:
         return candidate, {"selected": candidate, "fallback": False, "reason": None}
 
+    if candidate in LEGACY_MODEL_ALIASES:
+        mapped = LEGACY_MODEL_ALIASES[candidate]
+        return mapped, {
+            "selected": mapped,
+            "fallback": False,
+            "reason": f"旧模型别名 {candidate!r} 已映射到当前官方模型 {mapped!r}",
+            "alias": candidate,
+            "allowed_models": list(ALLOWED_MODELS),
+        }
+
     if explicit:
         raise InvalidModelError(
             f"指定的模型 {explicit!r} 不在 api.deepseek.com 白名单内"
-            f"（允许: {', '.join(ALLOWED_MODELS)}）"
+            f"（允许: {', '.join(ALLOWED_MODELS)}；旧别名仅兼容映射）"
         )
 
     return DEFAULT_REAL_MODEL, {
@@ -305,8 +326,11 @@ def _resolve_real_model(explicit: str | None) -> tuple[str, dict[str, Any]]:
 
 
 def _real_api_allowed(confirm_real: bool) -> bool:
-    # 公共演示模式硬性禁止真实 API（即使误设服务端开关也不放行）
-    if public_demo_enabled():
+    # 公共演示默认禁止；只有显式开启 TRACEPILOT_PUBLIC_REAL_API=1
+    # 且同时具备 ALLOW_REAL_API=1、API Key、持久预算时才允许（由 readiness 统一诊断）。
+    if public_demo_enabled() and os.environ.get("TRACEPILOT_PUBLIC_REAL_API", "").strip().lower() not in {
+        "1", "true", "yes", "on"
+    }:
         return False
     env_ok = os.environ.get(REAL_API_ENV_FLAG, "").strip() in {"1", "true", "True", "yes"}
     return bool(confirm_real and env_ok)
@@ -323,16 +347,30 @@ def real_api_readiness() -> dict[str, Any]:
     allow_flag = env_value in {"1", "true", "True", "yes"}
     api_key_present = bool((os.environ.get("DEEPSEEK_API_KEY", "") or "").strip())
     env_model = (os.environ.get("DEEPSEEK_MODEL", "") or "").strip()
-    configured_model_valid: bool | None = None if not env_model else env_model in ALLOWED_MODELS
+    configured_model_valid: bool | None = (
+        None if not env_model else (env_model in ALLOWED_MODELS or env_model in LEGACY_MODEL_ALIASES)
+    )
     demo_mode = public_demo_enabled()
+    public_real_enabled = (
+        os.environ.get("TRACEPILOT_PUBLIC_REAL_API", "").strip().lower() in {"1", "true", "yes", "on"}
+    )
+
+    from backend.app.services.real_api_budget import budget_status
 
     blocking_reasons: list[str] = []
-    if demo_mode:
-        blocking_reasons.append("公共演示环境禁止匿名真实 API 调用（仅 Mock 模式可用）")
+    if demo_mode and not public_real_enabled:
+        blocking_reasons.append(
+            "公共演示环境默认禁止真实 API 调用（需显式设置 TRACEPILOT_PUBLIC_REAL_API=1 并配置持久预算）"
+        )
     if not allow_flag:
         blocking_reasons.append(f"服务端未设置 {REAL_API_ENV_FLAG}=1")
     if not api_key_present:
         blocking_reasons.append("未配置 DEEPSEEK_API_KEY")
+    budget = budget_status()
+    if not budget.get("enabled"):
+        blocking_reasons.append(
+            "未配置真实模型持久化调用预算（需设置 TRACEPILOT_REAL_TOTAL_CALL_LIMIT）"
+        )
 
     warnings: list[str] = []
     if configured_model_valid is False:
@@ -341,10 +379,14 @@ def real_api_readiness() -> dict[str, Any]:
         )
 
     return {
-        "available": bool(allow_flag and api_key_present and not demo_mode),
+        "available": bool(
+            allow_flag and api_key_present and budget.get("enabled") and (not demo_mode or public_real_enabled)
+        ),
         "allow_flag": allow_flag,
         "api_key_configured": api_key_present,
         "public_demo": demo_mode,
+        "public_real_enabled": public_real_enabled,
+        "budget": budget,
         "configured_model": env_model or None,
         "configured_model_valid": configured_model_valid,
         "default_real_model": DEFAULT_REAL_MODEL,

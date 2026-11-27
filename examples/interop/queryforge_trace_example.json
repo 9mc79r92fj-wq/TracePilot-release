@@ -1,0 +1,336 @@
+{
+  "trace_id": "qf-example-trace-0001",
+  "schema_version": "1.0",
+  "task_id": "qf-example-session-0001",
+  "run_id": "qf-example-run-0001",
+  "execution_mode": "simulated",
+  "model": "deepseek-flash",
+  "started_at": "2026-11-25T08:00:00Z",
+  "ended_at": "2026-11-25T08:00:04Z",
+  "status": "succeeded",
+  "attributes": {
+    "example": true,
+    "note": "shape-only example, NOT a real QueryForge run; fields mirror QueryForge release response shapes",
+    "router_version": "1.0.0",
+    "index_revision": 42
+  },
+  "spans": [
+    {
+      "span_id": "span-qf-plan-001",
+      "parent_span_id": null,
+      "event_type": "planning",
+      "name": "adaptive_query_routing",
+      "started_at": "2026-11-25T08:00:00.010Z",
+      "latency_ms": 1.4,
+      "input": {
+        "query": "如何在 RAG 回答中防止引用错误？",
+        "session_id": "a1b2c3d4-1111-4222-8333-944455556666"
+      },
+      "output": {
+        "query_type": "semantic",
+        "bm25_weight": 0.3,
+        "dense_weight": 0.7,
+        "reason": "Natural language intent",
+        "router_version": "1.0.0"
+      },
+      "attributes": {
+        "router": "query_router",
+        "query_type": "semantic"
+      },
+      "token_usage": null,
+      "error": null,
+      "status": "succeeded"
+    },
+    {
+      "span_id": "span-qf-model-001",
+      "parent_span_id": "span-qf-plan-001",
+      "event_type": "model_call",
+      "name": "deepseek-flash/tool_selection",
+      "started_at": "2026-11-25T08:00:00.050Z",
+      "latency_ms": 612.4,
+      "input": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are QueryForge, a citation-grounded RAG assistant."
+          },
+          {
+            "role": "user",
+            "content": "如何在 RAG 回答中防止引用错误？"
+          }
+        ],
+        "available_tools": [
+          "knowledge_search"
+        ]
+      },
+      "output": {
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_qf_0001",
+            "name": "knowledge_search",
+            "args": {
+              "query": "如何在 RAG 回答中防止引用错误？",
+              "mode": "adaptive",
+              "rerank": true
+            }
+          }
+        ],
+        "finish_reason": "tool_calls"
+      },
+      "attributes": {
+        "model_provider": "deepseek",
+        "usage_source": "PROVIDER_REPORTED"
+      },
+      "token_usage": {
+        "input_tokens": 812,
+        "output_tokens": 64,
+        "total_tokens": 876
+      },
+      "error": null,
+      "status": "succeeded"
+    },
+    {
+      "span_id": "span-qf-tool-001",
+      "parent_span_id": "span-qf-model-001",
+      "event_type": "tool_call",
+      "name": "knowledge_search",
+      "started_at": "2026-11-25T08:00:00.700Z",
+      "latency_ms": 182.6,
+      "input": {
+        "tool": "knowledge_search",
+        "arguments": {
+          "query": "如何在 RAG 回答中防止引用错误？",
+          "mode": "adaptive",
+          "rerank": true
+        }
+      },
+      "output": {
+        "status": "ok",
+        "hit_count": 3,
+        "source_ids": [
+          "S1",
+          "S2",
+          "S3"
+        ]
+      },
+      "attributes": {
+        "tool_call_id": "call_qf_0001",
+        "source_ids": [
+          "S1",
+          "S2",
+          "S3"
+        ]
+      },
+      "token_usage": null,
+      "error": null,
+      "status": "succeeded"
+    },
+    {
+      "span_id": "span-qf-ret-001",
+      "parent_span_id": "span-qf-tool-001",
+      "event_type": "retrieval",
+      "name": "hybrid_retrieval",
+      "started_at": "2026-11-25T08:00:00.720Z",
+      "latency_ms": 96.3,
+      "input": {
+        "query": "如何在 RAG 回答中防止引用错误？",
+        "mode": "adaptive",
+        "top_k": 20,
+        "rerank": true
+      },
+      "output": {
+        "query": "如何在 RAG 回答中防止引用错误？",
+        "requested_mode": "adaptive",
+        "effective_mode": "hybrid",
+        "index_revision": 42,
+        "hits": [
+          {
+            "document_id": "3f6c1a2b-7d4e-4c8a-9b1f-2a5d6e7f8a90",
+            "version_id": "8b1e2f3a-4c5d-4e6f-8a9b-0c1d2e3f4a5b",
+            "chunk_id": "c0ffee00-1111-4222-8333-944455556666",
+            "filename": "rag-quality-handbook.md",
+            "page": 12,
+            "chunk_index": 8,
+            "text": "答案中的每个关键结论都应绑定到检索来源，并在返回前校验引用编号是否存在。",
+            "score": 0.0312
+          },
+          {
+            "document_id": "3f6c1a2b-7d4e-4c8a-9b1f-2a5d6e7f8a90",
+            "version_id": "8b1e2f3a-4c5d-4e6f-8a9b-0c1d2e3f4a5b",
+            "chunk_id": "deadbeef-2222-4333-8444-955566667777",
+            "filename": "rag-quality-handbook.md",
+            "page": 13,
+            "chunk_index": 9,
+            "text": "当引用不存在或答案为空时，应返回固定拒答文本而不是编造来源。",
+            "score": 0.0287
+          },
+          {
+            "document_id": "5a7b9c1d-2e3f-4a5b-8c6d-7e8f9a0b1c2d",
+            "version_id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+            "chunk_id": "feedface-3333-4444-8555-966677778888",
+            "filename": "citation-policy.md",
+            "page": 3,
+            "chunk_index": 2,
+            "text": "引用校验是生成后的强制步骤：解析 [S#] 标记并确认其命中检索证据集合。",
+            "score": 0.0221
+          }
+        ],
+        "latency_ms": 96.3,
+        "degraded": false,
+        "cache_hit": false,
+        "query_type": "semantic",
+        "fusion_weights": {
+          "bm25": 0.3,
+          "dense": 0.7
+        },
+        "rerank_applied": false,
+        "score_type": "rrf",
+        "warnings": []
+      },
+      "attributes": {
+        "bm25_weight": 0.3,
+        "dense_weight": 0.7,
+        "rrf_k": 60,
+        "index_revision": 42
+      },
+      "token_usage": null,
+      "error": null,
+      "status": "succeeded"
+    },
+    {
+      "span_id": "span-qf-rerank-001",
+      "parent_span_id": "span-qf-ret-001",
+      "event_type": "rerank",
+      "name": "BAAI/bge-reranker-base",
+      "started_at": "2026-11-25T08:00:00.830Z",
+      "latency_ms": 58.7,
+      "input": {
+        "query": "如何在 RAG 回答中防止引用错误？",
+        "candidate_count": 3,
+        "top_k": 5
+      },
+      "output": {
+        "hits": [
+          {
+            "chunk_id": "c0ffee00-1111-4222-8333-944455556666",
+            "filename": "rag-quality-handbook.md",
+            "chunk_index": 8,
+            "score": 0.8734
+          },
+          {
+            "chunk_id": "feedface-3333-4444-8555-966677778888",
+            "filename": "citation-policy.md",
+            "chunk_index": 2,
+            "score": 0.5512
+          },
+          {
+            "chunk_id": "deadbeef-2222-4333-8444-955566667777",
+            "filename": "rag-quality-handbook.md",
+            "chunk_index": 9,
+            "score": 0.4205
+          }
+        ],
+        "rerank_applied": true
+      },
+      "attributes": {
+        "rerank_model": "BAAI/bge-reranker-base",
+        "candidate_count": 3,
+        "top_k": 5
+      },
+      "token_usage": null,
+      "error": null,
+      "status": "succeeded"
+    },
+    {
+      "span_id": "span-qf-model-002",
+      "parent_span_id": "span-qf-rerank-001",
+      "event_type": "model_call",
+      "name": "deepseek-flash/answer_generation",
+      "started_at": "2026-11-25T08:00:01.100Z",
+      "latency_ms": 1520.8,
+      "input": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "回答必须只使用给定上下文，并用 [S#] 标注引用。"
+          },
+          {
+            "role": "user",
+            "content": "如何在 RAG 回答中防止引用错误？"
+          },
+          {
+            "role": "user",
+            "content": "上下文: [S1] ... [S2] ... [S3] ..."
+          }
+        ],
+        "context_refs": [
+          "S1",
+          "S2",
+          "S3"
+        ]
+      },
+      "output": {
+        "answer": "生成后必须做引用校验：解析答案中的 [S#] 标记，确认每个编号都命中本次检索证据集合，否则返回固定拒答文本。[S1][S3]",
+        "finish_reason": "stop"
+      },
+      "attributes": {
+        "model_provider": "deepseek",
+        "usage_source": "PROVIDER_REPORTED",
+        "ttft_ms": 420.5
+      },
+      "token_usage": {
+        "input_tokens": 1440,
+        "output_tokens": 236,
+        "total_tokens": 1676
+      },
+      "error": null,
+      "status": "succeeded"
+    },
+    {
+      "span_id": "span-qf-cite-001",
+      "parent_span_id": "span-qf-model-002",
+      "event_type": "citation_validation",
+      "name": "citation_validation",
+      "started_at": "2026-11-25T08:00:02.700Z",
+      "latency_ms": 2.4,
+      "input": {
+        "answer": "生成后必须做引用校验：解析答案中的 [S#] 标记，确认每个编号都命中本次检索证据集合，否则返回固定拒答文本。[S1][S3]",
+        "cited_sources": [
+          "S1",
+          "S3"
+        ]
+      },
+      "output": {
+        "refused": false,
+        "valid": true,
+        "citation_count": 2,
+        "citations": [
+          {
+            "document_id": "3f6c1a2b-7d4e-4c8a-9b1f-2a5d6e7f8a90",
+            "version_id": "8b1e2f3a-4c5d-4e6f-8a9b-0c1d2e3f4a5b",
+            "chunk_id": "c0ffee00-1111-4222-8333-944455556666",
+            "filename": "rag-quality-handbook.md",
+            "page": 12,
+            "chunk_index": 8
+          },
+          {
+            "document_id": "5a7b9c1d-2e3f-4a5b-8c6d-7e8f9a0b1c2d",
+            "version_id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+            "chunk_id": "feedface-3333-4444-8555-966677778888",
+            "filename": "citation-policy.md",
+            "page": 3,
+            "chunk_index": 2
+          }
+        ]
+      },
+      "attributes": {
+        "refusal_marker": "INSUFFICIENT_EVIDENCE",
+        "citation_pattern": "\\[(S\\d+)\\]"
+      },
+      "token_usage": null,
+      "error": null,
+      "status": "succeeded"
+    }
+  ]
+}

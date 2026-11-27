@@ -1,0 +1,245 @@
+{
+  "experiment_id": "realcf-b071d371d969419b94f48cfab547ca71",
+  "engine_version": "2.0.0",
+  "execution_mode": "real_api",
+  "simulated": false,
+  "source_trace_id": "trace-3071fea861694ee1b70731a400f28000",
+  "task": "请使用计算器工具计算 1+1",
+  "intervention": {
+    "type": "remove_fault"
+  },
+  "replays_requested": 1,
+  "replays_completed": 1,
+  "started_at": "2026-11-27T01:35:35.061061+00:00",
+  "elapsed_ms": 9742.99,
+  "observed_outcome": {
+    "trace_id": "trace-3071fea861694ee1b70731a400f28000",
+    "status": "succeeded",
+    "note": "原始 Trace 的观察记录，未重新执行"
+  },
+  "intervention_outcomes": [
+    {
+      "trace_id": "trace-03544cd2d26047f8929a72455c55da79",
+      "status": "succeeded",
+      "run_id": "realcf-run-78437ab17df2485a90010f8155982d29",
+      "is_real_api": true,
+      "total_tokens": 3626,
+      "elapsed_ms": 7327
+    }
+  ],
+  "replay_stability": {
+    "replays": 1,
+    "statuses": [
+      "succeeded"
+    ],
+    "status_stable": false,
+    "note": "真实模型存在采样随机性；仅 2 次重放不足以评估分布"
+  },
+  "comparisons": [
+    {
+      "traces": {
+        "reference": {
+          "trace_id": "trace-3071fea861694ee1b70731a400f28000",
+          "status": "succeeded",
+          "step_count": 5,
+          "total_duration_ms": 5,
+          "token_usage": {
+            "sum": 60,
+            "has_unknown": false
+          },
+          "fault_types": [
+            "tool_timeout"
+          ],
+          "recovery_observed": true
+        },
+        "target": {
+          "trace_id": "trace-03544cd2d26047f8929a72455c55da79",
+          "status": "succeeded",
+          "step_count": 5,
+          "total_duration_ms": 4485,
+          "token_usage": {
+            "sum": 3626,
+            "has_unknown": false
+          },
+          "fault_types": [],
+          "recovery_observed": null
+        }
+      },
+      "differences": {
+        "final_status": null,
+        "step_count": {
+          "ref": 5,
+          "tgt": 5
+        },
+        "total_duration_ms": {
+          "ref": 5,
+          "tgt": 4485
+        },
+        "token_usage": {
+          "ref": {
+            "sum": 60,
+            "has_unknown": false
+          },
+          "tgt": {
+            "sum": 3626,
+            "has_unknown": false
+          }
+        },
+        "fault_types": {
+          "ref": [
+            "tool_timeout"
+          ],
+          "tgt": []
+        },
+        "recovery_observed": {
+          "ref": true,
+          "tgt": null
+        }
+      },
+      "step_matches": [
+        {
+          "match_key": "model_call|",
+          "ref_step_id": "trace-3071fea861694ee1b70731a400f28000-s001",
+          "tgt_step_id": "trace-03544cd2d26047f8929a72455c55da79-s001",
+          "differences": null
+        },
+        {
+          "match_key": "model_call|",
+          "ref_step_id": "trace-3071fea861694ee1b70731a400f28000-s003",
+          "tgt_step_id": "trace-03544cd2d26047f8929a72455c55da79-s003",
+          "differences": null
+        },
+        {
+          "match_key": "model_call|",
+          "ref_step_id": "trace-3071fea861694ee1b70731a400f28000-s005",
+          "tgt_step_id": "trace-03544cd2d26047f8929a72455c55da79-s005",
+          "differences": null
+        },
+        {
+          "match_key": "planning|",
+          "ref_step_id": "trace-3071fea861694ee1b70731a400f28000-s002",
+          "tgt_step_id": "trace-03544cd2d26047f8929a72455c55da79-s002",
+          "differences": null
+        },
+        {
+          "match_key": "tool_call|calculator",
+          "ref_step_id": "trace-3071fea861694ee1b70731a400f28000-s004",
+          "tgt_step_id": "trace-03544cd2d26047f8929a72455c55da79-s004",
+          "differences": {
+            "status": {
+              "ref": "failed",
+              "tgt": "succeeded"
+            },
+            "error_type": {
+              "ref": "tool_timeout",
+              "tgt": null
+            },
+            "tool_result": {
+              "ref": {
+                "error": "注入故障：工具执行超时"
+              },
+              "tgt": {
+                "expression": "1+1",
+                "result": 2
+              }
+            },
+            "fault_injection": {
+              "ref": {
+                "type": "tool_timeout",
+                "injected": true,
+                "message": "注入故障：工具执行超时"
+              },
+              "tgt": null
+            }
+          }
+        }
+      ],
+      "unmatched": {
+        "reference_only": [],
+        "target_only": []
+      },
+      "diff_nodes": [
+        {
+          "step_id": "trace-03544cd2d26047f8929a72455c55da79-s004",
+          "ref_step_id": "trace-3071fea861694ee1b70731a400f28000-s004",
+          "match_key": "tool_call|calculator",
+          "differences": {
+            "status": {
+              "ref": "failed",
+              "tgt": "succeeded"
+            },
+            "error_type": {
+              "ref": "tool_timeout",
+              "tgt": null
+            },
+            "tool_result": {
+              "ref": {
+                "error": "注入故障：工具执行超时"
+              },
+              "tgt": {
+                "expression": "1+1",
+                "result": 2
+              }
+            },
+            "fault_injection": {
+              "ref": {
+                "type": "tool_timeout",
+                "injected": true,
+                "message": "注入故障：工具执行超时"
+              },
+              "tgt": null
+            }
+          },
+          "upstream": [
+            "trace-03544cd2d26047f8929a72455c55da79-s001",
+            "trace-03544cd2d26047f8929a72455c55da79-s002",
+            "trace-03544cd2d26047f8929a72455c55da79-s003"
+          ],
+          "downstream": [
+            "trace-03544cd2d26047f8929a72455c55da79-s005"
+          ]
+        }
+      ],
+      "earliest_difference": {
+        "step_id": "trace-03544cd2d26047f8929a72455c55da79-s004",
+        "kind": [
+          "status",
+          "error_type",
+          "tool_result",
+          "fault_injection"
+        ],
+        "note": "最早可确认的执行差异（观察结果，不构成根因结论）"
+      },
+      "observations": [
+        "步骤 trace-03544cd2d26047f8929a72455c55da79-s004 出现差异: ['status', 'error_type', 'tool_result', 'fault_injection']"
+      ],
+      "inferred_impacts": [
+        "未观察到可推测的故障影响"
+      ],
+      "unverified": [
+        "最早差异为时间上最先出现的观察差异，不等于根因；本对比为相关性观察，因果需通过反事实干预实验验证。"
+      ]
+    }
+  ],
+  "errors": [],
+  "causal_evidence_level": "weak",
+  "causal_evidence_note": "单次真实重放；只能作为弱因果提示，不能外推为生产环境普遍因果。",
+  "control_conditions": [
+    "同一任务描述与同一干预说明",
+    "真实 DeepSeek API，禁用 SDK 自动重试",
+    "Token/工具轮次上限固定，预算按每次上游调用扣减",
+    "工具仅本地无副作用白名单"
+  ],
+  "confounders": [
+    "模型采样随机性（temperature、服务端版本）",
+    "外部 Provider 延迟/限流波动",
+    "源 Trace 与本次任务的环境差异"
+  ],
+  "limitations": [
+    "真实反事实只改变输入/执行限额，不伪造工具返回",
+    "未做多次大量重放，不能估计成功率",
+    "单次执行成本与 Token 来自 Provider usage；预算按上游调用次数扣减"
+  ],
+  "original_trace_modified": false,
+  "paid_api_called": true
+}

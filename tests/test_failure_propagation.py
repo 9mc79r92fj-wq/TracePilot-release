@@ -4,6 +4,8 @@ import glob
 import sys
 from pathlib import Path
 
+import pytest
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -13,7 +15,7 @@ from backend.app.services.failure_propagation import (  # noqa: E402
     analyze_failure_propagation,
 )
 
-DATA_TRACES = PROJECT_ROOT / "data" / "traces"
+DATA_TRACES = Path(__file__).resolve().parent / "fixtures" / "traces"
 TS = "2026-11-18T12:00:00+00:00"
 FAULT = {"type": "tool_timeout", "injected": True, "message": "注入故障"}
 

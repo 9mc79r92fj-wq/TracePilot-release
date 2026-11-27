@@ -73,9 +73,9 @@ test('归因：单案例抽屉展示证据图与失败指标', async ({ page }) 
   await expect(page.getByText(/异常事件（/)).toBeVisible()
   await expect(page.getByText('归因证据图')).toBeVisible()
 
-  // 证据等级分层标签
-  await expect(page.getByText(/直接证据（Trace 记录）/)).toBeVisible()
-  await expect(page.getByText(/依赖关系（DAG 可达，不构成因果）/)).toBeVisible()
+  // 证据等级分层标签（页面按证据等级徽标展示）
+  await expect(page.getByText('直接证据', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('依赖推断', { exact: true }).first()).toBeVisible()
 
   // 候选归因节点
   await expect(page.locator('.attr-node').first()).toBeVisible()

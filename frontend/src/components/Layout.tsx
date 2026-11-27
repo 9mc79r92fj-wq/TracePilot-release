@@ -94,6 +94,7 @@ const GROUPS: NavGroup[] = [
     icon: Boxes,
     items: [
       { to: '/architecture', label: '系统架构', icon: Boxes },
+      { to: '/v2', label: 'V2 实验', icon: FlaskConical },
     ],
   },
 ]

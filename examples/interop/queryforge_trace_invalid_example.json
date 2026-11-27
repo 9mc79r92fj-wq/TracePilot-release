@@ -1,0 +1,61 @@
+{
+  "trace_id": "qf-example-invalid-0001",
+  "schema_version": "1.0",
+  "task_id": "qf-example-invalid-session",
+  "run_id": "qf-example-invalid-run",
+  "execution_mode": "simulated",
+  "model": "deepseek-flash",
+  "started_at": "2026-11-25T09:00:00Z",
+  "ended_at": "2026-11-25T09:00:01Z",
+  "status": "failed",
+  "attributes": {
+    "example": true,
+    "invalid_example": true,
+    "note": "intentionally invalid: span-qf-invalid-child references a parent span that does not exist; used by tests/test_trace_interop.py"
+  },
+  "spans": [
+    {
+      "span_id": "span-qf-invalid-root",
+      "parent_span_id": null,
+      "event_type": "retrieval",
+      "name": "hybrid_retrieval",
+      "started_at": "2026-11-25T09:00:00.100Z",
+      "latency_ms": 12.0,
+      "input": {
+        "query": "示例问题"
+      },
+      "output": {
+        "effective_mode": "bm25",
+        "hits": []
+      },
+      "attributes": {},
+      "token_usage": null,
+      "error": null,
+      "status": "succeeded"
+    },
+    {
+      "span_id": "span-qf-invalid-child",
+      "parent_span_id": "span-qf-does-not-exist",
+      "event_type": "model_call",
+      "name": "deepseek-flash/answer_generation",
+      "started_at": "2026-11-25T09:00:00.200Z",
+      "latency_ms": 300.0,
+      "input": {
+        "messages": []
+      },
+      "output": null,
+      "attributes": {},
+      "token_usage": {
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "total_tokens": 15
+      },
+      "error": {
+        "type": "LLMUnavailable",
+        "message": "upstream model unavailable",
+        "recoverable": false
+      },
+      "status": "failed"
+    }
+  ]
+}

@@ -1,0 +1,1279 @@
+{
+  "calibration_engine_version": "1.0.0",
+  "dataset": {
+    "calibration_id": "judge-calibration-v1",
+    "version": "1.0.0",
+    "rubric_id": "answer_quality",
+    "annotation_source": "synthetic_reference",
+    "annotation_note": "本校准集的 human_score 由项目开发者依据 Rubric 规则人工给出的**参考标注**，但并非独立第三方标注、也不是真实用户/专家双盲标注流程产物。因此统一标记为 synthetic_reference：可用于检验 Judge 与参考标准的一致性与稳定性，但**不得**对外声明为真实人工标注的一致率。",
+    "total_cases": 22,
+    "evaluated_cases": 16
+  },
+  "judge": {
+    "provider_kind": "deepseek",
+    "model_name": "deepseek-flash",
+    "is_mock": false,
+    "simulated": false,
+    "rubric_id": "answer_quality",
+    "rubric_version": "1.0.0",
+    "prompt_version": "judge-prompt-v1",
+    "judge_engine_version": "1.0.0",
+    "repeats": 1
+  },
+  "metrics": {
+    "evaluable_cases": 13,
+    "exact_agreement": 0.3077,
+    "exact_agreement_count": 4,
+    "mae": 0.9192,
+    "within_1_agreement": 0.6154,
+    "within_1_agreement_count": 8,
+    "confusion_matrix": {
+      "1": {
+        "1": 0,
+        "2": 1,
+        "3": 0,
+        "4": 1,
+        "5": 0
+      },
+      "2": {
+        "1": 1,
+        "2": 1,
+        "3": 2,
+        "4": 1,
+        "5": 0
+      },
+      "3": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 2,
+        "5": 0
+      },
+      "4": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 1,
+        "5": 1
+      },
+      "5": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 2
+      }
+    },
+    "denominator_definition": "参考标注与 Judge 均为 SCORED 的案例数"
+  },
+  "bias": {
+    "overestimated": [
+      {
+        "case_id": "cal-005-factual-wrong-number",
+        "category": "factual_error",
+        "human_score": 1,
+        "judge_score": 2.4,
+        "delta": 1.4,
+        "rationale": "工具返回 2，回答声称 3，构成直接事实矛盾。"
+      },
+      {
+        "case_id": "cal-006-factual-contradiction",
+        "category": "factual_error",
+        "human_score": 2,
+        "judge_score": 3.1,
+        "delta": 1.1,
+        "rationale": "行数 3 正确，但结论「表是空的」与证据自相矛盾，属内部不一致。"
+      },
+      {
+        "case_id": "cal-009-instruction-format-violation",
+        "category": "instruction_violation",
+        "human_score": 2,
+        "judge_score": 3.15,
+        "delta": 1.15,
+        "rationale": "任务明确要求只输出数字，回答包含大段解释，明显违反格式指令（但数值正确）。"
+      },
+      {
+        "case_id": "cal-011-tool-wrong-args",
+        "category": "unreasonable_tool_use",
+        "human_score": 2,
+        "judge_score": 4.1,
+        "delta": 2.1,
+        "rationale": "工具参数与任务意图不符（乘法而非加法），虽结果自洽但工具使用不合理。"
+      },
+      {
+        "case_id": "cal-012-tool-result-ignored",
+        "category": "unreasonable_tool_use",
+        "human_score": 1,
+        "judge_score": 3.6,
+        "delta": 2.6,
+        "rationale": "工具返回被完全无视且结论相反，工具链路失效。"
+      },
+      {
+        "case_id": "cal-016-boundary-brief",
+        "category": "ambiguous_boundary",
+        "human_score": 4,
+        "judge_score": 5.0,
+        "delta": 1.0,
+        "rationale": "极简但准确，满足核心要求；因缺少任何说明文字，完整性介于 4 与 5 之间，取 4。"
+      }
+    ],
+    "underestimated": [],
+    "aligned": [
+      {
+        "case_id": "cal-001-correct-calc",
+        "category": "correct_answer",
+        "human_score": 5,
+        "judge_score": 5.0,
+        "delta": 0.0,
+        "rationale": "回答直接命中任务要求，数值 100 与工具返回完全一致，无多余或矛盾陈述。"
+      },
+      {
+        "case_id": "cal-002-correct-sql",
+        "category": "correct_answer",
+        "human_score": 5,
+        "judge_score": 5.0,
+        "delta": 0.0,
+        "rationale": "回答数值与 SQL 返回一致（3 行），且未越权执行写操作。"
+      },
+      {
+        "case_id": "cal-003-partial-numeric",
+        "category": "partially_correct",
+        "human_score": 4,
+        "judge_score": 4.0,
+        "delta": 0.0,
+        "rationale": "数值正确，但任务要求说明计算过程，回答只有结果，完整性略欠。"
+      },
+      {
+        "case_id": "cal-004-partial-text",
+        "category": "partially_correct",
+        "human_score": 3,
+        "judge_score": 3.55,
+        "delta": 0.55,
+        "rationale": "两个要求中只回答了词数，遗漏唯一词数（2），属明显部分完成。"
+      },
+      {
+        "case_id": "cal-007-missing-key-requirement",
+        "category": "missing_information",
+        "human_score": 2,
+        "judge_score": 2.45,
+        "delta": 0.45,
+        "rationale": "总额正确但完全遗漏环比这一核心要求，且轨迹中也未取到该数据。"
+      },
+      {
+        "case_id": "cal-008-missing-detail",
+        "category": "missing_information",
+        "human_score": 3,
+        "judge_score": 3.85,
+        "delta": 0.85,
+        "rationale": "三项要求回答了前两项且数值正确，遗漏行数（1）。"
+      },
+      {
+        "case_id": "cal-010-instruction-forbidden-tool",
+        "category": "instruction_violation",
+        "human_score": 2,
+        "judge_score": 1.25,
+        "delta": -0.75,
+        "rationale": "答案本身正确，但违反「不得调用工具」的显式约束，该维度应低分。"
+      }
+    ]
+  },
+  "stability": {
+    "repeats": 1,
+    "per_case_scores": [
+      [
+        5.0
+      ],
+      [
+        5.0
+      ],
+      [
+        4.0
+      ],
+      [
+        3.55
+      ],
+      [
+        2.4
+      ],
+      [
+        3.1
+      ],
+      [
+        2.45
+      ],
+      [
+        3.85
+      ],
+      [
+        3.15
+      ],
+      [
+        1.25
+      ],
+      [
+        4.1
+      ],
+      [
+        3.6
+      ],
+      [
+        3.2
+      ],
+      [
+        1.0
+      ],
+      [
+        2.4
+      ],
+      [
+        5.0
+      ]
+    ],
+    "per_case_std": [],
+    "mean_within_case_std": null,
+    "max_within_case_std": null,
+    "exact_stable": null,
+    "normalized_stable": null,
+    "consistent": null,
+    "note": "无有效重复评分（repeats<2、含 UNKNOWN 或未执行）"
+  },
+  "differences": [
+    {
+      "case_id": "cal-001-correct-calc",
+      "category": "correct_answer",
+      "human_score": 5,
+      "judge_score": 5.0,
+      "judge_score_normalized": 5,
+      "delta": 0.0,
+      "unknown_dimensions": [],
+      "rationale": "回答直接命中任务要求，数值 100 与工具返回完全一致，无多余或矛盾陈述。"
+    },
+    {
+      "case_id": "cal-002-correct-sql",
+      "category": "correct_answer",
+      "human_score": 5,
+      "judge_score": 5.0,
+      "judge_score_normalized": 5,
+      "delta": 0.0,
+      "unknown_dimensions": [],
+      "rationale": "回答数值与 SQL 返回一致（3 行），且未越权执行写操作。"
+    },
+    {
+      "case_id": "cal-003-partial-numeric",
+      "category": "partially_correct",
+      "human_score": 4,
+      "judge_score": 4.0,
+      "judge_score_normalized": 4,
+      "delta": 0.0,
+      "unknown_dimensions": [],
+      "rationale": "数值正确，但任务要求说明计算过程，回答只有结果，完整性略欠。"
+    },
+    {
+      "case_id": "cal-004-partial-text",
+      "category": "partially_correct",
+      "human_score": 3,
+      "judge_score": 3.55,
+      "judge_score_normalized": 4,
+      "delta": 0.55,
+      "unknown_dimensions": [],
+      "rationale": "两个要求中只回答了词数，遗漏唯一词数（2），属明显部分完成。"
+    },
+    {
+      "case_id": "cal-005-factual-wrong-number",
+      "category": "factual_error",
+      "human_score": 1,
+      "judge_score": 2.4,
+      "judge_score_normalized": 2,
+      "delta": 1.4,
+      "unknown_dimensions": [],
+      "rationale": "工具返回 2，回答声称 3，构成直接事实矛盾。"
+    },
+    {
+      "case_id": "cal-006-factual-contradiction",
+      "category": "factual_error",
+      "human_score": 2,
+      "judge_score": 3.1,
+      "judge_score_normalized": 3,
+      "delta": 1.1,
+      "unknown_dimensions": [],
+      "rationale": "行数 3 正确，但结论「表是空的」与证据自相矛盾，属内部不一致。"
+    },
+    {
+      "case_id": "cal-007-missing-key-requirement",
+      "category": "missing_information",
+      "human_score": 2,
+      "judge_score": 2.45,
+      "judge_score_normalized": 2,
+      "delta": 0.45,
+      "unknown_dimensions": [],
+      "rationale": "总额正确但完全遗漏环比这一核心要求，且轨迹中也未取到该数据。"
+    },
+    {
+      "case_id": "cal-008-missing-detail",
+      "category": "missing_information",
+      "human_score": 3,
+      "judge_score": 3.85,
+      "judge_score_normalized": 4,
+      "delta": 0.85,
+      "unknown_dimensions": [],
+      "rationale": "三项要求回答了前两项且数值正确，遗漏行数（1）。"
+    },
+    {
+      "case_id": "cal-009-instruction-format-violation",
+      "category": "instruction_violation",
+      "human_score": 2,
+      "judge_score": 3.15,
+      "judge_score_normalized": 3,
+      "delta": 1.15,
+      "unknown_dimensions": [],
+      "rationale": "任务明确要求只输出数字，回答包含大段解释，明显违反格式指令（但数值正确）。"
+    },
+    {
+      "case_id": "cal-010-instruction-forbidden-tool",
+      "category": "instruction_violation",
+      "human_score": 2,
+      "judge_score": 1.25,
+      "judge_score_normalized": 1,
+      "delta": -0.75,
+      "unknown_dimensions": [],
+      "rationale": "答案本身正确，但违反「不得调用工具」的显式约束，该维度应低分。"
+    },
+    {
+      "case_id": "cal-011-tool-wrong-args",
+      "category": "unreasonable_tool_use",
+      "human_score": 2,
+      "judge_score": 4.1,
+      "judge_score_normalized": 4,
+      "delta": 2.1,
+      "unknown_dimensions": [],
+      "rationale": "工具参数与任务意图不符（乘法而非加法），虽结果自洽但工具使用不合理。"
+    },
+    {
+      "case_id": "cal-012-tool-result-ignored",
+      "category": "unreasonable_tool_use",
+      "human_score": 1,
+      "judge_score": 3.6,
+      "judge_score_normalized": 4,
+      "delta": 2.6,
+      "unknown_dimensions": [],
+      "rationale": "工具返回被完全无视且结论相反，工具链路失效。"
+    },
+    {
+      "case_id": "cal-013-no-tool-trace",
+      "category": "insufficient_evidence",
+      "human_score": null,
+      "judge_score": 3.2,
+      "judge_score_normalized": 3,
+      "delta": null,
+      "unknown_dimensions": [],
+      "rationale": "答案看似正确，但缺少工具执行证据，证据充分性维度应判 UNKNOWN；不应给高分。"
+    },
+    {
+      "case_id": "cal-014-empty-answer",
+      "category": "insufficient_evidence",
+      "human_score": null,
+      "judge_score": 1.0,
+      "judge_score_normalized": 1,
+      "delta": null,
+      "unknown_dimensions": [
+        "factual_consistency"
+      ],
+      "rationale": "最终回答为空，无法评估相关性/完整性等维度，应判 UNKNOWN 而非 1 分。"
+    },
+    {
+      "case_id": "cal-015-no-material",
+      "category": "insufficient_evidence",
+      "human_score": null,
+      "judge_score": 2.4,
+      "judge_score_normalized": 2,
+      "delta": null,
+      "unknown_dimensions": [],
+      "rationale": "无任何可核对证据，事实一致性无法判定，应 UNKNOWN。"
+    },
+    {
+      "case_id": "cal-016-boundary-brief",
+      "category": "ambiguous_boundary",
+      "human_score": 4,
+      "judge_score": 5.0,
+      "judge_score_normalized": 5,
+      "delta": 1.0,
+      "unknown_dimensions": [],
+      "rationale": "极简但准确，满足核心要求；因缺少任何说明文字，完整性介于 4 与 5 之间，取 4。"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "cal-001-correct-calc",
+      "category": "correct_answer",
+      "rubric_id": "answer_quality",
+      "human_score": 5,
+      "human_status": "SCORED",
+      "judge_score": 5.0,
+      "judge_score_normalized": 5,
+      "delta": 0.0,
+      "annotation_rationale": "回答直接命中任务要求，数值 100 与工具返回完全一致，无多余或矛盾陈述。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        5.0
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 使用计算器计算 (12+8)*5 并给出结果",
+          "[FINAL_ANSWER] 计算结果为 100"
+        ],
+        "factual_consistency": [
+          "tool=calculator | args={\"expression\": \"(12+8)*5\"} | result={\"expression\": \"(12+8)*5\", \"result\": 100}",
+          "[FINAL_ANSWER] 计算结果为 100"
+        ],
+        "completeness": [
+          "[TASK] 使用计算器计算 (12+8)*5 并给出结果",
+          "tool=calculator | args={\"expression\": \"(12+8)*5\"}",
+          "[FINAL_ANSWER] 计算结果为 100"
+        ],
+        "reasoning_quality": [
+          "type=tool_call | status=succeeded | tool=calculator | args={\"expression\": \"(12+8)*5\"} | result={\"expression\": \"(12+8)*5\", \"result\": 100}",
+          "type=model_call | status=succeeded | output=\"计算结果为 100\""
+        ],
+        "instruction_following": [
+          "[TASK] 使用计算器计算 (12+8)*5 并给出结果",
+          "tool=calculator | args={\"expression\": \"(12+8)*5\"}",
+          "[FINAL_ANSWER] 计算结果为 100"
+        ],
+        "evidence_grounding": [
+          "tool=calculator | args={\"expression\": \"(12+8)*5\"} | result={\"expression\": \"(12+8)*5\", \"result\": 100}",
+          "[FINAL_ANSWER] 计算结果为 100"
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 5,
+        "factual_consistency": 5,
+        "completeness": 5,
+        "reasoning_quality": 5,
+        "instruction_following": 5,
+        "evidence_grounding": 5
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-002-correct-sql",
+      "category": "correct_answer",
+      "rubric_id": "answer_quality",
+      "human_score": 5,
+      "human_status": "SCORED",
+      "judge_score": 5.0,
+      "judge_score_normalized": 5,
+      "delta": 0.0,
+      "annotation_rationale": "回答数值与 SQL 返回一致（3 行），且未越权执行写操作。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        5.0
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 以只读方式查询 sales 表行数并给出结果",
+          "[FINAL_ANSWER] 查询结果为 3"
+        ],
+        "factual_consistency": [
+          "tool=sqlite_query | args={\"query\": \"SELECT COUNT(*) FROM sales\"} | result={\"columns\": [\"COUNT(*)\"], \"rows\": [[3]], \"row_count\": 1}",
+          "[FINAL_ANSWER] 查询结果为 3"
+        ],
+        "completeness": [
+          "[TASK] 以只读方式查询 sales 表行数并给出结果",
+          "tool=sqlite_query | args={\"query\": \"SELECT COUNT(*) FROM sales\"} | result={\"columns\": [\"COUNT(*)\"], \"rows\": [[3]], \"row_count\": 1}",
+          "[FINAL_ANSWER] 查询结果为 3"
+        ],
+        "reasoning_quality": [
+          "type=tool_call | status=succeeded | tool=sqlite_query | args={\"query\": \"SELECT COUNT(*) FROM sales\"} | result={\"columns\": [\"COUNT(*)\"], \"rows\": [[3]], \"row_count\": 1}",
+          "[FINAL_ANSWER] 查询结果为 3"
+        ],
+        "instruction_following": [
+          "[TASK] 以只读方式查询 sales 表行数并给出结果",
+          "args={\"query\": \"SELECT COUNT(*) FROM sales\"}"
+        ],
+        "evidence_grounding": [
+          "tool=sqlite_query | args={\"query\": \"SELECT COUNT(*) FROM sales\"} | result={\"columns\": [\"COUNT(*)\"], \"rows\": [[3]], \"row_count\": 1}",
+          "[FINAL_ANSWER] 查询结果为 3"
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 5,
+        "factual_consistency": 5,
+        "completeness": 5,
+        "reasoning_quality": 5,
+        "instruction_following": 5,
+        "evidence_grounding": 5
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-003-partial-numeric",
+      "category": "partially_correct",
+      "rubric_id": "answer_quality",
+      "human_score": 4,
+      "human_status": "SCORED",
+      "judge_score": 4.0,
+      "judge_score_normalized": 4,
+      "delta": 0.0,
+      "annotation_rationale": "数值正确，但任务要求说明计算过程，回答只有结果，完整性略欠。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        4.0
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 计算 12+8 并说明计算过程",
+          "[FINAL_ANSWER] 结果是 20"
+        ],
+        "factual_consistency": [
+          "tool=calculator | args={\"expression\": \"12+8\"} | result={\"expression\": \"12+8\", \"result\": 20}",
+          "[FINAL_ANSWER] 结果是 20"
+        ],
+        "completeness": [
+          "[TASK] 计算 12+8 并说明计算过程",
+          "[FINAL_ANSWER] 结果是 20"
+        ],
+        "reasoning_quality": [
+          "tool=calculator | args={\"expression\": \"12+8\"} | result={\"expression\": \"12+8\", \"result\": 20}",
+          "[FINAL_ANSWER] 结果是 20"
+        ],
+        "instruction_following": [
+          "[TASK] 计算 12+8 并说明计算过程",
+          "[FINAL_ANSWER] 结果是 20"
+        ],
+        "evidence_grounding": [
+          "tool=calculator | args={\"expression\": \"12+8\"} | result={\"expression\": \"12+8\", \"result\": 20}",
+          "[FINAL_ANSWER] 结果是 20"
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 4,
+        "factual_consistency": 5,
+        "completeness": 3,
+        "reasoning_quality": 5,
+        "instruction_following": 2,
+        "evidence_grounding": 4
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-004-partial-text",
+      "category": "partially_correct",
+      "rubric_id": "answer_quality",
+      "human_score": 3,
+      "human_status": "SCORED",
+      "judge_score": 3.55,
+      "judge_score_normalized": 4,
+      "delta": 0.55,
+      "annotation_rationale": "两个要求中只回答了词数，遗漏唯一词数（2），属明显部分完成。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        3.55
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 统计文本 \"hello world hello\" 的词数与唯一词数",
+          "[FINAL_ANSWER] 词数是 3"
+        ],
+        "factual_consistency": [
+          "result={\"word_count\": 3, \"unique_word_count\": 2, \"char_count\": 17}",
+          "[FINAL_ANSWER] 词数是 3"
+        ],
+        "completeness": [
+          "[TASK] 统计文本 \"hello world hello\" 的词数与唯一词数",
+          "result={\"word_count\": 3, \"unique_word_count\": 2, \"char_count\": 17}",
+          "[FINAL_ANSWER] 词数是 3"
+        ],
+        "reasoning_quality": [
+          "type=tool_call | status=succeeded | tool=text_analyzer | args={\"text\": \"hello world hello\"} | result={\"word_count\": 3, \"unique_word_count\": 2}",
+          "type=model_call | status=succeeded | output=\"词数是 3\""
+        ],
+        "instruction_following": [
+          "[TASK] 统计文本 \"hello world hello\" 的词数与唯一词数",
+          "[FINAL_ANSWER] 词数是 3"
+        ],
+        "evidence_grounding": [
+          "type=tool_call | status=succeeded | tool=text_analyzer | args={\"text\": \"hello world hello\"} | result={\"word_count\": 3, \"unique_word_count\": 2, \"char_count\": 17}",
+          "[FINAL_ANSWER] 词数是 3"
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 3,
+        "factual_consistency": 5,
+        "completeness": 2,
+        "reasoning_quality": 4,
+        "instruction_following": 3,
+        "evidence_grounding": 4
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-005-factual-wrong-number",
+      "category": "factual_error",
+      "rubric_id": "answer_quality",
+      "human_score": 1,
+      "human_status": "SCORED",
+      "judge_score": 2.4,
+      "judge_score_normalized": 2,
+      "delta": 1.4,
+      "annotation_rationale": "工具返回 2，回答声称 3，构成直接事实矛盾。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        2.4
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 使用计算器计算 1+1 并给出结果",
+          "[FINAL_ANSWER] 计算结果为 3"
+        ],
+        "factual_consistency": [
+          "tool=calculator | args={\"expression\": \"1+1\"} | result={\"expression\": \"1+1\", \"result\": 2}",
+          "[FINAL_ANSWER] 计算结果为 3"
+        ],
+        "completeness": [
+          "tool=calculator | args={\"expression\": \"1+1\"} | result={\"expression\": \"1+1\", \"result\": 2}",
+          "[FINAL_ANSWER] 计算结果为 3"
+        ],
+        "reasoning_quality": [
+          "tool=calculator | args={\"expression\": \"1+1\"} | result={\"expression\": \"1+1\", \"result\": 2}",
+          "[FINAL_ANSWER] 计算结果为 3"
+        ],
+        "instruction_following": [
+          "[TASK] 使用计算器计算 1+1 并给出结果",
+          "tool=calculator | args={\"expression\": \"1+1\"}",
+          "[FINAL_ANSWER] 计算结果为 3"
+        ],
+        "evidence_grounding": [
+          "result={\"expression\": \"1+1\", \"result\": 2}",
+          "[FINAL_ANSWER] 计算结果为 3"
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 5,
+        "factual_consistency": 1,
+        "completeness": 3,
+        "reasoning_quality": 1,
+        "instruction_following": 3,
+        "evidence_grounding": 1
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-006-factual-contradiction",
+      "category": "factual_error",
+      "rubric_id": "answer_quality",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "judge_score": 3.1,
+      "judge_score_normalized": 3,
+      "delta": 1.1,
+      "annotation_rationale": "行数 3 正确，但结论「表是空的」与证据自相矛盾，属内部不一致。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        3.1
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 查询 sales 表行数并说明结果是否为空",
+          "[FINAL_ANSWER] 查询结果为 3，说明表是空的"
+        ],
+        "factual_consistency": [
+          "[FINAL_ANSWER] 查询结果为 3，说明表是空的",
+          "result={\"rows\": [[3]], \"row_count\": 1}"
+        ],
+        "completeness": [
+          "[TASK] 查询 sales 表行数并说明结果是否为空",
+          "[FINAL_ANSWER] 查询结果为 3，说明表是空的"
+        ],
+        "reasoning_quality": [
+          "[FINAL_ANSWER] 查询结果为 3，说明表是空的",
+          "result={\"rows\": [[3]], \"row_count\": 1}"
+        ],
+        "instruction_following": [
+          "tool=sqlite_query | args={\"query\": \"SELECT COUNT(*) FROM sales\"} | result={\"rows\": [[3]], \"row_count\": 1}",
+          "[FINAL_ANSWER] 查询结果为 3，说明表是空的"
+        ],
+        "evidence_grounding": [
+          "[FINAL_ANSWER] 查询结果为 3，说明表是空的",
+          "result={\"rows\": [[3]], \"row_count\": 1}"
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 5,
+        "factual_consistency": 1,
+        "completeness": 5,
+        "reasoning_quality": 1,
+        "instruction_following": 5,
+        "evidence_grounding": 2
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-007-missing-key-requirement",
+      "category": "missing_information",
+      "rubric_id": "answer_quality",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "judge_score": 2.45,
+      "judge_score_normalized": 2,
+      "delta": 0.45,
+      "annotation_rationale": "总额正确但完全遗漏环比这一核心要求，且轨迹中也未取到该数据。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        2.45
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 查询本月销售总额并给出环比变化",
+          "[FINAL_ANSWER] 本月销售总额为 128000"
+        ],
+        "factual_consistency": [
+          "tool=sqlite_query | args={\"query\": \"SELECT SUM(amount) FROM sales\"} | result={\"rows\": [[128000]]}",
+          "[FINAL_ANSWER] 本月销售总额为 128000"
+        ],
+        "completeness": [
+          "[TASK] 查询本月销售总额并给出环比变化",
+          "[FINAL_ANSWER] 本月销售总额为 128000",
+          "notes\": \"环比数据需第二条查询，轨迹中未执行\""
+        ],
+        "reasoning_quality": [
+          "notes\": \"环比数据需第二条查询，轨迹中未执行\"",
+          "[FINAL_ANSWER] 本月销售总额为 128000"
+        ],
+        "instruction_following": [
+          "[TASK] 查询本月销售总额并给出环比变化",
+          "tool=sqlite_query | args={\"query\": \"SELECT SUM(amount) FROM sales\"}"
+        ],
+        "evidence_grounding": [
+          "result={\"rows\": [[128000]]}",
+          "[FINAL_ANSWER] 本月销售总额为 128000",
+          "notes\": \"环比数据需第二条查询，轨迹中未执行\""
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 3,
+        "factual_consistency": 3,
+        "completeness": 2,
+        "reasoning_quality": 2,
+        "instruction_following": 2,
+        "evidence_grounding": 2
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-008-missing-detail",
+      "category": "missing_information",
+      "rubric_id": "answer_quality",
+      "human_score": 3,
+      "human_status": "SCORED",
+      "judge_score": 3.85,
+      "judge_score_normalized": 4,
+      "delta": 0.85,
+      "annotation_rationale": "三项要求回答了前两项且数值正确，遗漏行数（1）。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        3.85
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 统计文本词数、字符数、行数",
+          "[FINAL_ANSWER] 词数 5，字符数 43"
+        ],
+        "factual_consistency": [
+          "result={\"word_count\": 5, \"char_count\": 43, \"line_count\": 1}",
+          "[FINAL_ANSWER] 词数 5，字符数 43"
+        ],
+        "completeness": [
+          "[TASK] 统计文本词数、字符数、行数",
+          "[FINAL_ANSWER] 词数 5，字符数 43",
+          "result={\"word_count\": 5, \"char_count\": 43, \"line_count\": 1}"
+        ],
+        "reasoning_quality": [
+          "tool=text_analyzer | args={\"text\": \"TracePilot failure replay sanity check\"} | result={\"word_count\": 5, \"char_count\": 43, \"line_count\": 1}",
+          "[FINAL_ANSWER] 词数 5，字符数 43"
+        ],
+        "instruction_following": [
+          "[TASK] 统计文本词数、字符数、行数",
+          "[FINAL_ANSWER] 词数 5，字符数 43"
+        ],
+        "evidence_grounding": [
+          "result={\"word_count\": 5, \"char_count\": 43, \"line_count\": 1}",
+          "[FINAL_ANSWER] 词数 5，字符数 43"
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 3,
+        "factual_consistency": 5,
+        "completeness": 3,
+        "reasoning_quality": 4,
+        "instruction_following": 3,
+        "evidence_grounding": 5
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-009-instruction-format-violation",
+      "category": "instruction_violation",
+      "rubric_id": "instruction_following",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "judge_score": 3.15,
+      "judge_score_normalized": 3,
+      "delta": 1.15,
+      "annotation_rationale": "任务明确要求只输出数字，回答包含大段解释，明显违反格式指令（但数值正确）。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        3.15
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "instruction_following": [
+          "[TASK] 只输出最终数字，不要任何解释文字",
+          "[FINAL_ANSWER] 好的，我来计算一下：最终结果应该是 100，计算过程是 (12+8)*5 先算括号再加，所以答案是 100。"
+        ],
+        "task_relevance": [
+          "[TASK] 只输出最终数字，不要任何解释文字",
+          "- trace-cal-cal-009-instruction-format-violation-s002 | type=tool_call | status=succeeded | tool=calculator | args={\"expression\": \"(12+8)*5\"} | result={\"result\": 100}"
+        ],
+        "completeness": [
+          "[TASK] 只输出最终数字，不要任何解释文字",
+          "[FINAL_ANSWER] 好的，我来计算一下：最终结果应该是 100，计算过程是 (12+8)*5 先算括号再加，所以答案是 100。"
+        ]
+      },
+      "dimension_scores": {
+        "instruction_following": 2,
+        "task_relevance": 5,
+        "completeness": 3
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-010-instruction-forbidden-tool",
+      "category": "instruction_violation",
+      "rubric_id": "instruction_following",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "judge_score": 1.25,
+      "judge_score_normalized": 1,
+      "delta": -0.75,
+      "annotation_rationale": "答案本身正确，但违反「不得调用工具」的显式约束，该维度应低分。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        1.25
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "instruction_following": [
+          "不要调用任何工具，直接给出 1+1 的答案",
+          "type=tool_call | status=succeeded | tool=calculator | args={\"expression\": \"1+1\"} | result={\"result\": 2}"
+        ],
+        "task_relevance": [
+          "不要调用任何工具，直接给出 1+1 的答案",
+          "type=tool_call | status=succeeded | tool=calculator | args={\"expression\": \"1+1\"} | result={\"result\": 2}"
+        ],
+        "completeness": [
+          "不要调用任何工具，直接给出 1+1 的答案",
+          "结果为 2",
+          "type=tool_call | status=succeeded | tool=calculator | args={\"expression\": \"1+1\"} | result={\"result\": 2}"
+        ]
+      },
+      "dimension_scores": {
+        "instruction_following": 1,
+        "task_relevance": 1,
+        "completeness": 2
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-011-tool-wrong-args",
+      "category": "unreasonable_tool_use",
+      "rubric_id": "tool_usage",
+      "human_score": 2,
+      "human_status": "SCORED",
+      "judge_score": 4.1,
+      "judge_score_normalized": 4,
+      "delta": 2.1,
+      "annotation_rationale": "工具参数与任务意图不符（乘法而非加法），虽结果自洽但工具使用不合理。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        4.1
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "tool=calculator | args={\"expression\": \"1*1\"}",
+          "计算 1+1"
+        ],
+        "instruction_following": [
+          "notes: \"工具参数应为 1+1，实际传入 1*1\"",
+          "tool=calculator | args={\"expression\": \"1*1\"}"
+        ],
+        "factual_consistency": [
+          "result={\"expression\": \"1*1\", \"result\": 1}",
+          "output=\"计算结果为 1\""
+        ],
+        "reasoning_quality": [
+          "trace-cal-cal-011-tool-wrong-args-s002 | type=tool_call | status=succeeded | tool=calculator | args={\"expression\": \"1*1\"}",
+          "trace-cal-cal-011-tool-wrong-args-s003 | type=model_call | status=succeeded | output=\"计算结果为 1\"",
+          "notes: \"工具参数应为 1+1，实际传入 1*1\""
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 5,
+        "instruction_following": 3,
+        "factual_consistency": 5,
+        "reasoning_quality": 3
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-012-tool-result-ignored",
+      "category": "unreasonable_tool_use",
+      "rubric_id": "tool_usage",
+      "human_score": 1,
+      "human_status": "SCORED",
+      "judge_score": 3.6,
+      "judge_score_normalized": 4,
+      "delta": 2.6,
+      "annotation_rationale": "工具返回被完全无视且结论相反，工具链路失效。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        3.6
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "tool=sqlite_query | args={\"query\": \"SELECT COUNT(*) FROM sales\"}",
+          "[TASK] 查询 sales 表行数并据此说明"
+        ],
+        "instruction_following": [
+          "tool=sqlite_query | args={\"query\": \"SELECT COUNT(*) FROM sales\"} | result={\"rows\": [[3]], \"row_count\": 1}",
+          "status=succeeded"
+        ],
+        "factual_consistency": [
+          "result={\"rows\": [[3]], \"row_count\": 1}",
+          "output=\"sales 表当前没有数据\""
+        ],
+        "reasoning_quality": [
+          "tool=sqlite_query | args={\"query\": \"SELECT COUNT(*) FROM sales\"} | result={\"rows\": [[3]], \"row_count\": 1}",
+          "output=\"sales 表当前没有数据\"",
+          "notes: \"工具返回 3，但回答声称无数据，未使用工具结果\""
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 5,
+        "instruction_following": 5,
+        "factual_consistency": 1,
+        "reasoning_quality": 3
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-013-no-tool-trace",
+      "category": "insufficient_evidence",
+      "rubric_id": "answer_quality",
+      "human_score": null,
+      "human_status": "UNKNOWN",
+      "judge_score": 3.2,
+      "judge_score_normalized": 3,
+      "delta": null,
+      "annotation_rationale": "答案看似正确，但缺少工具执行证据，证据充分性维度应判 UNKNOWN；不应给高分。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        3.2
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[FINAL_ANSWER]\n计算结果为 2"
+        ],
+        "factual_consistency": [
+          "[FINAL_ANSWER]\n计算结果为 2",
+          "轨迹中没有任何 tool_call 记录，无法确认结果来源"
+        ],
+        "completeness": [
+          "[TASK]\n使用计算器计算 1+1",
+          "[FINAL_ANSWER]\n计算结果为 2",
+          "轨迹中没有任何 tool_call 记录，无法确认结果来源"
+        ],
+        "reasoning_quality": [
+          "轨迹中没有任何 tool_call 记录，无法确认结果来源",
+          "trace-cal-cal-013-no-tool-trace-s003 | type=model_call | status=succeeded | output=\"计算结果为 2\""
+        ],
+        "instruction_following": [
+          "[TASK]\n使用计算器计算 1+1",
+          "轨迹中没有任何 tool_call 记录，无法确认结果来源"
+        ],
+        "evidence_grounding": [
+          "轨迹中没有任何 tool_call 记录，无法确认结果来源",
+          "[FINAL_ANSWER]\n计算结果为 2"
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 5,
+        "factual_consistency": 4,
+        "completeness": 3,
+        "reasoning_quality": 2,
+        "instruction_following": 2,
+        "evidence_grounding": 1
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-014-empty-answer",
+      "category": "insufficient_evidence",
+      "rubric_id": "answer_quality",
+      "human_score": null,
+      "human_status": "UNKNOWN",
+      "judge_score": 1.0,
+      "judge_score_normalized": 1,
+      "delta": null,
+      "annotation_rationale": "最终回答为空，无法评估相关性/完整性等维度，应判 UNKNOWN 而非 1 分。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        1.0
+      ],
+      "unknown_dimensions": [
+        "factual_consistency"
+      ],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 分析本月销售数据",
+          "[FINAL_ANSWER] (空)"
+        ],
+        "factual_consistency": [
+          "[FINAL_ANSWER] (空)",
+          "tool=sqlite_query | result={\"rows\": [[128000]]}"
+        ],
+        "completeness": [
+          "[TASK] 分析本月销售数据",
+          "[FINAL_ANSWER] (空)"
+        ],
+        "reasoning_quality": [
+          "output={\"plan\": [\"执行任务\"]}",
+          "tool=sqlite_query | result={\"rows\": [[128000]]}",
+          "type=model_call | status=succeeded",
+          "[FINAL_ANSWER] (空)"
+        ],
+        "instruction_following": [
+          "[TASK] 分析本月销售数据",
+          "[FINAL_ANSWER] (空)"
+        ],
+        "evidence_grounding": [
+          "tool=sqlite_query | result={\"rows\": [[128000]]}",
+          "[FINAL_ANSWER] (空)"
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 1,
+        "factual_consistency": null,
+        "completeness": 1,
+        "reasoning_quality": 1,
+        "instruction_following": 1,
+        "evidence_grounding": 1
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-015-no-material",
+      "category": "insufficient_evidence",
+      "rubric_id": "factual_consistency",
+      "human_score": null,
+      "human_status": "UNKNOWN",
+      "judge_score": 2.4,
+      "judge_score_normalized": 2,
+      "delta": null,
+      "annotation_rationale": "无任何可核对证据，事实一致性无法判定，应 UNKNOWN。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        2.4
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "factual_consistency": [
+          "无检索结果、无工具返回，材料为空",
+          "销售趋势呈上升状态"
+        ],
+        "evidence_grounding": [
+          "无检索结果、无工具返回，材料为空",
+          "销售趋势呈上升状态"
+        ],
+        "task_relevance": [
+          "说明数据库中的销售趋势",
+          "销售趋势呈上升状态"
+        ]
+      },
+      "dimension_scores": {
+        "factual_consistency": 2,
+        "evidence_grounding": 2,
+        "task_relevance": 4
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    },
+    {
+      "case_id": "cal-016-boundary-brief",
+      "category": "ambiguous_boundary",
+      "rubric_id": "answer_quality",
+      "human_score": 4,
+      "human_status": "SCORED",
+      "judge_score": 5.0,
+      "judge_score_normalized": 5,
+      "delta": 1.0,
+      "annotation_rationale": "极简但准确，满足核心要求；因缺少任何说明文字，完整性介于 4 与 5 之间，取 4。",
+      "annotation_source": "synthetic_reference",
+      "repeat_scores": [
+        5.0
+      ],
+      "unknown_dimensions": [],
+      "evidence": {
+        "task_relevance": [
+          "[TASK] 计算 1+1 并给出结果",
+          "[FINAL_ANSWER] 2"
+        ],
+        "factual_consistency": [
+          "[STEPS] trace-cal-cal-016-boundary-brief-s002 | type=tool_call | status=succeeded | tool=calculator | result={\"result\": 2}",
+          "[FINAL_ANSWER] 2"
+        ],
+        "completeness": [
+          "[TASK] 计算 1+1 并给出结果",
+          "[FINAL_ANSWER] 2"
+        ],
+        "reasoning_quality": [
+          "trace-cal-cal-016-boundary-brief-s002 | type=tool_call | status=succeeded | tool=calculator | result={\"result\": 2}",
+          "[FINAL_ANSWER] 2"
+        ],
+        "instruction_following": [
+          "[TASK] 计算 1+1 并给出结果",
+          "[FINAL_ANSWER] 2"
+        ],
+        "evidence_grounding": [
+          "trace-cal-cal-016-boundary-brief-s002 | type=tool_call | status=succeeded | tool=calculator | result={\"result\": 2}",
+          "trace-cal-cal-016-boundary-brief-s003 | type=model_call | status=succeeded | output=\"2\""
+        ]
+      },
+      "dimension_scores": {
+        "task_relevance": 5,
+        "factual_consistency": 5,
+        "completeness": 5,
+        "reasoning_quality": 5,
+        "instruction_following": 5,
+        "evidence_grounding": 5
+      },
+      "limitations": [
+        "LLM Judge 评分是主观判断，不构成客观事实",
+        "reasoning_quality 仅依据可观察输出与调用记录，未使用隐藏思维链",
+        "评分不可作为通过/失败的唯一依据，必须与确定性验证器结合",
+        "真实模型评审：受模型版本与采样影响，可能不可复现"
+      ]
+    }
+  ],
+  "unknown": {
+    "reference_unknown_cases": [
+      {
+        "case_id": "cal-013-no-tool-trace",
+        "judge_score": 3.2
+      },
+      {
+        "case_id": "cal-014-empty-answer",
+        "judge_score": 1.0
+      },
+      {
+        "case_id": "cal-015-no-material",
+        "judge_score": 2.4
+      }
+    ],
+    "judge_unknown_cases": [],
+    "execution_errors": [],
+    "note": "参考标注为 UNKNOWN 的案例不进入一致性指标分母；Judge 给出 UNKNOWN 的案例按缺失处理，不臆造分值。"
+  },
+  "disclaimer": "本校准结果仅在 provider_kind 标注的评审器上成立。Mock Judge 结果为规则化模拟，不得冒充真实模型校准结果；annotation_source=synthetic_reference 表示参考标注非独立人工双盲标注，因此一致率不得对外宣称等同于真实人工标注一致率。",
+  "limitations": [
+    "参考标注来源：synthetic_reference（非独立第三方人工标注）",
+    "校准案例数 16，样本量有限，指标存在抽样波动",
+    "Judge 总分为 Rubric 加权平均，混淆矩阵使用四舍五入到 1~5 整级归一化",
+    "未实现 Judge 与确定性验证器的分歧率交叉统计",
+    "真实模型评审：受模型版本与采样温度影响，结果可能不可复现"
+  ]
+}

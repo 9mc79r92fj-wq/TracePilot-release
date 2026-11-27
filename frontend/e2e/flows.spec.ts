@@ -32,8 +32,8 @@ test('流程A: Agent 运行（mock）→ 结果 → Trace → DAG', async ({ pag
   await page.goto('/runs')
   await expect(page.getByRole('heading', { name: /Agent Runs/ })).toBeVisible()
 
-  // 后端能力状态加载（真实 API 请求）
-  await expect(page.getByText(/模式可用性/)).toBeVisible({ timeout: 20_000 })
+  // 后端能力状态加载（真实 API 请求）：预算由 /api/real-api/budget 异步返回
+  await expect(page.getByText(/剩余 \/ 上限：/)).toBeVisible({ timeout: 20_000 })
 
   // 输入任务
   const textarea = page.locator('textarea').first()
@@ -87,7 +87,7 @@ test('流程B: 故障分析（Trace → 故障 → 传播 → 对比）', async 
 
   // 3) 传播分析：Fault Lab 的 Recorded Replay 是只读重放，展示故障位置
   await page.goto('/fault-lab')
-  await expect(page.getByRole('heading', { name: /Fault Lab/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /故障重放/ })).toBeVisible()
   await expect(page.getByText(/重放配置/)).toBeVisible({ timeout: 20_000 })
   await page.getByRole('button', { name: /开始重放/ }).click()
   await expect(page.getByText(/重放结果/)).toBeVisible({ timeout: 30_000 })
@@ -110,23 +110,31 @@ test('流程C: 反事实实验（选 Trace → 干预 → 受控实验 → 结�
   await page.goto('/counterfactual')
   await expect(page.getByRole('heading', { name: /Counterfactual Lab/ })).toBeVisible()
 
-  // 等待 Trace 列表加载
-  const traceSelect = page.locator('select').nth(1)
+  // 等待 Trace 列表加载（用 aria-label 精确锁定「原始故障 Trace」下拉框）
+  const traceSelect = page.getByLabel('选择 Trace')
   await expect(traceSelect).toBeVisible({ timeout: 20_000 })
   await expect
     .poll(async () => await traceSelect.locator('option').count(), { timeout: 20_000 })
     .toBeGreaterThan(0)
 
+  // 页面会自动选中一条「反事实资格可用」的故障 Trace（calculator 工具故障；
+  // 当前数据由 scripts/create_mock_failure_trace.py 生成的受控失败 Trace 提供），
+  // 资格接口返回前按钮 disabled，因此以按钮可用作为资格就绪信号。
+  const runBtn = page.getByRole('button', { name: '运行实验', exact: true })
+  await expect(runBtn).toBeEnabled({ timeout: 30_000 })
+  await expect(traceSelect.locator('option:checked')).toContainText('故障:')
+
   // 配置干预：remove_fault（默认）
   await expect(page.getByText(/干预类型/).first()).toBeVisible()
 
   // 运行受控实验
-  await page.getByRole('button', { name: /运行实验/ }).click()
+  await runBtn.click()
 
-  // 结果：实验状态 + Evidence Strength
+  // 结果：实验状态 + Evidence Strength（模拟模型徽标必须出现在结果卡内）
   await expect(page.getByText('实验状态')).toBeVisible()
-  await expect(page.getByText(/Evidence Strength/)).toBeVisible({ timeout: 60_000 })
-  await expect(page.getByText(/MOCK（模拟评审）|模拟模型/).first()).toBeVisible()
+  const strengthCard = page.locator('.card', { hasText: 'Evidence Strength' })
+  await expect(strengthCard).toBeVisible({ timeout: 60_000 })
+  await expect(strengthCard.getByText('模拟模型', { exact: true })).toBeVisible()
 
   expect(serious(errors)).toEqual([])
 })
@@ -164,11 +172,16 @@ test('流程D: 修复验证（候选 → 验证 → 结果）', async ({ page })
   await candidateCards.first().click()
   await expect(page.getByText('候选详情')).toBeVisible()
 
-  // 验证修复（全部候选）
-  await page.getByRole('button', { name: /验证修复/ }).click()
-  await expect(page.getByText(/Repair Confidence Breakdown/)).toBeVisible({ timeout: 120_000 })
-  await expect(page.getByText(/verification_status/)).toBeVisible()
-  await expect(page.getByText(/不是成功率/)).toBeVisible()
+  // 验证修复（全部候选）—— 用精确名称，避免命中真实 API 卡片里的「真实 API 修复验证」
+  await page.getByRole('button', { name: '验证修复（全部候选）', exact: true }).click()
+  // Repair Confidence Breakdown 现渲染为「修复候选评估」区块（真实报告字段推导，不生成虚假成功率）
+  const breakdown = page.locator('.cf-note', { hasText: '修复候选评估' })
+  await expect(breakdown).toBeVisible({ timeout: 120_000 })
+  await expect(breakdown).toContainText('验证状态')
+  await expect(breakdown.locator('tr', { hasText: '验证状态' })).toContainText(
+    /已验证有效|验证未通过|未验证/,
+  )
+  await expect(breakdown).toContainText('以上为模拟环境下的验证元数据，不代表生产结果')
 
   expect(serious(errors)).toEqual([])
 })
@@ -246,7 +259,7 @@ test('流程F2: Judge 校准（运行 → 一致性指标 → 混淆矩阵）', 
 
   await page.getByRole('button', { name: /运行校准/ }).click()
 
-  await expect(page.getByText('Exact Agreement')).toBeVisible({ timeout: 120_000 })
+  await expect(page.getByText('完全一致率')).toBeVisible({ timeout: 120_000 })
   await expect(page.getByText(/Confusion Matrix/)).toBeVisible()
   // 断言可见的版本/来源信息（避免匹配到 <option> 这类不可见元素）
   await expect(page.getByText(/数据集 v1\.0\.0/)).toBeVisible()

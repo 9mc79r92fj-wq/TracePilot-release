@@ -20,6 +20,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
+from backend.app.services.request_context import set_client_key
+
 __all__ = [
     "RateLimitMiddleware",
     "reset_rate_limits",
@@ -117,6 +119,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     """公开演示限流中间件（默认关闭，生产环境显式开启）。"""
 
     async def dispatch(self, request: Request, call_next: Any):
+        # 每个请求任务内记录访客标识，供真实模型调用预算按访客统计；
+        # 不写入响应或 Trace，原始 IP 不落盘（预算模块内部哈希）。
+        set_client_key(_client_ip(request))
         if not rate_limit_enabled():
             return await call_next(request)
         path = request.url.path

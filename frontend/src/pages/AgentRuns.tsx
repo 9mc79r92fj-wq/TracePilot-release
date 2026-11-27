@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, CheckCircle2, Clock3, Copy, Play, RefreshCw, ShieldCheck, Terminal } from 'lucide-react'
 import { api, apiErrorMessage } from '../api'
+import { fetchRealBudget, v2ErrorMessage } from '../v2api'
+import type { V2Budget } from '../v2api'
 import DocumentPanel from '../components/DocumentPanel'
 import { Card, EmptyState, ErrorBox, Spinner, StatusBadge } from '../components/ui'
 
@@ -101,9 +103,30 @@ export default function AgentRuns() {
   const [error, setError] = useState<string | null>(null)
   const [run, setRun] = useState<RunRecord | null>(null)
   const [history, setHistory] = useState<RunRecord[]>([])
+  // 真实 API 预算（只读展示；不改变执行逻辑）
+  const [budget, setBudget] = useState<V2Budget | null>(null)
+  const [budgetError, setBudgetError] = useState<string | null>(null)
+
+  const loadBudget = useCallback(async () => {
+    try {
+      const r = await fetchRealBudget()
+      // 预算状态文件损坏时服务端返回 error 字段（fail closed），此时不展示过期数字
+      if (r.budget?.error) {
+        setBudget(null)
+        setBudgetError(r.budget.error)
+        return
+      }
+      setBudget(r.budget)
+      setBudgetError(null)
+    } catch (e) {
+      setBudget(null)
+      setBudgetError(v2ErrorMessage(e))
+    }
+  }, [])
 
   const load = useCallback(async () => {
     setError(null)
+    void loadBudget()
     try {
       const [st, runs] = await Promise.all([
         api.get<AgentStatus>('/api/agent/status'),
@@ -116,7 +139,7 @@ export default function AgentRuns() {
     } catch (e) {
       setError(apiErrorMessage(e))
     }
-  }, [])
+  }, [loadBudget])
 
   useEffect(() => {
     void load()
@@ -282,6 +305,42 @@ export default function AgentRuns() {
               </li>
               <li>仅允许白名单内的本地工具</li>
             </ul>
+            <div className="ar-safety-divider" />
+            <div className="ar-safety-subtitle">真实 API 预算</div>
+            {budget ? (
+              <ul className="ar-safety-list">
+                <li>
+                  剩余 / 上限：<strong>{budget.total_calls_remaining}</strong> / {budget.total_calls_limit}
+                  （已用 {budget.total_calls_used}）
+                </li>
+                <li>
+                  访客今日剩余：<strong>{budget.visitor_calls_remaining ?? '—'}</strong> /{' '}
+                  {budget.visitor_daily_limit}
+                </li>
+                <li>
+                  估算费用：¥{(budget.estimated_cost_cny ?? 0).toFixed(4)}
+                  <span className="muted">（估算，不是 Provider 账单）</span>
+                </li>
+                <li>
+                  累计 Token：输入 {budget.total_tokens?.input ?? '—'} · 输出{' '}
+                  {budget.total_tokens?.output ?? '—'}
+                </li>
+              </ul>
+            ) : budgetError ? (
+              <div className="ar-warn small">预算信息不可用：{budgetError}</div>
+            ) : (
+              <p className="muted small" style={{ margin: 0 }}>正在读取真实 API 预算…</p>
+            )}
+            {!realAvailable && (
+              <div className="ar-warn small" style={{ marginTop: 8 }}>
+                真实模式不可用：{realBlockers.length ? realBlockers.join('；') : '服务端未开启真实 API'}
+              </div>
+            )}
+            {budget && !budget.enabled && (
+              <div className="ar-warn small" style={{ marginTop: 6 }}>
+                真实调用预算未启用（总上限为 0）：任何真实模式调用都会被服务端拒绝，不产生费用。
+              </div>
+            )}
             <details className="ar-runtime-details">
               <summary>查看模型与工具配置</summary>
               {status ? (

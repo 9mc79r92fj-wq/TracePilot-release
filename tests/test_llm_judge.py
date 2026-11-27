@@ -234,7 +234,8 @@ def test_real_judge_requires_explicit_authorization(monkeypatch):
     with pytest.raises(RealJudgeDisabledError):
         build_judge("deepseek", allow_real=False)
 
-    # 未提供 client 也不得构造
+    # 未提供 client 且没有 DEEPSEEK_API_KEY 时不得构造
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     with pytest.raises(RealJudgeDisabledError):
         build_judge("deepseek", allow_real=True)
 

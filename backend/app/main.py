@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+import json
+
 from pathlib import Path
 from typing import Any
 
@@ -37,7 +39,7 @@ from backend.app.services.execution_config import get_execution_limits as _get_e
 # 统一执行限额快照（在 .env 加载之后读取；用于请求默认值/边界与前端展示）
 _EXEC_LIMITS = _get_execution_limits()
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Response
 from backend.app.services.document_store import (
     build_document_context,
     router as document_router,
@@ -48,8 +50,16 @@ from pydantic import BaseModel, Field
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from fastapi import Depends
 
 from backend.app.services.rate_limit import RateLimitMiddleware
+from backend.app.security import (
+    admin_status as _admin_status,
+    clear_admin_session,
+    create_admin_session,
+    require_admin,
+    verify_admin_token,
+)
 
 from backend.app.services.counterfactual_engine import (
     INTERVENTION_TYPES,
@@ -101,6 +111,234 @@ from backend.app.services.data_governance import (
 app = FastAPI(title="TracePilot API", version="0.1.0", description="Agent 执行轨迹分析与故障归因 API")
 # STEP59_DOCUMENTS
 app.include_router(document_router)
+
+
+# ---------------------------------------------------------------------------
+# 管理员认证与真实调用预算（V2）
+# ---------------------------------------------------------------------------
+
+class AdminLoginRequest(BaseModel):
+    token: str = Field(min_length=1, max_length=512)
+
+
+class BudgetLimitRequest(BaseModel):
+    total_calls_limit: int = Field(ge=0, le=100_000)
+
+
+@app.get("/api/admin/session")
+def admin_session(request: Request) -> dict[str, Any]:
+    """查询当前管理员会话状态（不返回令牌）。"""
+    return _admin_status(
+        request=request,
+        cookie=request.cookies.get("tp_admin"),
+        authorization=request.headers.get("authorization"),
+        x_admin_token=request.headers.get("x-admin-token"),
+    )
+
+
+@app.post("/api/admin/login")
+def admin_login(body: AdminLoginRequest, request: Request, response: Response) -> dict[str, Any]:
+    """管理员登录：校验服务端环境变量中的令牌，成功后签发 HttpOnly Cookie。"""
+    from backend.app.security import admin_configured, admin_required
+
+    if not admin_configured():
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "ADMIN_NOT_CONFIGURED",
+                "message": "服务端未配置管理员令牌（TRACEPILOT_ADMIN_TOKEN）",
+            },
+        )
+    if not verify_admin_token(body.token):
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "ADMIN_TOKEN_INVALID", "message": "管理员令牌不正确"},
+        )
+    create_admin_session(response, body.token)
+    return {
+        "authenticated": True,
+        "required": admin_required(),
+        "session_ttl_seconds": 8 * 3600,
+        "note": "会话 Cookie 为 HttpOnly；浏览器刷新后保持登录",
+    }
+
+
+@app.post("/api/admin/logout")
+def admin_logout(response: Response) -> dict[str, Any]:
+    clear_admin_session(response)
+    return {"authenticated": False}
+
+
+@app.get("/api/real-api/budget")
+def real_api_budget_status(request: Request) -> dict[str, Any]:
+    """公开的预算余量（不含密钥、不含内部路径）。"""
+    from backend.app.services.real_api_budget import budget_status
+    from backend.app.services.request_context import get_client_key
+
+    status = budget_status(visitor_key=get_client_key())
+    return {"budget": status, "paid_api_called": False}
+
+
+@app.get("/api/admin/budget")
+def admin_budget_status(request: Request) -> dict[str, Any]:
+    """管理员查看预算（需管理员会话；未启用认证时仅本地可读）。"""
+    from backend.app.services.real_api_budget import budget_status
+
+    return {
+        "budget": budget_status(),
+        "admin": _admin_status(
+            request=request,
+            cookie=request.cookies.get("tp_admin"),
+            authorization=request.headers.get("authorization"),
+            x_admin_token=request.headers.get("x-admin-token"),
+        ),
+    }
+
+
+@app.post("/api/admin/budget", dependencies=[Depends(require_admin)])
+def admin_budget_update(body: BudgetLimitRequest) -> dict[str, Any]:
+    """管理员调整持久化总调用上限（重启后仍生效）。"""
+    from backend.app.services.real_api_budget import set_total_limit
+
+    return {"budget": set_total_limit(body.total_calls_limit)}
+
+
+# ---------------------------------------------------------------------------
+# V2 实验与真实 API 运营状态
+# ---------------------------------------------------------------------------
+
+def _v2_experiment_dir() -> Path:
+    return Path(__file__).resolve().parents[2] / "data" / "v2_experiments"
+
+
+def _read_v2_json(name: str) -> dict[str, Any] | None:
+    path = _v2_experiment_dir() / name
+    if not path.is_file():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+@app.get("/api/v2/status")
+def v2_status() -> dict[str, Any]:
+    """V2 真实模型/预算/公开 Benchmark/校准实验的运营状态汇总。"""
+    from backend.app.services.agent_runner import ALLOWED_MODELS, real_api_readiness
+    from backend.app.services.real_api_budget import budget_status
+
+    readiness = real_api_readiness()
+    bench = _read_v2_json("benchmark_rootcause_results.json")
+    cal = _read_v2_json("real_judge_calibration.json")
+    return {
+        "version": "2.0",
+        "real_api": {
+            "available": readiness["available"],
+            "models": list(ALLOWED_MODELS),
+            "blocking_reasons": readiness["blocking_reasons"],
+            "public_real_enabled": readiness.get("public_real_enabled", False),
+        },
+        "budget": budget_status(),
+        "benchmark": {
+            "available": bench is not None,
+            "dataset": (bench or {}).get("dataset"),
+            "case_count": (bench or {}).get("case_count"),
+            "metrics": (bench or {}).get("metrics"),
+            "limitations": (bench or {}).get("limitations"),
+            "file": "data/v2_experiments/benchmark_rootcause_results.json",
+        },
+        "judge_calibration": {
+            "available": cal is not None,
+            "judge": (cal or {}).get("judge"),
+            "metrics": (cal or {}).get("metrics"),
+            "evaluated_cases": ((cal or {}).get("dataset") or {}).get("evaluated_cases"),
+            "file": "data/v2_experiments/real_judge_calibration.json",
+        },
+        "paid_api_called_note": "真实调用仅在显式授权、预算范围内发生；本接口只读，不产生调用",
+    }
+
+
+@app.get("/api/v2/benchmark/rootcause")
+def v2_benchmark_rootcause() -> dict[str, Any]:
+    """公开 AgentRx 子集上的三组根因归因对照结果（本地真实实验产物）。"""
+    report = _read_v2_json("benchmark_rootcause_results.json")
+    if report is None:
+        raise HTTPException(status_code=404, detail="尚未生成 V2 Benchmark 结果文件")
+    return report
+
+
+def _queryforge_schema() -> dict[str, Any]:
+    """读取协议 JSON Schema。
+
+    优先使用 `docs/schemas/` 下的文件（协议的事实来源）；如果部署镜像未包含
+    docs 目录，则从 Pydantic 模型即时生成等价 schema（含 ``$schema`` / ``$id``）。
+    """
+    path = Path(__file__).resolve().parents[2] / "docs" / "schemas" / "queryforge_trace_v1.schema.json"
+    if path.is_file():
+        return json.loads(path.read_text(encoding="utf-8"))
+    from backend.app.schemas.queryforge_trace import QueryForgeTraceV1
+
+    schema = QueryForgeTraceV1.model_json_schema()
+    schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+    schema["$id"] = "queryforge_trace_v1.schema.json"
+    return schema
+
+
+@app.get("/api/interop/queryforge/schema")
+def queryforge_schema() -> dict[str, Any]:
+    """返回 QueryForge Trace 协议 v1 的 JSON Schema（公开只读）。"""
+    return {
+        "schema": _queryforge_schema(),
+        "protocol_version": "1.0",
+        "source": "queryforge",
+        "note": "导入接口需管理员会话；协议与映射见 docs/TRACE_INTEROPERABILITY.md",
+    }
+
+
+@app.post("/api/interop/queryforge/import", dependencies=[Depends(require_admin)])
+def queryforge_trace_import(payload: dict[str, Any]) -> dict[str, Any]:
+    """导入一条 QueryForge Trace v1；写入 data/traces，不覆盖同名 Trace。"""
+    from backend.app.services.trace_interop import (
+        TraceIdConflictError,
+        TraceInteropError,
+        import_queryforge_trace,
+    )
+
+    try:
+        imported = import_queryforge_trace(payload)
+    except TraceIdConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except TraceInteropError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return {
+        "trace_id": imported.record.trace_id,
+        "source": imported.source,
+        "schema_version": imported.schema_version,
+        "warnings": imported.warnings,
+        "saved": bool(imported.saved_path),
+        "step_count": len(imported.record.steps),
+        "requires_admin": True,
+    }
+
+
+@app.get("/api/admin/status", dependencies=[Depends(require_admin)])
+def admin_status_endpoint() -> dict[str, Any]:
+    """管理员功能状态（不返回令牌）。"""
+    from backend.app.security import admin_configured, admin_required
+
+    return {
+        "admin_configured": admin_configured(),
+        "admin_required": admin_required(),
+        "capabilities": {
+            "upload_documents": True,
+            "update_documents": True,
+            "full_retrieval": True,
+            "tool_calls": True,
+            "manage_budget": True,
+        },
+        "note": "上传/删除文件、预算调整由服务端依赖强制校验管理员会话",
+    }
+
 
 # CORS 白名单：本地默认仅 Vite 开发地址；生产通过
 # TRACEPILOT_CORS_ORIGINS（逗号分隔）配置正式前端域名（如 Vercel）。
@@ -580,7 +818,118 @@ def replay_controlled(body: ControlledRerunRequest) -> dict[str, Any]:
 @app.get("/api/counterfactual/intervention-types")
 def counterfactual_types() -> dict[str, Any]:
     """返回允许的干预类型白名单（不暴露任何执行能力）。"""
-    return {"intervention_types": sorted(INTERVENTION_TYPES)}
+    from backend.app.services.real_counterfactual import REAL_INTERVENTION_TYPES
+
+    return {
+        "intervention_types": sorted(INTERVENTION_TYPES),
+        "real_execution_intervention_types": sorted(REAL_INTERVENTION_TYPES),
+        "note": "真实执行仅支持可审计的输入/限额干预；伪造工具返回会被拒绝",
+    }
+
+
+class RealCounterfactualRequest(BaseModel):
+    trace_id: str = Field(min_length=1, max_length=128)
+    intervention: dict[str, Any]
+    replays: int = Field(default=1, ge=1, le=2)
+
+
+class RealRepairValidateRequest(BaseModel):
+    trace_id: str = Field(min_length=1, max_length=128)
+    max_candidates: int = Field(default=2, ge=1, le=3)
+
+
+def _require_real_api_ready() -> dict[str, Any]:
+    from backend.app.services.agent_runner import real_api_readiness
+
+    readiness = real_api_readiness()
+    if not readiness["available"]:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "code": "REAL_API_UNAVAILABLE",
+                "message": "真实 API 未启用或预算未配置",
+                "blocking_reasons": readiness["blocking_reasons"],
+            },
+        )
+    return readiness
+
+
+@app.post("/api/counterfactual/real-experiments", dependencies=[Depends(require_admin)])
+def real_counterfactual_experiment(body: RealCounterfactualRequest) -> dict[str, Any]:
+    """真实 DeepSeek 受控反事实执行（按上游调用扣减持久预算）。"""
+    from backend.app.services.real_counterfactual import (
+        RealCounterfactualError,
+        run_real_counterfactual,
+    )
+
+    _require_real_api_ready()
+    trace = load_trace(body.trace_id)
+    try:
+        report = run_real_counterfactual(
+            trace, body.intervention, replays=body.replays
+        )
+    except RealCounterfactualError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"experiment": report}
+
+
+@app.post("/api/repairs/validate-real", dependencies=[Depends(require_admin)])
+def repair_validate_real(body: RealRepairValidateRequest) -> dict[str, Any]:
+    """用真实 API 重放验证可表达的修复候选；无法真实表达的候选明确拒绝。"""
+    from backend.app.services.minimal_repair import generate_candidates
+    from backend.app.services.real_counterfactual import (
+        RealCounterfactualError,
+        UnsupportedRealIntervention,
+        verify_repair_candidate_real,
+    )
+
+    _require_real_api_ready()
+    trace = load_trace(body.trace_id)
+    candidates = generate_candidates(trace, max_candidates=body.max_candidates)
+    results: list[dict[str, Any]] = []
+    for candidate in candidates:
+        try:
+            report = verify_repair_candidate_real(trace, candidate)
+            results.append(
+                {
+                    "repair_id": candidate.repair_id,
+                    "repair_type": candidate.repair_type,
+                    "status": "verified_real",
+                    "experiment_id": report["experiment_id"],
+                    "outcome": report["intervention_outcomes"],
+                    "causal_evidence_level": report["causal_evidence_level"],
+                }
+            )
+        except UnsupportedRealIntervention as exc:
+            results.append(
+                {
+                    "repair_id": candidate.repair_id,
+                    "repair_type": candidate.repair_type,
+                    "status": "rejected_not_real_executable",
+                    "reason": str(exc),
+                }
+            )
+        except RealCounterfactualError as exc:
+            results.append(
+                {
+                    "repair_id": candidate.repair_id,
+                    "repair_type": candidate.repair_type,
+                    "status": "failed",
+                    "reason": str(exc),
+                }
+            )
+    return {
+        "trace_id": body.trace_id,
+        "candidate_count": len(candidates),
+        "executed_count": sum(1 for item in results if item["status"] == "verified_real"),
+        "candidates": results,
+        "execution_mode": "real_api",
+        "paid_api_called": any(item["status"] == "verified_real" for item in results),
+        "limitations": [
+            "真实执行只改变任务输入/限额，不伪造工具返回",
+            "单次真实重放不足以估计修复成功率，需扩大样本",
+        ],
+    }
 
 
 @app.post("/api/counterfactual/experiments")
@@ -1145,7 +1494,7 @@ def calibration_datasets() -> dict[str, Any]:
 
 
 @app.post("/api/evaluation/calibration/runs")
-def calibration_run(body: CalibrationRunRequest) -> dict[str, Any]:
+def calibration_run(body: CalibrationRunRequest, request: Request) -> dict[str, Any]:
     """运行一次 Judge 校准（默认 Mock，零成本；真实模式需显式授权）。
 
     - 仅允许受控校准集白名单，不接受路径；
@@ -1162,6 +1511,15 @@ def calibration_run(body: CalibrationRunRequest) -> dict[str, Any]:
         RealJudgeDisabledError,
         build_judge,
     )
+
+    if body.judge_mode == "deepseek":
+        from backend.app.security import admin_required, is_admin_request
+
+        if admin_required() and not is_admin_request(request):
+            raise HTTPException(
+                status_code=401,
+                detail={"code": "ADMIN_AUTH_REQUIRED", "message": "真实 Judge 校准需要管理员会话"},
+            )
 
     try:
         dataset = load_calibration_dataset(body.dataset_id)
@@ -1225,7 +1583,7 @@ def multi_judge_configs() -> dict[str, Any]:
 
 
 @app.post("/api/evaluation/multi-judge/runs")
-def multi_judge_run_create(body: MultiJudgeRunRequest) -> dict[str, Any]:
+def multi_judge_run_create(body: MultiJudgeRunRequest, request: Request) -> dict[str, Any]:
     """创建异步多 Judge 评测（默认 Mock，零成本）。
 
     - 仅允许受控数据集与预设配置组（或显式 Mock 配置）；
@@ -1260,7 +1618,15 @@ def multi_judge_run_create(body: MultiJudgeRunRequest) -> dict[str, Any]:
         except Exception as exc:
             raise HTTPException(status_code=400, detail=f"judges 配置非法: {exc}") from exc
 
-    # 真实 Judge 预检：未授权则立即 403，绝不排队执行
+    # 真实 Judge 预检：未授权/未登录管理员则立即拒绝，绝不排队执行
+    if any(spec.mode == "deepseek" for spec in specs):
+        from backend.app.security import admin_required, is_admin_request
+
+        if admin_required() and not is_admin_request(request):
+            raise HTTPException(
+                status_code=401,
+                detail={"code": "ADMIN_AUTH_REQUIRED", "message": "真实多 Judge 评测需要管理员会话"},
+            )
     for spec in specs:
         if spec.mode == "deepseek":
             try:
@@ -1468,6 +1834,8 @@ def agent_status() -> dict[str, Any]:
         "real_api_blocking_reasons": readiness["blocking_reasons"],
         "real_api_warnings": readiness["warnings"],
         "api_key_configured": readiness["api_key_configured"],
+        "public_real_enabled": readiness.get("public_real_enabled", False),
+        "real_call_budget": readiness.get("budget"),
         "tool_whitelist": safe_tool_names(),
         "limits": frontend_limits,
         "data_sources": ["real_api", "mock", "simulated"],
@@ -3933,3 +4301,20 @@ def governance_trace_eligibility(trace_id: str):
     """单条 Trace 对重放 / 受控重跑 / 反事实 / 修复候选四类操作的资格与原因。"""
     record = load_trace(trace_id)
     return {"eligibility": trace_eligibility(record), "paid_api_called": False}
+
+
+# ---------------------------------------------------------------------------
+# 同源部署扩展（单端口同时提供 /api 与前端 SPA）
+#
+# ModelScope 等单端口环境由同一个 FastAPI 进程托管前端构建产物。本段必须位于
+# 所有 API 路由注册之后：
+# - 静态托管只在 TRACEPILOT_STATIC_DIR 指向含 index.html 的构建产物时启用；
+# - 本地开发（Vite 5173 + 后端 8000）不设置该变量，行为与原来完全一致。
+# ---------------------------------------------------------------------------
+from starlette.middleware.gzip import GZipMiddleware  # noqa: E402
+
+from backend.app.static_files import mount_frontend  # noqa: E402
+
+# 单端口部署下压缩 JSON 与构建产物（免费 CPU/较弱带宽环境）
+app.add_middleware(GZipMiddleware, minimum_size=1024)
+mount_frontend(app)

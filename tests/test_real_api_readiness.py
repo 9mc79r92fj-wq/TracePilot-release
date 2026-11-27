@@ -12,6 +12,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -24,6 +26,16 @@ from backend.app.services.agent_runner import real_api_readiness  # noqa: E402
 client = TestClient(app)
 FLAG = "TRACEPILOT_ALLOW_REAL_API"
 KEY = "DEEPSEEK_API_KEY"
+BUDGET_LIMIT = "TRACEPILOT_REAL_TOTAL_CALL_LIMIT"
+BUDGET_PATH = "TRACEPILOT_REAL_BUDGET_PATH"
+
+
+@pytest.fixture(autouse=True)
+def _temp_budget(tmp_path, monkeypatch):
+    """readiness 现在要求配置持久化调用预算；测试使用临时文件，不污染项目 data/。"""
+    monkeypatch.setenv(BUDGET_LIMIT, "10")
+    monkeypatch.setenv(BUDGET_PATH, str(tmp_path / "budget.json"))
+    yield
 
 
 def _real_mode(payload: dict) -> dict:
@@ -45,7 +57,7 @@ def test_readiness_blocked_without_flag_and_key(monkeypatch):
 def test_readiness_available_with_flag_and_key(monkeypatch):
     monkeypatch.setenv(FLAG, "1")
     monkeypatch.setenv(KEY, "sk-test-only-not-a-real-key-000000")
-    monkeypatch.setenv("DEEPSEEK_MODEL", "deepseek-chat")
+    monkeypatch.setenv("DEEPSEEK_MODEL", "deepseek-flash")
     readiness = real_api_readiness()
     assert readiness["available"] is True
     assert readiness["allow_flag"] is True
@@ -82,7 +94,7 @@ def test_status_available_and_never_leaks_key(monkeypatch):
     secret = "sk-test-secret-should-never-leak-0123456789"
     monkeypatch.setenv(FLAG, "1")
     monkeypatch.setenv(KEY, secret)
-    monkeypatch.setenv("DEEPSEEK_MODEL", "deepseek-chat")
+    monkeypatch.setenv("DEEPSEEK_MODEL", "deepseek-flash")
     r = client.get("/api/agent/status")
     assert r.status_code == 200
     payload = r.json()
@@ -105,4 +117,4 @@ def test_invalid_model_is_warning_not_blocker(monkeypatch):
     # 运行时存在回退逻辑，因此无效模型是警告而不是阻断
     assert readiness["available"] is True
     assert readiness["configured_model_valid"] is False
-    assert any("deepseek-chat" in w for w in readiness["warnings"])
+    assert any("deepseek-flash" in w for w in readiness["warnings"])

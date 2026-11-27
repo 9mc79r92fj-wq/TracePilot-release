@@ -44,27 +44,20 @@ test('Adversarial Lab：生成 → 选择案例运行 → 覆盖率地图 → Ba
   // 4) 指标 + 覆盖率地图
   await expect(page.getByText('安全通过率', { exact: true })).toBeVisible({ timeout: 120_000 })
   await expect(page.getByText('任务成功率（独立）', { exact: true })).toBeVisible()
-  await expect(page.getByText(/Attack Coverage Map/)).toBeVisible()
+  await expect(page.getByText('攻击覆盖图', { exact: true })).toBeVisible()
 
-  // 覆盖率表格七列齐全
-  for (const h of ['generated', 'executed', 'not_executed', 'safety_passed', 'safety_failed', 'unknown', 'coverage_status']) {
+  // 覆盖率表格列齐全（攻击类型 + 7 个指标列，列头已中文化）
+  for (const h of ['生成', '执行', '未执行', '通过', '失败', '未知', '覆盖状态']) {
     await expect(page.locator('th').filter({ hasText: h }).first()).toBeVisible()
   }
 
-  // 6 类攻击类型均出现在覆盖表中
-  for (const t of [
-    'prompt_injection',
-    'tool_misuse',
-    'permission_boundary',
-    'invalid_arguments',
-    'conflicting_instructions',
-    'fault_recovery',
-  ]) {
+  // 6 类攻击类型均出现在覆盖表中（页面按中文类型标签展示）
+  for (const t of ['提示注入', '工具误用', '权限边界', '非法参数', '指令冲突', '故障恢复']) {
     await expect(page.locator('td').filter({ hasText: t }).first()).toBeVisible()
   }
 
-  // 5) Bad Case Explorer（金丝雀负控必为 UNSAFE）
-  await expect(page.getByText(/Bad Case Explorer（/)).toBeVisible()
+  // 5) Bad Case（金丝雀负控必为 UNSAFE）
+  await expect(page.getByText(/^Bad Case（\d+\/\d+）/)).toBeVisible()
   await expect(page.getByRole('button', { name: '证据' }).first()).toBeVisible({ timeout: 20_000 })
 
   // 6) 证据面板
@@ -87,7 +80,7 @@ test('Adversarial Lab：Bad Case 筛选可用（风险类型/安全状态/原因
   await page.getByRole('button', { name: /生成案例/ }).click()
   await expect(page.getByText(/生成结果（\d+ 例）/)).toBeVisible({ timeout: 60_000 })
   await page.getByRole('button', { name: /运行所选/ }).click()
-  await expect(page.getByText(/Bad Case Explorer（/)).toBeVisible({ timeout: 120_000 })
+  await expect(page.getByText(/^Bad Case（\d+\/\d+）/)).toBeVisible({ timeout: 120_000 })
 
   // 筛选控件齐全
   await expect(page.getByLabel('按风险类型筛选')).toBeVisible()
@@ -111,7 +104,7 @@ test('Adversarial Lab：跳转 DAG 可用', async ({ page }) => {
   await page.getByRole('button', { name: /生成案例/ }).click()
   await expect(page.getByText(/生成结果（\d+ 例）/)).toBeVisible({ timeout: 60_000 })
   await page.getByRole('button', { name: /运行所选/ }).click()
-  await expect(page.getByText(/Bad Case Explorer（/)).toBeVisible({ timeout: 120_000 })
+  await expect(page.getByText(/^Bad Case（\d+\/\d+）/)).toBeVisible({ timeout: 120_000 })
 
   await page.getByRole('button', { name: 'DAG' }).first().click()
   await expect(page).toHaveURL(/\/dag\/trace-rt-/, { timeout: 20_000 })
@@ -121,7 +114,12 @@ test('Adversarial Lab：跳转 DAG 可用', async ({ page }) => {
 test('导航：Adversarial Lab 入口可达', async ({ page }) => {
   await page.goto('/')
   const nav = page.locator('.sidebar .nav')
-  await nav.getByRole('link', { name: 'Adversarial Lab', exact: true }).click()
+  // 侧栏默认只展开当前路由分组，需要先展开「安全与性能」
+  const securityGroup = nav.getByRole('button', { name: '安全与性能', exact: true })
+  if ((await securityGroup.getAttribute('aria-expanded')) !== 'true') {
+    await securityGroup.click()
+  }
+  await nav.getByRole('link', { name: '对抗评测', exact: true }).click()
   await expect(page).toHaveURL(/\/adversarial$/)
   await expect(page.getByRole('heading', { name: /Adversarial Evaluation Lab/ })).toBeVisible()
 })

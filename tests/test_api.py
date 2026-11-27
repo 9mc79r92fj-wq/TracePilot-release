@@ -15,14 +15,13 @@ client = TestClient(app)
 
 
 def _get_pair():
+    from fixture_data import STEP21_FAULT_ID, STEP21_NORMAL_ID
+
     data = client.get("/api/traces").json()
-    normal = fault = None
-    for t in data["traces"]:
-        if t["fault_types"] and fault is None:
-            fault = t
-        elif not t["fault_types"] and normal is None:
-            normal = t
-    assert normal is not None and fault is not None, "data/traces 中缺少正常/故障 Trace"
+    rows = {t["trace_id"]: t for t in data["traces"]}
+    normal = rows.get(STEP21_NORMAL_ID)
+    fault = rows.get(STEP21_FAULT_ID)
+    assert normal is not None and fault is not None, "缺少第 21 步 fixture Trace"
     return normal, fault
 
 

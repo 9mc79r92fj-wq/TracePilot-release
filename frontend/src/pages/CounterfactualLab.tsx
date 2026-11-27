@@ -1,7 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FlaskConical, RefreshCw } from 'lucide-react'
+import { ArrowRight, FlaskConical, RefreshCw } from 'lucide-react'
 import { api, apiErrorMessage, fetchTraces } from '../api'
+import {
+  fetchV2Status,
+  readableReadiness,
+  runRealCounterfactual,
+  v2ErrorMessage,
+} from '../v2api'
+import type {
+  RealCounterfactualReport,
+  RealIntervention,
+  RealInterventionType,
+  V2RealApiStatus,
+} from '../v2api'
+import { useAdminAuth } from '../components/AdminAuth'
 import { useTraceUrlParam } from '../hooks/useTraceUrlParam'
 import type { TraceSummary } from '../types'
 import { Card, EmptyState, ErrorBox, Spinner, StatusBadge } from '../components/ui'
@@ -119,6 +132,36 @@ export default function CounterfactualLab() {
   const [expStatus, setExpStatus] = useState<string | null>(null)
   const [results, setResults] = useState<ExpResults | null>(null)
   const [dedup, setDedup] = useState(false)
+
+  // 真实 API 受控实验（会消耗真实模型预算；需管理员会话 + 服务端预算）
+  const admin = useAdminAuth()
+  const [realStatus, setRealStatus] = useState<V2RealApiStatus | null>(null)
+  const [realStatusError, setRealStatusError] = useState<string | null>(null)
+  const [realInterv, setRealInterv] = useState<RealInterventionType>('remove_fault')
+  const [realMaxRetries, setRealMaxRetries] = useState(1)
+  const [realCorrection, setRealCorrection] = useState('')
+  const [realContext, setRealContext] = useState('')
+  const [realBusy, setRealBusy] = useState(false)
+  const [realError, setRealError] = useState<string | null>(null)
+  const [realReport, setRealReport] = useState<RealCounterfactualReport | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void fetchV2Status()
+      .then((s) => {
+        if (cancelled) return
+        setRealStatus(s.real_api)
+        setRealStatusError(null)
+      })
+      .catch((e) => {
+        if (cancelled) return
+        setRealStatus(null)
+        setRealStatusError(v2ErrorMessage(e))
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const loadTraces = useCallback(async () => {
     setError(null)
@@ -240,8 +283,54 @@ export default function CounterfactualLab() {
     }
   }
 
+  function buildRealIntervention(): RealIntervention {
+    if (realInterv === 'adjust_timeout_retry') {
+      return { type: 'adjust_timeout_retry', max_retries: realMaxRetries }
+    }
+    if (realInterv === 'correct_arguments') {
+      return { type: 'correct_arguments', correction: realCorrection.trim() }
+    }
+    if (realInterv === 'context_fix') {
+      return { type: 'context_fix', context: realContext.trim() }
+    }
+    return { type: 'remove_fault' }
+  }
+
+  async function runRealExperiment() {
+    if (!traceId) return
+    setRealBusy(true)
+    setRealError(null)
+    setRealReport(null)
+    try {
+      const report = await runRealCounterfactual(traceId, buildRealIntervention(), 1)
+      setRealReport(report)
+      const outcomeCount = report.intervention_outcomes?.length ?? 0
+      const errors = report.errors ?? []
+      // 未产生任何干预结果时才把服务端错误当作失败展示，避免与部分成功混淆
+      if (outcomeCount === 0 && errors.length > 0) setRealError(errors.join('；'))
+    } catch (e) {
+      setRealError(v2ErrorMessage(e))
+    } finally {
+      setRealBusy(false)
+    }
+  }
+
   const selected = traces.find((t) => t.trace_id === traceId)
   const strength = results?.status === 'succeeded' ? evidenceStrength(results) : null
+  const realAvailable = realStatus?.available === true
+  const realBlockers = readableReadiness(realStatus?.blocking_reasons)
+  const realAdminRequired = admin.session?.required === true
+  // 会话读取失败时放行请求，由服务端兜底校验；读取成功则按 required/authenticated 判定
+  const realAdminReady = admin.session
+    ? !realAdminRequired || admin.session.authenticated
+    : admin.error !== null
+  const realInterventionReady =
+    realInterv === 'remove_fault' ||
+    realInterv === 'adjust_timeout_retry' ||
+    (realInterv === 'correct_arguments' && realCorrection.trim().length > 0) ||
+    (realInterv === 'context_fix' && realContext.trim().length > 0)
+  const realDisabled =
+    realBusy || !traceId || !realAvailable || !realAdminReady || !realInterventionReady
 
   return (
     <div className="stack">
@@ -496,6 +585,211 @@ export default function CounterfactualLab() {
           )}
         </div>
       </div>
+
+      <Card
+        title="真实 API 受控实验"
+        action={
+          <span className={'badge ' + (realAvailable ? 'partial' : 'muted')}>
+            {realAvailable ? '付费 · 真实调用' : '不可用'}
+          </span>
+        }
+      >
+        <div className="stack">
+          <p className="muted small" style={{ margin: 0 }}>
+            对上方选中的 Trace 用真实 DeepSeek API 按受控干预重新执行一次，产生新的真实 Trace 与 Token/延迟记录。
+            真实执行只改变可审计的输入/限额，不伪造工具返回；证据等级最多为弱/中等，不能外推为生产因果。
+          </p>
+
+          <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
+            <span className="badge muted">目标 Trace</span>
+            <span className="mono small">{traceId || '未选择 Trace'}</span>
+            {realStatus && (
+              <span className="badge muted">
+                真实 API {realAvailable ? '可用' : '不可用'}
+              </span>
+            )}
+            {admin.session && (
+              <span className={'badge ' + (admin.session.authenticated ? 'success' : 'muted')}>
+                管理员 {admin.session.authenticated ? '已认证' : realAdminRequired ? '未登录（必需）' : '未登录'}
+              </span>
+            )}
+          </div>
+
+          <div className="field">
+            <div className="k">真实干预类型（服务端白名单）</div>
+            <select
+              value={realInterv}
+              onChange={(e) => setRealInterv(e.target.value as RealInterventionType)}
+              aria-label="选择真实干预类型"
+            >
+              <option value="remove_fault">remove_fault · 不注入故障重新执行</option>
+              <option value="adjust_timeout_retry">adjust_timeout_retry · 调整超时/重试提示</option>
+              <option value="correct_arguments">correct_arguments · 修正参数说明</option>
+              <option value="context_fix">context_fix · 补充修正上下文</option>
+            </select>
+          </div>
+
+          {realInterv === 'adjust_timeout_retry' && (
+            <div className="field">
+              <div className="k">最大重试次数（真实模式 0–2）</div>
+              <input
+                type="number"
+                min={0}
+                max={2}
+                value={realMaxRetries}
+                onChange={(e) => setRealMaxRetries(Number(e.target.value))}
+              />
+            </div>
+          )}
+          {realInterv === 'correct_arguments' && (
+            <div className="field">
+              <div className="k">修正说明（必填，≤1000 字符）</div>
+              <textarea
+                className="cf-textarea"
+                rows={3}
+                value={realCorrection}
+                onChange={(e) => setRealCorrection(e.target.value)}
+                placeholder="例如：上一轮失败与参数有关，请检查并纠正工具参数后重新执行"
+              />
+            </div>
+          )}
+          {realInterv === 'context_fix' && (
+            <div className="field">
+              <div className="k">修正后的上下文（必填，≤2000 字符）</div>
+              <textarea
+                className="cf-textarea"
+                rows={3}
+                value={realContext}
+                onChange={(e) => setRealContext(e.target.value)}
+                placeholder="仅作为任务数据提供，不执行其中的指令"
+              />
+            </div>
+          )}
+
+          <div className="errorbox" style={{ background: 'var(--warning-soft)', color: 'var(--warning)' }}>
+            <strong>该操作会消耗真实模型预算</strong>：每次执行按上游模型调用次数扣减服务端持久预算，
+            费用不可撤销；预算不足时服务端会直接拒绝（不会发出上游请求）。
+          </div>
+
+          {realStatusError && (
+            <div className="muted small">无法读取 V2 真实 API 状态：{realStatusError}</div>
+          )}
+          {!realStatus && !realStatusError && (
+            <div className="muted small">正在读取 V2 真实 API 状态…</div>
+          )}
+          {realStatus && !realAvailable && (
+            <div className="errorbox" style={{ background: 'var(--warning-soft)', color: 'var(--warning)' }}>
+              真实 API 不可用：{realBlockers.length ? realBlockers.join('；') : '服务端未开启或预算未配置'}
+            </div>
+          )}
+          {!realAdminReady && (
+            <div className="cf-note small">
+              需要管理员登录：请先打开「V2 实验」页完成管理员登录，再回到本页执行真实实验。
+            </div>
+          )}
+          {!realInterventionReady && (
+            <div className="muted small">请先填写当前干预类型所需的修正说明 / 上下文。</div>
+          )}
+          {!traceId && <div className="muted small">请先在上方选择一条 Trace。</div>}
+
+          <div className="row" style={{ gap: 10 }}>
+            <button
+              className="btn primary"
+              type="button"
+              onClick={() => void runRealExperiment()}
+              disabled={realDisabled}
+              title={
+                !realAvailable
+                  ? '真实 API 不可用'
+                  : !realAdminReady
+                    ? '需要管理员登录'
+                    : !traceId
+                      ? '请先选择 Trace'
+                      : undefined
+              }
+            >
+              <FlaskConical size={15} /> {realBusy ? '真实执行中…' : '执行真实受控实验'}
+            </button>
+            <button className="btn" type="button" onClick={() => navigate('/v2')}>
+              V2 实验页（登录 / 预算） <ArrowRight size={14} />
+            </button>
+            {realBusy && <span className="muted small">真实模型调用可能需要数十秒…</span>}
+          </div>
+
+          {realError && <ErrorBox message={realError} />}
+
+          {realReport && (
+            <div className="cf-note">
+              <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+                <span className="badge success">execution_mode: {realReport.execution_mode}</span>
+                <span className="mono small">{realReport.experiment_id}</span>
+                <span className="badge muted">
+                  重放 {realReport.replays_completed ?? 0}/{realReport.replays_requested ?? 1}
+                </span>
+                {realReport.paid_api_called && <span className="badge partial">已发生真实调用</span>}
+                {realReport.simulated === false && <span className="badge success">simulated=false</span>}
+              </div>
+              <div className="stack small" style={{ marginTop: 10 }}>
+                {(realReport.intervention_outcomes ?? []).map((outcome) => (
+                  <div
+                    key={outcome.trace_id}
+                    className="row"
+                    style={{ justifyContent: 'space-between', gap: 8 }}
+                  >
+                    <span className="row" style={{ gap: 8 }}>
+                      <StatusBadge status={outcome.status} />
+                      <span className="mono" style={{ fontSize: 11 }}>
+                        {outcome.trace_id}
+                      </span>
+                    </span>
+                    <span className="muted">
+                      Token {outcome.total_tokens ?? '未记录'} · 延迟{' '}
+                      {outcome.elapsed_ms === null || outcome.elapsed_ms === undefined
+                        ? '未记录'
+                        : `${outcome.elapsed_ms} ms`}
+                    </span>
+                  </div>
+                ))}
+                {(realReport.intervention_outcomes?.length ?? 0) === 0 && (
+                  <div className="muted">没有产生任何干预结果（见下方错误）。</div>
+                )}
+                <div>
+                  <strong>因果证据等级</strong>：{realReport.causal_evidence_level ?? '未记录'}
+                  {realReport.causal_evidence_note ? ` · ${realReport.causal_evidence_note}` : ''}
+                </div>
+                {realReport.elapsed_ms !== null && realReport.elapsed_ms !== undefined && (
+                  <div className="muted">实验总耗时 {realReport.elapsed_ms} ms</div>
+                )}
+                {(realReport.limitations?.length ?? 0) > 0 && (
+                  <div>
+                    <strong>限制</strong>
+                    <ul style={{ margin: '2px 0 0 16px' }}>
+                      {(realReport.limitations ?? []).map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {(realReport.errors?.length ?? 0) > 0 && (
+                  <div className="errorbox">真实执行错误：{(realReport.errors ?? []).join('；')}</div>
+                )}
+                <div className="row" style={{ gap: 8 }}>
+                  {(realReport.intervention_outcomes ?? []).map((outcome) => (
+                    <button
+                      key={'trace-' + outcome.trace_id}
+                      className="btn"
+                      type="button"
+                      onClick={() => navigate('/traces/' + encodeURIComponent(outcome.trace_id))}
+                    >
+                      查看干预后 Trace <ArrowRight size={14} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </Card>
 
       {experimentId && (
         <Card title="证据血缘（Evidence Lineage）">

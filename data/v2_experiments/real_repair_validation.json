@@ -1,0 +1,66 @@
+{
+  "trace_id": "trace-3071fea861694ee1b70731a400f28000",
+  "candidates": [
+    {
+      "repair_id": "repair-0eabbb2241c9",
+      "repair_type": "INCREASE_TIMEOUT",
+      "status": "verified_real",
+      "experiment_id": "realcf-c0a6f7b70eb64f04982238c49a79db7d",
+      "outcomes": [
+        {
+          "trace_id": "trace-3656cc2e5f6d43a4927a465eb1d06ef5",
+          "status": "succeeded",
+          "run_id": "realcf-run-4c784f274246400ca55810434910316a",
+          "is_real_api": true,
+          "total_tokens": 3799,
+          "elapsed_ms": 8514
+        }
+      ],
+      "level": "weak",
+      "limitations": [
+        "真实反事实只改变输入/执行限额，不伪造工具返回",
+        "未做多次大量重放，不能估计成功率",
+        "单次执行成本与 Token 来自 Provider usage；预算按上游调用次数扣减"
+      ]
+    },
+    {
+      "repair_id": "repair-62360d24969d",
+      "repair_type": "LIMITED_RETRY",
+      "status": "verified_real",
+      "experiment_id": "realcf-3f12ea2057584cc5a45e61168c29a2f3",
+      "outcomes": [
+        {
+          "trace_id": "trace-e284a57d71f4478fbba90bf976296a54",
+          "status": "succeeded",
+          "run_id": "realcf-run-0eca71df974c43bfa4ce52451144c259",
+          "is_real_api": true,
+          "total_tokens": 3934,
+          "elapsed_ms": 6422
+        }
+      ],
+      "level": "weak",
+      "limitations": [
+        "真实反事实只改变输入/执行限额，不伪造工具返回",
+        "未做多次大量重放，不能估计成功率",
+        "单次执行成本与 Token 来自 Provider usage；预算按上游调用次数扣减"
+      ]
+    }
+  ],
+  "execution_mode": "real_api",
+  "budget_after": {
+    "enabled": true,
+    "total_calls_limit": 160,
+    "total_calls_used": 142,
+    "total_calls_remaining": 18,
+    "visitor_daily_limit": 200,
+    "visitor_day": "2026-11-27",
+    "total_tokens": {
+      "input": 369830,
+      "output": 58278
+    },
+    "estimated_cost_cny": 0.486386,
+    "price_estimate_note": "按环境变量配置的人民币单价估算，不是 Provider 实际账单",
+    "updated_at": "2026-11-27T01:47:35.657928+00:00"
+  },
+  "generated_at": "2026-11-27T01:47:35.657928+00:00"
+}

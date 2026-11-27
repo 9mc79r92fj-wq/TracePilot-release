@@ -1,0 +1,3503 @@
+{
+  "dataset": "microsoft/AgentRx (public GitHub subset)",
+  "split": "test",
+  "case_count": 25,
+  "selection": {
+    "method": "test split 中的前 14 条 tau + 前 11 条 magentic（按 case_id 排序）",
+    "case_ids": [
+      "tau-104",
+      "tau-12",
+      "tau-20",
+      "tau-21",
+      "tau-28",
+      "tau-31",
+      "tau-38",
+      "tau-39",
+      "tau-4",
+      "tau-59",
+      "tau-71",
+      "tau-74",
+      "tau-98",
+      "tau-99",
+      "magentic-0a65cb96-cb6e-4a6a-8aae-c1084f613456",
+      "magentic-14569e28-c88c-43e4-8c32-097d35b9a67d",
+      "magentic-16d825ff-1623-4176-a5b5-42e0f5c2b0ac",
+      "magentic-1f975693-876d-457b-a649-393859e79bf3",
+      "magentic-42576abe-0deb-4869-8c63-225c2d75a95a",
+      "magentic-52f7224e9c79431e7926afe317782711a0028750693e7456cde22ef6f4bd8bd5",
+      "magentic-55f4258484c5b398956133128a50462a767da211f8f72aa5ac5bbffb9bcbba1a",
+      "magentic-57d9dc6935e8a40b02e7f8ec81768fe70e68a0c05f6866927c9fda38db38a486",
+      "magentic-5d0080cb-90d7-4712-bc33-848150e917d3",
+      "magentic-5f982798-16b9-4051-ab57-cfc7ebdb2a91",
+      "magentic-624cbf11-6a41-4692-af9c-36b3e5ca3130"
+    ]
+  },
+  "metrics": {
+    "baseline_b": {
+      "cases": 25,
+      "predictions": 23,
+      "top1_accuracy": 0.04,
+      "top3_hit_rate": 0.08,
+      "failure_step_accuracy": 0.08,
+      "category_accuracy": 0.12,
+      "category_macro_f1": 0.0351,
+      "llm_calls": 0,
+      "total_tokens": 0,
+      "avg_latency_ms": 0.0,
+      "sample_size_definition": "AgentRx 公开 GitHub 子集 test split；标签仅在打分阶段使用"
+    },
+    "baseline_a": {
+      "cases": 25,
+      "predictions": 25,
+      "top1_accuracy": 0.32,
+      "top3_hit_rate": 0.32,
+      "failure_step_accuracy": 0.48,
+      "category_accuracy": 0.16,
+      "category_macro_f1": 0.0873,
+      "llm_calls": 25,
+      "total_tokens": 97001,
+      "avg_latency_ms": 1293.912,
+      "sample_size_definition": "AgentRx 公开 GitHub 子集 test split；标签仅在打分阶段使用"
+    },
+    "tracepilot_v2": {
+      "cases": 25,
+      "predictions": 25,
+      "top1_accuracy": 0.2,
+      "top3_hit_rate": 0.4,
+      "failure_step_accuracy": 0.36,
+      "category_accuracy": 0.2,
+      "category_macro_f1": 0.0926,
+      "llm_calls": 25,
+      "total_tokens": 108642,
+      "avg_latency_ms": 1596.606,
+      "sample_size_definition": "AgentRx 公开 GitHub 子集 test split；标签仅在打分阶段使用"
+    }
+  },
+  "results": [
+    {
+      "case_id": "tau-104",
+      "source": "tau",
+      "split": "test",
+      "steps": 58,
+      "labels": {
+        "case_id": "tau-104",
+        "root_cause_step": 57,
+        "root_cause_failure_id": 38,
+        "root_cause_category": "Misinterpretation of Tool Output",
+        "root_cause_reason": "The assistant did not provide the tracking number of the cancelled order #W1154986 due to misinterpretation of tool output.",
+        "failure_steps": [
+          57
+        ],
+        "failure_categories": [
+          "Misinterpretation of Tool Output"
+        ],
+        "failure_ids": [
+          38
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "The assistant misinterpreted the tool output, assumed or misinterpreted the fact that cancelled order did not have a tracking number fiels and hence did not provide the tracking number of the cancelled order #W1154986 back to the user."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 1,
+          "top3_steps": [
+            1,
+            21
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['cannot']",
+          "candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 21,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 2,
+          "top3_steps": [
+            2
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "The user's task explicitly required mentioning at the beginning that they want to cancel the bookshelf and jigsaw from the same order. The agent's first response (step 2) instead asked for authentication without acknowledging the cancellation request, violating the instruction to state the cancellation intent upfront.",
+          "llm_calls": 1,
+          "latency_ms": 3649.215,
+          "tokens": {
+            "input_tokens": 4615,
+            "output_tokens": 83,
+            "total_tokens": 4698
+          },
+          "raw": "{\"root_cause_step\": 2, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"The user's task explicitly required mentioning at the beginning that they want to cancel the bookshelf and jigsaw from the same order. The agent's first response (step 2) instead asked for authentication without acknowledging the cancellation request, violating the instruction to state the cancellation intent upfront.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21,
+            11,
+            27
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "用户明确要求取消 bookshelf 和 jigsaw（步骤2、10），但步骤21将已送达订单误判为无法取消，未按政策区分取消与退货，导致后续全部转为退货流程；步骤11-20的订单查询本身正确，根因在于对订单状态与可执行操作的误读。",
+          "deterministic_candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 21,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 3965.342,
+          "tokens": {
+            "input_tokens": 4949,
+            "output_tokens": 109,
+            "total_tokens": 5058
+          },
+          "raw": "{\"root_cause_step\": 21, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"用户明确要求取消 bookshelf 和 jigsaw（步骤2、10），但步骤21将已送达订单误判为无法取消，未按政策区分取消与退货，导致后续全部转为退货流程；步骤11-20的订单查询本身正确，根因在于对订单状态与可执行操作的误读。\", \"top3_steps\": [21, 11, 27]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-12",
+      "source": "tau",
+      "split": "test",
+      "steps": 26,
+      "labels": {
+        "case_id": "tau-12",
+        "root_cause_step": 19,
+        "root_cause_failure_id": 6,
+        "root_cause_category": "Instruction Adherence Failure",
+        "root_cause_reason": "The agent did not recover from this error.",
+        "failure_steps": [
+          19
+        ],
+        "failure_categories": [
+          "Instruction Adherence Failure"
+        ],
+        "failure_ids": [
+          6
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "Assistant did not ask user for confirmation and payment method before initiating return."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 1,
+          "top3_steps": [
+            1,
+            23
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['cannot']",
+          "candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 23,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 19,
+          "top3_steps": [
+            19
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "The user explicitly requested a PayPal refund preference and anger/human-agent fallback, but the agent processed the return with the Visa credit card as the refund method without first confirming or attempting PayPal, violating the user's stated refund preference and the plan to honor it.",
+          "llm_calls": 1,
+          "latency_ms": 1252.766,
+          "tokens": {
+            "input_tokens": 2680,
+            "output_tokens": 79,
+            "total_tokens": 2759
+          },
+          "raw": "{\"root_cause_step\": 19, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"The user explicitly requested a PayPal refund preference and anger/human-agent fallback, but the agent processed the return with the Visa credit card as the refund method without first confirming or attempting PayPal, violating the user's stated refund preference and the plan to honor it.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 19,
+          "top3_steps": [
+            19,
+            23,
+            17
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "Step 19 调用 return_delivered_order_items 时把退款方式指定为 credit_card_3124723，而用户此前明确偏好 PayPal（步骤 22 再次强调）。该错误退款方式导致后续步骤 23 无法改回 PayPal、用户不满并要求转人工。根因是最早的退款方式选择错误，而非步骤 23 的报错。",
+          "deterministic_candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 23,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1116.652,
+          "tokens": {
+            "input_tokens": 3008,
+            "output_tokens": 121,
+            "total_tokens": 3129
+          },
+          "raw": "{\"root_cause_step\": 19, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"Step 19 调用 return_delivered_order_items 时把退款方式指定为 credit_card_3124723，而用户此前明确偏好 PayPal（步骤 22 再次强调）。该错误退款方式导致后续步骤 23 无法改回 PayPal、用户不满并要求转人工。根因是最早的退款方式选择错误，而非步骤 23 的报错。\", \"top3_steps\": [19, 23, 17]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-20",
+      "source": "tau",
+      "split": "test",
+      "steps": 62,
+      "labels": {
+        "case_id": "tau-20",
+        "root_cause_step": 21,
+        "root_cause_failure_id": 7,
+        "root_cause_category": "Misinterpretation of Tool Output",
+        "root_cause_reason": "The assistant did not recover from misinterpretation error, which led to subsequent failures in the trajectory.",
+        "failure_steps": [
+          21,
+          41,
+          49,
+          61
+        ],
+        "failure_categories": [
+          "Misinterpretation of Tool Output",
+          "Misinterpretation of Tool Output",
+          "Invalid Invocation",
+          "Invalid Invocation"
+        ],
+        "failure_ids": [
+          7,
+          8,
+          9,
+          10
+        ],
+        "failure_agents": [
+          "Assistant",
+          "Assistant",
+          "Assistant",
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "Assistant mistook two of the orders that were processed as delivered."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 3,
+          "top3_steps": [
+            3,
+            5,
+            50
+          ],
+          "failure_category": "Instruction Adherence Failure",
+          "rationale": "步骤文本包含错误/失败信号: ['cannot']；政策要求先认证用户，但 assistant 在认证工具调用前直接提供业务信息",
+          "candidates": [
+            {
+              "step": 3,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']；政策要求先认证用户，但 assistant 在认证工具调用前直接提供业务信息"
+            },
+            {
+              "step": 5,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure",
+              "reason": "政策要求先认证用户，但 assistant 在认证工具调用前直接提供业务信息"
+            },
+            {
+              "step": 50,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'cannot']"
+            },
+            {
+              "step": 56,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'not found']"
+            },
+            {
+              "step": 62,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21
+          ],
+          "failure_category": "Intent Plan Misalignment",
+          "rationale": "At step 21 the assistant committed to a plan of upgrading all items to the most expensive versions, but the user's request to upgrade 'everything' conflicts with the policy that only same-product-type option changes are allowed; the assistant proceeded to look up most expensive variants without resolving the ambiguity or confirming feasibility, leading to a misaligned plan.",
+          "llm_calls": 1,
+          "latency_ms": 1123.426,
+          "tokens": {
+            "input_tokens": 4683,
+            "output_tokens": 94,
+            "total_tokens": 4777
+          },
+          "raw": "{\"root_cause_step\": 21, \"failure_category\": \"Intent Plan Misalignment\", \"rationale\": \"At step 21 the assistant committed to a plan of upgrading all items to the most expensive versions, but the user's request to upgrade 'everything' conflicts with the policy that only same-product-type option changes are allowed; the assistant proceeded to look up most expensive variants without resolving the ambiguity or confirming feasibility, leading to a misaligned plan.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 50,
+          "top3_steps": [
+            50,
+            56,
+            62
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤50对pending订单#W9911714调用exchange_delivered_order_items，返回'non-delivered order cannot be exchanged'。助手此前(步骤21)已识别该订单为Pending应走modify而非exchange，却仍用exchange工具，导致后续步骤56、62连续失败。根因是最早的错误工具选择/对订单状态与可用操作的误判。",
+          "deterministic_candidates": [
+            {
+              "step": 3,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure"
+            },
+            {
+              "step": 5,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure"
+            },
+            {
+              "step": 50,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 56,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 62,
+              "score": 0.65,
+              "category": "System Failure"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1311.504,
+          "tokens": {
+            "input_tokens": 5198,
+            "output_tokens": 122,
+            "total_tokens": 5320
+          },
+          "raw": "{\"root_cause_step\": 50, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"步骤50对pending订单#W9911714调用exchange_delivered_order_items，返回'non-delivered order cannot be exchanged'。助手此前(步骤21)已识别该订单为Pending应走modify而非exchange，却仍用exchange工具，导致后续步骤56、62连续失败。根因是最早的错误工具选择/对订单状态与可用操作的误判。\", \"top3_steps\": [50, 56, 62]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-21",
+      "source": "tau",
+      "split": "test",
+      "steps": 48,
+      "labels": {
+        "case_id": "tau-21",
+        "root_cause_step": 28,
+        "root_cause_failure_id": 11,
+        "root_cause_category": "Underspecified User Intent",
+        "root_cause_reason": "The item should have been modified and not exchanged and exchange was not possible because of the order status. The agent did not recover from this error.",
+        "failure_steps": [
+          28,
+          41
+        ],
+        "failure_categories": [
+          "Underspecified User Intent",
+          "Instruction Adherence Failure"
+        ],
+        "failure_ids": [
+          11,
+          12
+        ],
+        "failure_agents": [
+          "User",
+          "Assistant"
+        ],
+        "failed_agent": "User",
+        "failure_summary": "The User agent insisted for exchange of item on 'pending' item which is not valid, when assistant asked if it could instead modify (corresponds to the ground truth), the user agent said no."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 1,
+          "top3_steps": [
+            1,
+            27,
+            45
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['cannot']",
+          "candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 27,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 45,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 41,
+          "top3_steps": [
+            41
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "The user explicitly asked to use GC (gift card) to cover possible charges, but the agent used paypal_3798357 as the payment method in modify_pending_order_items, violating the user's payment instruction.",
+          "llm_calls": 1,
+          "latency_ms": 853.615,
+          "tokens": {
+            "input_tokens": 4569,
+            "output_tokens": 72,
+            "total_tokens": 4641
+          },
+          "raw": "{\"root_cause_step\": 41, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"The user explicitly asked to use GC (gift card) to cover possible charges, but the agent used paypal_3798357 as the payment method in modify_pending_order_items, violating the user's payment instruction.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 41,
+          "top3_steps": [
+            41,
+            45,
+            39
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "用户明确要求用 GC（gift_card_4332117）覆盖可能产生的费用，但步骤41的 modify_pending_order_items 调用 payment_method_id 为 paypal_3798357，未使用礼品卡，导致后续步骤45无法再更改支付方式。这是最早的关键错误，直接造成用户诉求（用GC支付并查询余额）无法满足。",
+          "deterministic_candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 27,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 45,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1107.929,
+          "tokens": {
+            "input_tokens": 4986,
+            "output_tokens": 119,
+            "total_tokens": 5105
+          },
+          "raw": "{\"root_cause_step\": 41, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"用户明确要求用 GC（gift_card_4332117）覆盖可能产生的费用，但步骤41的 modify_pending_order_items 调用 payment_method_id 为 paypal_3798357，未使用礼品卡，导致后续步骤45无法再更改支付方式。这是最早的关键错误，直接造成用户诉求（用GC支付并查询余额）无法满足。\", \"top3_steps\": [41, 45, 39]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-28",
+      "source": "tau",
+      "split": "test",
+      "steps": 42,
+      "labels": {
+        "case_id": "tau-28",
+        "root_cause_step": 33,
+        "root_cause_failure_id": 13,
+        "root_cause_category": "Intent Plan Misalignment",
+        "root_cause_reason": "The assistant called cancel order on the entire order which led to an incorrect final outcome as compared to ground truth actions.",
+        "failure_steps": [
+          33
+        ],
+        "failure_categories": [
+          "Intent Plan Misalignment"
+        ],
+        "failure_ids": [
+          13
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "Assistant mistakenly believes that it can cancel a subset of the pending order which is not allowed as per domain policy, as a result the entire order got cancelled instead of just the hose."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 1,
+          "top3_steps": [
+            1
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['cannot']",
+          "candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 31,
+          "top3_steps": [
+            31
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "At step 31 the assistant claimed the garden hose was in pending Order #W2575533, but the order details (steps 16/18) show #W2575533 contains a vacuum, charger, e-reader—not a hose. The hose was in delivered order #W7181492. This misreading led to cancelling the wrong entire order.",
+          "llm_calls": 1,
+          "latency_ms": 1720.717,
+          "tokens": {
+            "input_tokens": 4665,
+            "output_tokens": 102,
+            "total_tokens": 4767
+          },
+          "raw": "{\"root_cause_step\": 31, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"At step 31 the assistant claimed the garden hose was in pending Order #W2575533, but the order details (steps 16/18) show #W2575533 contains a vacuum, charger, e-reader—not a hose. The hose was in delivered order #W7181492. This misreading led to cancelling the wrong entire order.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 31,
+          "top3_steps": [
+            31,
+            33,
+            35
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤31中助手声称花园水管属于订单#W2575533且该订单为pending，但步骤18的订单详情显示#W2575533包含吸尘器、充电宝、电子阅读器等，并无花园水管（花园水管在#W7181492）。助手误读了订单数据，导致步骤33取消整个#W2575533订单，而非仅取消水管，进而造成步骤35-37的整单取消与用户不满。",
+          "deterministic_candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1341.765,
+          "tokens": {
+            "input_tokens": 4899,
+            "output_tokens": 136,
+            "total_tokens": 5035
+          },
+          "raw": "{\"root_cause_step\": 31, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"步骤31中助手声称花园水管属于订单#W2575533且该订单为pending，但步骤18的订单详情显示#W2575533包含吸尘器、充电宝、电子阅读器等，并无花园水管（花园水管在#W7181492）。助手误读了订单数据，导致步骤33取消整个#W2575533订单，而非仅取消水管，进而造成步骤35-37的整单取消与用户不满。\", \"top3_steps\": [31, 33, 35]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-31",
+      "source": "tau",
+      "split": "test",
+      "steps": 42,
+      "labels": {
+        "case_id": "tau-31",
+        "root_cause_step": 31,
+        "root_cause_failure_id": 14,
+        "root_cause_category": "Intent Plan Misalignment",
+        "root_cause_reason": "The assistant called cancel order on the entire order which led to an incorrect final outcome as compared to ground truth actions.",
+        "failure_steps": [
+          31
+        ],
+        "failure_categories": [
+          "Intent Plan Misalignment"
+        ],
+        "failure_ids": [
+          14
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "Assistant mistakenly believes that it can cancel a subset of the pending order which is not allowed as per domain policy, as a result the entire order got cancelled instead of just the hiking boots."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 1,
+          "top3_steps": [
+            1,
+            17
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['cannot']",
+          "candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 17,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 31,
+          "top3_steps": [
+            31
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "The user asked to cancel only the boot and keep the kettle, but the agent called cancel_pending_order on the entire order #W5481803, which contains both the kettle and boots, canceling the kettle too. The agent should have canceled only the boot item, not the whole order.",
+          "llm_calls": 1,
+          "latency_ms": 831.749,
+          "tokens": {
+            "input_tokens": 4806,
+            "output_tokens": 87,
+            "total_tokens": 4893
+          },
+          "raw": "{\"root_cause_step\": 31, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"The user asked to cancel only the boot and keep the kettle, but the agent called cancel_pending_order on the entire order #W5481803, which contains both the kettle and boots, canceling the kettle too. The agent should have canceled only the boot item, not the whole order.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 31,
+          "top3_steps": [
+            31,
+            29,
+            28
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "用户明确要求取消boot但保留kettle，若无法单独取消则不动该订单。步骤28显示#W5481803同时含kettle和boot，步骤31却直接调用cancel_pending_order取消整个订单，导致kettle也被取消，违反用户指令。",
+          "deterministic_candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 17,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1197.979,
+          "tokens": {
+            "input_tokens": 5140,
+            "output_tokens": 99,
+            "total_tokens": 5239
+          },
+          "raw": "{\"root_cause_step\": 31, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"用户明确要求取消boot但保留kettle，若无法单独取消则不动该订单。步骤28显示#W5481803同时含kettle和boot，步骤31却直接调用cancel_pending_order取消整个订单，导致kettle也被取消，违反用户指令。\", \"top3_steps\": [31, 29, 28]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-38",
+      "source": "tau",
+      "split": "test",
+      "steps": 46,
+      "labels": {
+        "case_id": "tau-38",
+        "root_cause_step": 37,
+        "root_cause_failure_id": 19,
+        "root_cause_category": "Misinterpretation of Tool Output",
+        "root_cause_reason": "The assistant failed to recognize that the cheapest item was not available from the tool output, leading to an incorrect selection and hence, not matching with the ground truth.",
+        "failure_steps": [
+          37
+        ],
+        "failure_categories": [
+          "Misinterpretation of Tool Output"
+        ],
+        "failure_ids": [
+          19
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "For the umbrella, it picks an item that is cheapest but is not available. The assistant is unable to figure out if the cheapest option is actually available."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 3,
+          "top3_steps": [
+            3,
+            8,
+            1
+          ],
+          "failure_category": "Instruction Adherence Failure",
+          "rationale": "政策要求先认证用户，但 assistant 在认证工具调用前直接提供业务信息",
+          "candidates": [
+            {
+              "step": 3,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure",
+              "reason": "政策要求先认证用户，但 assistant 在认证工具调用前直接提供业务信息"
+            },
+            {
+              "step": 8,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'not found']"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 21,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "The agent told the user it could not cancel individual items only after the user had already confirmed cancellation of the Action Camera, despite the policy allowing modification of pending orders. This late refusal broke the agreed plan and forced the user to abandon the item-cancellation path.",
+          "llm_calls": 1,
+          "latency_ms": 925.606,
+          "tokens": {
+            "input_tokens": 4752,
+            "output_tokens": 80,
+            "total_tokens": 4832
+          },
+          "raw": "{\"root_cause_step\": 21, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"The agent told the user it could not cancel individual items only after the user had already confirmed cancellation of the Action Camera, despite the policy allowing modification of pending orders. This late refusal broke the agreed plan and forced the user to abandon the item-cancellation path.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 3,
+          "top3_steps": [
+            3,
+            8,
+            21
+          ],
+          "failure_category": "Instruction Adherence Failure",
+          "rationale": "政策要求对话开始必须先认证用户身份，但 step 3 在未做任何认证工具调用前就直接回答支付方式问题并提供业务信息，违反认证前置规则。后续 step 5 才补做认证，step 8 邮箱查找失败等均为该违规引发的连锁症状，而非根因。",
+          "deterministic_candidates": [
+            {
+              "step": 3,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure"
+            },
+            {
+              "step": 8,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 21,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1411.903,
+          "tokens": {
+            "input_tokens": 5218,
+            "output_tokens": 105,
+            "total_tokens": 5323
+          },
+          "raw": "{\"root_cause_step\": 3, \"failure_category\": \"Instruction Adherence Failure\", \"rationale\": \"政策要求对话开始必须先认证用户身份，但 step 3 在未做任何认证工具调用前就直接回答支付方式问题并提供业务信息，违反认证前置规则。后续 step 5 才补做认证，step 8 邮箱查找失败等均为该违规引发的连锁症状，而非根因。\", \"top3_steps\": [3, 8, 21]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-39",
+      "source": "tau",
+      "split": "test",
+      "steps": 26,
+      "labels": {
+        "case_id": "tau-39",
+        "root_cause_step": 17,
+        "root_cause_failure_id": 20,
+        "root_cause_category": "Intent Plan Misalignment",
+        "root_cause_reason": "Since the assistant was not able to update the address, it led to incorrect final outcome as compared to ground truth actions.",
+        "failure_steps": [
+          17
+        ],
+        "failure_categories": [
+          "Intent Plan Misalignment"
+        ],
+        "failure_ids": [
+          20
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "Assistant believed it could not find the latest address using get_order_details and thus failed to modify the user address to the latest one."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 6,
+          "top3_steps": [
+            6,
+            1,
+            17
+          ],
+          "failure_category": "System Failure",
+          "rationale": "步骤文本包含错误/失败信号: ['Error', 'not found']",
+          "candidates": [
+            {
+              "step": 6,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'not found']"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 17,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: [\"can't\"]"
+            },
+            {
+              "step": 25,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: [\"can't\"]"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 23,
+          "top3_steps": [
+            23
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "The assistant reported the cheapest T-shirt as $46.66 (red, size L, cotton, v-neck), but the tool output in step 22 shows the cheapest listed variant is $46.85 (red XXL cotton crew neck) and $46.66 does not appear in the visible data. The assistant misread the product details, giving an incorrect price and variant.",
+          "llm_calls": 1,
+          "latency_ms": 1511.859,
+          "tokens": {
+            "input_tokens": 2727,
+            "output_tokens": 105,
+            "total_tokens": 2832
+          },
+          "raw": "{\"root_cause_step\": 23, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"The assistant reported the cheapest T-shirt as $46.66 (red, size L, cotton, v-neck), but the tool output in step 22 shows the cheapest listed variant is $46.85 (red XXL cotton crew neck) and $46.66 does not appear in the visible data. The assistant misread the product details, giving an incorrect price and variant.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 23,
+          "top3_steps": [
+            23,
+            17,
+            25
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤22返回的T-Shirt变体价格中，可见最低为46.85（红色XXL），而助手在步骤23声称最低价为46.66并描述为红色L码v-neck，与工具输出不符，属于对工具输出的误读，导致后续用户基于错误价格继续对话。",
+          "deterministic_candidates": [
+            {
+              "step": 6,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 17,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 25,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1221.351,
+          "tokens": {
+            "input_tokens": 3212,
+            "output_tokens": 107,
+            "total_tokens": 3319
+          },
+          "raw": "{\"root_cause_step\": 23, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"步骤22返回的T-Shirt变体价格中，可见最低为46.85（红色XXL），而助手在步骤23声称最低价为46.66并描述为红色L码v-neck，与工具输出不符，属于对工具输出的误读，导致后续用户基于错误价格继续对话。\", \"top3_steps\": [23, 17, 25]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-4",
+      "source": "tau",
+      "split": "test",
+      "steps": 48,
+      "labels": {
+        "case_id": "tau-4",
+        "root_cause_step": 15,
+        "root_cause_failure_id": 5,
+        "root_cause_category": "Misinterpretation of Tool Output",
+        "root_cause_reason": "The incorrect count does not correspond with ground truth output.",
+        "failure_steps": [
+          15
+        ],
+        "failure_categories": [
+          "Misinterpretation of Tool Output"
+        ],
+        "failure_ids": [
+          5
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "Assistant misinterpreted the tool output and incorrectly counted the number of available t-shirts."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 1,
+          "top3_steps": [
+            1
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['cannot']",
+          "candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 35,
+          "top3_steps": [
+            35
+          ],
+          "failure_category": "Invention of new information",
+          "rationale": "At step 35 the assistant asserts the item ID 9647292434 for the purple/S/v-neck/polyester variant, but the product details returned at steps 14 and 34 do not contain that item ID. The assistant fabricated the variant ID, leading to incorrect modification attempts.",
+          "llm_calls": 1,
+          "latency_ms": 1150.983,
+          "tokens": {
+            "input_tokens": 4842,
+            "output_tokens": 85,
+            "total_tokens": 4927
+          },
+          "raw": "{\"root_cause_step\": 35, \"failure_category\": \"Invention of new information\", \"rationale\": \"At step 35 the assistant asserts the item ID 9647292434 for the purple/S/v-neck/polyester variant, but the product details returned at steps 14 and 34 do not contain that item ID. The assistant fabricated the variant ID, leading to incorrect modification attempts.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 35,
+          "top3_steps": [
+            35,
+            33,
+            41
+          ],
+          "failure_category": "Invention of new information",
+          "rationale": "Step 34's tool output (T-Shirt variants) does not contain item_id 9647292434 nor a purple/S/polyester/v-neck variant; the assistant in step 35 fabricates that item ID and price $53.48, then proceeds to modify both orders based on this invented variant, causing downstream failures.",
+          "deterministic_candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1242.288,
+          "tokens": {
+            "input_tokens": 5076,
+            "output_tokens": 108,
+            "total_tokens": 5184
+          },
+          "raw": "{\"root_cause_step\": 35, \"failure_category\": \"Invention of new information\", \"rationale\": \"Step 34's tool output (T-Shirt variants) does not contain item_id 9647292434 nor a purple/S/polyester/v-neck variant; the assistant in step 35 fabricates that item ID and price $53.48, then proceeds to modify both orders based on this invented variant, causing downstream failures.\", \"top3_steps\": [35, 33, 41]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-59",
+      "source": "tau",
+      "split": "test",
+      "steps": 26,
+      "labels": {
+        "case_id": "tau-59",
+        "root_cause_step": 14,
+        "root_cause_failure_id": 24,
+        "root_cause_category": "Underspecified User Intent",
+        "root_cause_reason": "User agent made an assumption that was not supported by the information provided by the assistant which led to incorrect action being performed by the assistant as compared to ground truth action.",
+        "failure_steps": [
+          14
+        ],
+        "failure_categories": [
+          "Underspecified User Intent"
+        ],
+        "failure_ids": [
+          24
+        ],
+        "failure_agents": [
+          "User"
+        ],
+        "failed_agent": "User",
+        "failure_summary": "User agent incorrectly assumed that one order was older than the other even when the assistant did not tell it do so."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 3,
+          "top3_steps": [
+            3,
+            1,
+            12
+          ],
+          "failure_category": "Instruction Adherence Failure",
+          "rationale": "政策要求先认证用户，但 assistant 在认证工具调用前直接提供业务信息",
+          "candidates": [
+            {
+              "step": 3,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure",
+              "reason": "政策要求先认证用户，但 assistant 在认证工具调用前直接提供业务信息"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 12,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: [\"can't\"]"
+            },
+            {
+              "step": 13,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 22,
+          "top3_steps": [
+            22
+          ],
+          "failure_category": "Intent Plan Misalignment",
+          "rationale": "The user's original task specified changing the shipping address for order #W2702727 (the older order) to the new Springfield address, but the agent instead canceled #W2702727 and then changed the address on #W8268610. The agent misaligned the plan with the user's stated intent, applying the address change to the wrong order.",
+          "llm_calls": 1,
+          "latency_ms": 1343.536,
+          "tokens": {
+            "input_tokens": 3042,
+            "output_tokens": 98,
+            "total_tokens": 3140
+          },
+          "raw": "{\"root_cause_step\": 22, \"failure_category\": \"Intent Plan Misalignment\", \"rationale\": \"The user's original task specified changing the shipping address for order #W2702727 (the older order) to the new Springfield address, but the agent instead canceled #W2702727 and then changed the address on #W8268610. The agent misaligned the plan with the user's stated intent, applying the address change to the wrong order.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 23,
+          "top3_steps": [
+            23,
+            25,
+            13
+          ],
+          "failure_category": "Intent Plan Misalignment",
+          "rationale": "用户明确要求修改订单 #W2702727 的收货地址（步骤22），但 assistant 在步骤23 却对 #W8268610 调用了 modify_pending_order_address，修改了错误的订单。步骤24-25 确认了错误订单的地址变更，导致用户对 #W2702727 的地址变更请求未被满足。这是最早的关键错误，后续确认均基于错误操作。",
+          "deterministic_candidates": [
+            {
+              "step": 3,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 12,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 13,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1196.555,
+          "tokens": {
+            "input_tokens": 3561,
+            "output_tokens": 127,
+            "total_tokens": 3688
+          },
+          "raw": "{\"root_cause_step\": 23, \"failure_category\": \"Intent Plan Misalignment\", \"rationale\": \"用户明确要求修改订单 #W2702727 的收货地址（步骤22），但 assistant 在步骤23 却对 #W8268610 调用了 modify_pending_order_address，修改了错误的订单。步骤24-25 确认了错误订单的地址变更，导致用户对 #W2702727 的地址变更请求未被满足。这是最早的关键错误，后续确认均基于错误操作。\", \"top3_steps\": [23, 25, 13]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-71",
+      "source": "tau",
+      "split": "test",
+      "steps": 36,
+      "labels": {
+        "case_id": "tau-71",
+        "root_cause_step": 24,
+        "root_cause_failure_id": 26,
+        "root_cause_category": "Underspecified User Intent",
+        "root_cause_reason": "The task instruction did not specify the type of black lamp and since there are multiple black lamps available, it led to incorrect matching of the ground truth actions. Did not recover from the error.",
+        "failure_steps": [
+          24,
+          27
+        ],
+        "failure_categories": [
+          "Underspecified User Intent",
+          "Intent Plan Misalignment"
+        ],
+        "failure_ids": [
+          26,
+          27
+        ],
+        "failure_agents": [
+          "User",
+          "Assistant"
+        ],
+        "failed_agent": "User",
+        "failure_summary": "The task instruction did not specify the type of black lamp and since there are multiple black lamps available, it wont be possible to match the ground truth actions."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 3,
+          "top3_steps": [
+            3,
+            1
+          ],
+          "failure_category": "Instruction Adherence Failure",
+          "rationale": "政策要求先认证用户，但 assistant 在认证工具调用前直接提供业务信息",
+          "candidates": [
+            {
+              "step": 3,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure",
+              "reason": "政策要求先认证用户，但 assistant 在认证工具调用前直接提供业务信息"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 27,
+          "top3_steps": [
+            27
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "The agent modified the desk lamp (step 27) before handling the backpack change, consuming the single-use modification tool. The user's request included both desk lamp and backpack changes; the agent should have gathered all modifications and applied them together, or prioritized the backpack, to avoid the one-modification limit blocking the backpack change.",
+          "llm_calls": 1,
+          "latency_ms": 1339.537,
+          "tokens": {
+            "input_tokens": 4165,
+            "output_tokens": 92,
+            "total_tokens": 4257
+          },
+          "raw": "{\"root_cause_step\": 27, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"The agent modified the desk lamp (step 27) before handling the backpack change, consuming the single-use modification tool. The user's request included both desk lamp and backpack changes; the agent should have gathered all modifications and applied them together, or prioritized the backpack, to avoid the one-modification limit blocking the backpack change.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 27,
+          "top3_steps": [
+            27,
+            35,
+            25
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "Step 27 在用户尚未确认背包修改前，就调用 modify_pending_order_items 修改了台灯，消耗了该 pending 订单唯一一次修改机会；导致 step 35 无法再修改背包，用户最终放弃。根因是过早执行修改，而非 step 35 的报错。",
+          "deterministic_candidates": [
+            {
+              "step": 3,
+              "score": 0.72,
+              "category": "Instruction Adherence Failure"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1363.326,
+          "tokens": {
+            "input_tokens": 4500,
+            "output_tokens": 108,
+            "total_tokens": 4608
+          },
+          "raw": "{\"root_cause_step\": 27, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"Step 27 在用户尚未确认背包修改前，就调用 modify_pending_order_items 修改了台灯，消耗了该 pending 订单唯一一次修改机会；导致 step 35 无法再修改背包，用户最终放弃。根因是过早执行修改，而非 step 35 的报错。\", \"top3_steps\": [27, 35, 25]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-74",
+      "source": "tau",
+      "split": "test",
+      "steps": 30,
+      "labels": {
+        "case_id": "tau-74",
+        "root_cause_step": 21,
+        "root_cause_failure_id": 29,
+        "root_cause_category": "Instruction Adherence Failure",
+        "root_cause_reason": "The assistant after step 21, realised that it cannot exchange items in a pending order and tried to recover by asking the user to modify the items in the order instead which corresponds to the ground truth. However, the user agent then asked to cancel the order instead of modifying it which led to incorrect final outcome.",
+        "failure_steps": [
+          21,
+          24
+        ],
+        "failure_categories": [
+          "Instruction Adherence Failure",
+          "Underspecified User Intent"
+        ],
+        "failure_ids": [
+          29,
+          30
+        ],
+        "failure_agents": [
+          "Assistant",
+          "User"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "The user agent asked the assistant to cancel the order instead of modifying it contrary to the task instruction provided to the user agent."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 22,
+          "top3_steps": [
+            22,
+            1
+          ],
+          "failure_category": "System Failure",
+          "rationale": "步骤文本包含错误/失败信号: ['Error', 'cannot']",
+          "candidates": [
+            {
+              "step": 22,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'cannot']"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21
+          ],
+          "failure_category": "Invalid Invocation",
+          "rationale": "The agent attempted to exchange items on a pending order using exchange_delivered_order_items, which only works for delivered orders. The order was pending, so the tool call failed. The agent should have used modify_pending_order_items instead, as it later recognized.",
+          "llm_calls": 1,
+          "latency_ms": 1346.903,
+          "tokens": {
+            "input_tokens": 3232,
+            "output_tokens": 77,
+            "total_tokens": 3309
+          },
+          "raw": "{\"root_cause_step\": 21, \"failure_category\": \"Invalid Invocation\", \"rationale\": \"The agent attempted to exchange items on a pending order using exchange_delivered_order_items, which only works for delivered orders. The order was pending, so the tool call failed. The agent should have used modify_pending_order_items instead, as it later recognized.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21,
+            22,
+            1
+          ],
+          "failure_category": "Invalid Invocation",
+          "rationale": "步骤21对状态为pending的订单#W5166363调用exchange_delivered_order_items，而策略规定exchange仅适用于delivered订单（步骤1），导致步骤22报错'non-delivered order cannot be exchanged'。该错误调用是最早的关键失败，后续取消订单只是补救。",
+          "deterministic_candidates": [
+            {
+              "step": 22,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1272.076,
+          "tokens": {
+            "input_tokens": 3518,
+            "output_tokens": 102,
+            "total_tokens": 3620
+          },
+          "raw": "{\"root_cause_step\": 21, \"failure_category\": \"Invalid Invocation\", \"rationale\": \"步骤21对状态为pending的订单#W5166363调用exchange_delivered_order_items，而策略规定exchange仅适用于delivered订单（步骤1），导致步骤22报错'non-delivered order cannot be exchanged'。该错误调用是最早的关键失败，后续取消订单只是补救。\", \"top3_steps\": [21, 22, 1]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-98",
+      "source": "tau",
+      "split": "test",
+      "steps": 38,
+      "labels": {
+        "case_id": "tau-98",
+        "root_cause_step": 21,
+        "root_cause_failure_id": 36,
+        "root_cause_category": "Intent Plan Misalignment",
+        "root_cause_reason": "Even thought the user agent clearly specified the request to modify the items and the address at the same time, the assistant first modified the items in the pending orders before modifying the addresses. This led to the order being locked and producing an incorrect final outcome as compared to ground truth actions.",
+        "failure_steps": [
+          21
+        ],
+        "failure_categories": [
+          "Intent Plan Misalignment"
+        ],
+        "failure_ids": [
+          36
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "The assistant came up with an incorrect plan and modified the items in the pending orders before updating the shipping addresses, leading to an incorrect final outcome."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 16,
+          "top3_steps": [
+            16,
+            24,
+            32
+          ],
+          "failure_category": "System Failure",
+          "rationale": "步骤文本包含错误/失败信号: ['Error', 'cannot']",
+          "candidates": [
+            {
+              "step": 16,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'cannot']"
+            },
+            {
+              "step": 24,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'cannot']"
+            },
+            {
+              "step": 32,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'cannot']"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 17,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "The agent modified the pending order item before handling the address change. Per policy, modifying a pending order changes its status to 'pending (item modified)', which then blocks address modification and cancellation. The agent should have updated the shipping address first (or handled both requests in the correct order) to avoid locking the order.",
+          "llm_calls": 1,
+          "latency_ms": 1658.21,
+          "tokens": {
+            "input_tokens": 3712,
+            "output_tokens": 90,
+            "total_tokens": 3802
+          },
+          "raw": "{\"root_cause_step\": 21, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"The agent modified the pending order item before handling the address change. Per policy, modifying a pending order changes its status to 'pending (item modified)', which then blocks address modification and cancellation. The agent should have updated the shipping address first (or handled both requests in the correct order) to avoid locking the order.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 15,
+          "top3_steps": [
+            15,
+            21,
+            23
+          ],
+          "failure_category": "Invalid Invocation",
+          "rationale": "步骤15在订单#W6750959仍为pending时调用exchange_delivered_order_items，违反政策（仅delivered订单可换货），触发step16错误。该错误导致后续改用modify_pending_order_items，使订单变为'pending (item modified)'，从而step24地址修改与step32取消均失败。根因是最早的错误工具调用，而非后续症状。",
+          "deterministic_candidates": [
+            {
+              "step": 16,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 24,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 32,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 17,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1617.518,
+          "tokens": {
+            "input_tokens": 4192,
+            "output_tokens": 122,
+            "total_tokens": 4314
+          },
+          "raw": "{\"root_cause_step\": 15, \"failure_category\": \"Invalid Invocation\", \"rationale\": \"步骤15在订单#W6750959仍为pending时调用exchange_delivered_order_items，违反政策（仅delivered订单可换货），触发step16错误。该错误导致后续改用modify_pending_order_items，使订单变为'pending (item modified)'，从而step24地址修改与step32取消均失败。根因是最早的错误工具调用，而非后续症状。\", \"top3_steps\": [15, 21, 23]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "tau-99",
+      "source": "tau",
+      "split": "test",
+      "steps": 46,
+      "labels": {
+        "case_id": "tau-99",
+        "root_cause_step": 35,
+        "root_cause_failure_id": 37,
+        "root_cause_category": "Instruction Adherence Failure",
+        "root_cause_reason": "Since the assistant used the incorrect credit card while exchanging the delivered order items, it led to an incorrect final outcome as compared to ground truth actions.",
+        "failure_steps": [
+          35
+        ],
+        "failure_categories": [
+          "Instruction Adherence Failure"
+        ],
+        "failure_ids": [
+          37
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "The assistant did not confirm the payment method and ultimately used the incorrect credit card while exchanging the delivered order items, leading to an incorrect final outcome."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 1,
+          "top3_steps": [
+            1,
+            32,
+            45
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['cannot']",
+          "candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            },
+            {
+              "step": 32,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['404']"
+            },
+            {
+              "step": 45,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 29,
+          "top3_steps": [
+            29
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "At step 29 the agent executed the bicycle and puzzle exchanges but ignored the user's explicit request to refund to the other card (Mastercard 8484), instead passing credit_card_8105988. It also proceeded without addressing the camera exchange and skateboard cancellation the user had requested, failing to follow the full plan.",
+          "llm_calls": 1,
+          "latency_ms": 1068.297,
+          "tokens": {
+            "input_tokens": 4851,
+            "output_tokens": 92,
+            "total_tokens": 4943
+          },
+          "raw": "{\"root_cause_step\": 29, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"At step 29 the agent executed the bicycle and puzzle exchanges but ignored the user's explicit request to refund to the other card (Mastercard 8484), instead passing credit_card_8105988. It also proceeded without addressing the camera exchange and skateboard cancellation the user had requested, failing to follow the full plan.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 23,
+          "top3_steps": [
+            23,
+            24,
+            29
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤22返回的拼图变体中，1000片+动物+中级不可用；步骤23却向用户列出“1500 pieces, animals theme, intermediate difficulty”等选项，并让用户据此选择。用户随后在步骤24选择该不存在的变体，导致后续交换参数错误。根因是助手误读/臆造了工具返回的可用变体信息。",
+          "deterministic_candidates": [
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 32,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 45,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1478.724,
+          "tokens": {
+            "input_tokens": 5311,
+            "output_tokens": 123,
+            "total_tokens": 5434
+          },
+          "raw": "{\"root_cause_step\": 23, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"步骤22返回的拼图变体中，1000片+动物+中级不可用；步骤23却向用户列出“1500 pieces, animals theme, intermediate difficulty”等选项，并让用户据此选择。用户随后在步骤24选择该不存在的变体，导致后续交换参数错误。根因是助手误读/臆造了工具返回的可用变体信息。\", \"top3_steps\": [23, 24, 29]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-0a65cb96-cb6e-4a6a-8aae-c1084f613456",
+      "source": "magentic",
+      "split": "test",
+      "steps": 93,
+      "labels": {
+        "case_id": "magentic-0a65cb96-cb6e-4a6a-8aae-c1084f613456",
+        "root_cause_step": 56,
+        "root_cause_failure_id": 1,
+        "root_cause_category": "Instruction/Plan Adherence Failure",
+        "root_cause_reason": "The root cause of the failures in this trajectory is the WebSurfer's repeated failure to adhere to the instructions provided for retrieving NASA Astronomy Pictures of the Day for the year 2015. The WebSurfer consistently omitted the specified year when searching for the images, leading to incomplete or incorrect results. Additionally, the WebSurfer encountered a Responsible AI Policy Violation when attempting to access a website, further hindering its ability to complete the task as intended.",
+        "failure_steps": [
+          56,
+          64,
+          93
+        ],
+        "failure_categories": [
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Guardrails Triggered"
+        ],
+        "failure_ids": [
+          1,
+          2,
+          3
+        ],
+        "failure_agents": [
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer"
+        ],
+        "failed_agent": "WebSurfer",
+        "failure_summary": "The root cause of the failures in this trajectory is the WebSurfer's repeated failure to adhere to the instructions provided for retrieving NASA Astronomy Pictures of the Day for the year 2015. The WebSurfer consistently omitted the specified year when searching for the images, leading to incomplete or incorrect results. Additionally, the WebSurfer encountered a Responsible AI Policy Violation when attempting to access a website, further hindering its ability to complete the task as intended."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 39,
+          "top3_steps": [
+            39,
+            66,
+            83
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['Stalled']",
+          "candidates": [
+            {
+              "step": 39,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            },
+            {
+              "step": 66,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            },
+            {
+              "step": 83,
+              "score": 0.55,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['error']"
+            },
+            {
+              "step": 88,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            },
+            {
+              "step": 93,
+              "score": 0.55,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 13,
+          "top3_steps": [
+            13
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "The archive page lists entries newest-first; the agent scrolled downward from the top (2024 dates) instead of jumping to August 2015, wasting steps and never reaching the target date. This is a failure to follow an effective plan for locating the specified entries.",
+          "llm_calls": 1,
+          "latency_ms": 1414.444,
+          "tokens": {
+            "input_tokens": 3833,
+            "output_tokens": 77,
+            "total_tokens": 3910
+          },
+          "raw": "{\"root_cause_step\": 13,\"failure_category\":\"Instruction/Plan Adherence Failure\",\"rationale\":\"The archive page lists entries newest-first; the agent scrolled downward from the top (2024 dates) instead of jumping to August 2015, wasting steps and never reaching the target date. This is a failure to follow an effective plan for locating the specified entries.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 9,
+          "top3_steps": [
+            9,
+            13,
+            39
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "WebSurfer 打开 APOD 归档页后，误将页面顶部（2024 年条目）当作目标区域，随后反复向下滚动（步骤 13-29 等），始终停留在 2024 年条目，未定位到 2015 年 8 月。归档页实际按年份分节，应直接跳转到 2015 年区块或使用 ap1508xx URL。这一对页面结构的误读导致后续所有滚动、停滞与重规划。",
+          "deterministic_candidates": [
+            {
+              "step": 39,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 66,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 83,
+              "score": 0.55,
+              "category": "System Failure"
+            },
+            {
+              "step": 88,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 93,
+              "score": 0.55,
+              "category": "System Failure"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1815.62,
+          "tokens": {
+            "input_tokens": 4414,
+            "output_tokens": 146,
+            "total_tokens": 4560
+          },
+          "raw": "{\"root_cause_step\": 9, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"WebSurfer 打开 APOD 归档页后，误将页面顶部（2024 年条目）当作目标区域，随后反复向下滚动（步骤 13-29 等），始终停留在 2024 年条目，未定位到 2015 年 8 月。归档页实际按年份分节，应直接跳转到 2015 年区块或使用 ap1508xx URL。这一对页面结构的误读导致后续所有滚动、停滞与重规划。\", \"top3_steps\": [9, 13, 39]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-14569e28-c88c-43e4-8c32-097d35b9a67d",
+      "source": "magentic",
+      "split": "test",
+      "steps": 16,
+      "labels": {
+        "case_id": "magentic-14569e28-c88c-43e4-8c32-097d35b9a67d",
+        "root_cause_step": 12,
+        "root_cause_failure_id": 1,
+        "root_cause_category": "Invention of new information",
+        "root_cause_reason": "The root cause of the failure in this trajectory is the Assistant's invention of a non-existent operator in the Unlambda programming language. This fabrication of information led to an incorrect answer, as the Assistant deviated from established knowledge and introduced an element that does not exist within the Unlambda framework.",
+        "failure_steps": [
+          12
+        ],
+        "failure_categories": [
+          "Invention of new information"
+        ],
+        "failure_ids": [
+          1
+        ],
+        "failure_agents": [
+          "Assistant"
+        ],
+        "failed_agent": "Assistant",
+        "failure_summary": "The root cause of the failure in this trajectory is the Assistant's invention of a non-existent operator in the Unlambda programming language. This fabrication of information led to an incorrect answer, as the Assistant deviated from established knowledge and introduced an element that does not exist within the Unlambda framework."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": null,
+          "top3_steps": [],
+          "failure_category": "Unknown",
+          "rationale": "无候选",
+          "candidates": [],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 13,
+          "top3_steps": [
+            13
+          ],
+          "failure_category": "Invention of new information",
+          "rationale": "The Assistant concluded that adding 'k' would fix the code, but this is unsupported by the gathered information and incorrect for Unlambda. The actual issue is the missing backtick/application structure, not a 'k' character. The answer 'k' was fabricated rather than derived from analysis.",
+          "llm_calls": 1,
+          "latency_ms": 1279.535,
+          "tokens": {
+            "input_tokens": 2199,
+            "output_tokens": 87,
+            "total_tokens": 2286
+          },
+          "raw": "{\"root_cause_step\": 13, \"failure_category\": \"Invention of new information\", \"rationale\": \"The Assistant concluded that adding 'k' would fix the code, but this is unsupported by the gathered information and incorrect for Unlambda. The actual issue is the missing backtick/application structure, not a 'k' character. The answer 'k' was fabricated rather than derived from analysis.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 13,
+          "top3_steps": [
+            13,
+            14,
+            16
+          ],
+          "failure_category": "Invention of new information",
+          "rationale": "Step 13 Assistant claims the 'r' operator reads input and that adding 'k' stops unwanted output, but never actually analyzes the given code or verifies that 'k' is the needed character. The final answer 'k' (step 16) is unsupported by any evidence; the trajectory never examines the code's structure (e.g., the leading `r and backtick count) to determine the actual missing character.",
+          "deterministic_candidates": [],
+          "llm_calls": 1,
+          "latency_ms": 1172.185,
+          "tokens": {
+            "input_tokens": 2350,
+            "output_tokens": 128,
+            "total_tokens": 2478
+          },
+          "raw": "{\"root_cause_step\": 13, \"failure_category\": \"Invention of new information\", \"rationale\": \"Step 13 Assistant claims the 'r' operator reads input and that adding 'k' stops unwanted output, but never actually analyzes the given code or verifies that 'k' is the needed character. The final answer 'k' (step 16) is unsupported by any evidence; the trajectory never examines the code's structure (e.g., the leading `r and backtick count) to determine the actual missing character.\", \"top3_steps\": [13, 14, 16]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-16d825ff-1623-4176-a5b5-42e0f5c2b0ac",
+      "source": "magentic",
+      "split": "test",
+      "steps": 130,
+      "labels": {
+        "case_id": "magentic-16d825ff-1623-4176-a5b5-42e0f5c2b0ac",
+        "root_cause_step": 5,
+        "root_cause_failure_id": 1,
+        "root_cause_category": "Instruction/Plan Adherence Failure",
+        "root_cause_reason": "The primary root cause of the failures in this trajectory is the WebSurfer's inability to retrieve specific arrival time information for the specified date. This lack of crucial information led to a series of misinterpretations by the Orchestrator, which repeatedly attempted to contact through email—a strategy misaligned with the user's intent. The cascading effect of these initial shortcomings resulted in multiple failures throughout the trajectory.",
+        "failure_steps": [
+          5,
+          13,
+          17,
+          25,
+          29,
+          33,
+          37,
+          41,
+          56,
+          60,
+          66,
+          70,
+          74,
+          78,
+          82,
+          86,
+          90,
+          101,
+          105,
+          109,
+          116,
+          120
+        ],
+        "failure_categories": [
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment",
+          "Intent Plan Misalignment"
+        ],
+        "failure_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22
+        ],
+        "failure_agents": [
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator"
+        ],
+        "failed_agent": "WebSurfer",
+        "failure_summary": "The primary root cause of the failures in this trajectory is the WebSurfer's inability to retrieve specific arrival time information for the specified date. This lack of crucial information led to a series of misinterpretations by the Orchestrator, which repeatedly attempted to contact through email—a strategy misaligned with the user's intent. The cascading effect of these initial shortcomings resulted in multiple failures throughout the trajectory."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 53,
+          "top3_steps": [
+            53,
+            34,
+            43
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['stalled', 'unable']",
+          "candidates": [
+            {
+              "step": 53,
+              "score": 0.65,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['stalled', 'unable']"
+            },
+            {
+              "step": 34,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['not found']"
+            },
+            {
+              "step": 43,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            },
+            {
+              "step": 49,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['not found']"
+            },
+            {
+              "step": 50,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['not found']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 5,
+          "top3_steps": [
+            5
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "The WebSurfer's initial search returned only a Bing search results page with metadata, not actual schedule or passenger count data. The orchestrator treated this as progress and continued looping on the same unproductive searches rather than recognizing the data was unavailable, leading to repeated failed attempts and no answer.",
+          "llm_calls": 1,
+          "latency_ms": 1268.824,
+          "tokens": {
+            "input_tokens": 3948,
+            "output_tokens": 85,
+            "total_tokens": 4033
+          },
+          "raw": "{\"root_cause_step\": 5, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"The WebSurfer's initial search returned only a Bing search results page with metadata, not actual schedule or passenger count data. The orchestrator treated this as progress and continued looping on the same unproductive searches rather than recognizing the data was unavailable, leading to repeated failed attempts and no answer.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 4,
+          "top3_steps": [
+            4,
+            43,
+            53
+          ],
+          "failure_category": "Intent Plan Misalignment",
+          "rationale": "Step 4 的指令要求 WebSurfer 搜索 2019-05-27 的 Tri-Rail 时刻表及当日各列车乘客数，但该数据并非公开可检索信息；后续步骤 5-53 反复搜索同一不可得数据并陷入停滞（step 43 'Stalled... Replanning'、step 53 'stalled/unable'），说明根因是最初计划将任务建立在不存在的数据源上，而非后续的搜索失败症状。",
+          "deterministic_candidates": [
+            {
+              "step": 53,
+              "score": 0.65,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 34,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 43,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 49,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 50,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1904.973,
+          "tokens": {
+            "input_tokens": 4641,
+            "output_tokens": 143,
+            "total_tokens": 4784
+          },
+          "raw": "{\"root_cause_step\": 4, \"failure_category\": \"Intent Plan Misalignment\", \"rationale\": \"Step 4 的指令要求 WebSurfer 搜索 2019-05-27 的 Tri-Rail 时刻表及当日各列车乘客数，但该数据并非公开可检索信息；后续步骤 5-53 反复搜索同一不可得数据并陷入停滞（step 43 'Stalled... Replanning'、step 53 'stalled/unable'），说明根因是最初计划将任务建立在不存在的数据源上，而非后续的搜索失败症状。\", \"top3_steps\": [4, 43, 53]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-1f975693-876d-457b-a649-393859e79bf3",
+      "source": "magentic",
+      "split": "test",
+      "steps": 123,
+      "labels": {
+        "case_id": "magentic-1f975693-876d-457b-a649-393859e79bf3",
+        "root_cause_step": 4,
+        "root_cause_failure_id": 1,
+        "root_cause_category": "Intent not supported",
+        "root_cause_reason": "The Orchestrator consistently misunderstood the capabilities of the FileSurfer agent, repeatedly assigning it tasks that it was not designed to perform, such as listening to audio files and finding text transcripts. This fundamental misalignment between the Orchestrator's instructions and the FileSurfer's intended functionality led to multiple failures throughout the trajectory.",
+        "failure_steps": [
+          4,
+          12,
+          16,
+          51,
+          55,
+          57,
+          62,
+          66,
+          70,
+          74,
+          78,
+          82,
+          86,
+          90,
+          96,
+          104,
+          108,
+          110,
+          116
+        ],
+        "failure_categories": [
+          "Intent not supported",
+          "Intent not supported",
+          "Intent not supported",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Intent not supported",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Intent not supported",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure"
+        ],
+        "failure_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "failure_agents": [
+          "Orchestrator",
+          "Orchestrator",
+          "Orchestrator",
+          "WebSurfer",
+          "WebSurfer",
+          "Orchestrator",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "Orchestrator",
+          "WebSurfer",
+          "WebSurfer",
+          "Orchestrator",
+          "WebSurfer"
+        ],
+        "failed_agent": "Orchestrator",
+        "failure_summary": "The Orchestrator agent consistently misunderstood the capabilities of the FileSurfer agent, leading to repeated failures as it assigned tasks that FileSurfer was not designed to perform."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 38,
+          "top3_steps": [
+            38,
+            31,
+            42
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['failed', 'failure', 'unable']",
+          "candidates": [
+            {
+              "step": 38,
+              "score": 0.75,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['failed', 'failure', 'unable']"
+            },
+            {
+              "step": 31,
+              "score": 0.65,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot', 'failed']"
+            },
+            {
+              "step": 42,
+              "score": 0.65,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['failed', 'unable']"
+            },
+            {
+              "step": 48,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'cannot']"
+            },
+            {
+              "step": 66,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['404', 'Error']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 6,
+          "top3_steps": [
+            6
+          ],
+          "failure_category": "System Failure",
+          "rationale": "The audio transcription tool failed with 'Error. Could not transcribe this audio,' preventing extraction of page numbers. This is a system/tool failure, not a reasoning error, and all subsequent steps looped without recovering.",
+          "llm_calls": 1,
+          "latency_ms": 804.063,
+          "tokens": {
+            "input_tokens": 4008,
+            "output_tokens": 67,
+            "total_tokens": 4075
+          },
+          "raw": "{\"root_cause_step\": 6, \"failure_category\": \"System Failure\", \"rationale\": \"The audio transcription tool failed with 'Error. Could not transcribe this audio,' preventing extraction of page numbers. This is a system/tool failure, not a reasoning error, and all subsequent steps looped without recovering.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 6,
+          "top3_steps": [
+            6,
+            14,
+            18
+          ],
+          "failure_category": "System Failure",
+          "rationale": "步骤6中FileSurfer返回音频转录结果为'Error. Could not transcribe this audio.'，这是最早的关键失败点。该转录失败导致后续所有步骤（步骤14、18重复尝试、步骤20-30循环、最终TERMINATE）都无法获取页码，属于系统/工具能力失败而非推理错误。",
+          "deterministic_candidates": [
+            {
+              "step": 38,
+              "score": 0.75,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 31,
+              "score": 0.65,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 42,
+              "score": 0.65,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 48,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 66,
+              "score": 0.65,
+              "category": "System Failure"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1343.258,
+          "tokens": {
+            "input_tokens": 4684,
+            "output_tokens": 105,
+            "total_tokens": 4789
+          },
+          "raw": "{\"root_cause_step\": 6, \"failure_category\": \"System Failure\", \"rationale\": \"步骤6中FileSurfer返回音频转录结果为'Error. Could not transcribe this audio.'，这是最早的关键失败点。该转录失败导致后续所有步骤（步骤14、18重复尝试、步骤20-30循环、最终TERMINATE）都无法获取页码，属于系统/工具能力失败而非推理错误。\", \"top3_steps\": [6, 14, 18]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-42576abe-0deb-4869-8c63-225c2d75a95a",
+      "source": "magentic",
+      "split": "test",
+      "steps": 5,
+      "labels": {
+        "case_id": "magentic-42576abe-0deb-4869-8c63-225c2d75a95a",
+        "root_cause_step": 2,
+        "root_cause_failure_id": 1,
+        "root_cause_category": "Misinterpretation of Tool Output",
+        "root_cause_reason": "The root cause of the failure in this trajectory is the Orchestrator's misinterpretation of the sentence structure, leading to an incorrect identification of the object in a verb-object-subject construction. Despite initially recognizing that the entity performing the action was actually the object, the Orchestrator ultimately misidentified 'Apple' as the object instead of 'I', resulting in a failure to accurately process the information.",
+        "failure_steps": [
+          2
+        ],
+        "failure_categories": [
+          "Misinterpretation of Tool Output"
+        ],
+        "failure_ids": [
+          1
+        ],
+        "failure_agents": [
+          "Orchestrator"
+        ],
+        "failed_agent": "Orchestrator",
+        "failure_summary": "The root cause of the failure in this trajectory is the Orchestrator's misinterpretation of the sentence structure, leading to an incorrect identification of the object in a verb-object-subject construction. Despite initially recognizing that the entity performing the action was actually the object, the Orchestrator ultimately misidentified 'Apple' as the object instead of 'I', resulting in a failure to accurately process the information."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": null,
+          "top3_steps": [],
+          "failure_category": "Unknown",
+          "rationale": "无候选",
+          "candidates": [],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 3,
+          "top3_steps": [
+            3
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "The orchestrator accepted the translation 'Maktay Zapple Mato' as correct without verifying the grammar. Since 'Maktay' means 'is pleasing to', the apples are the subject (nominative 'Apple') and the self is the object (accusative 'Mato'), so the correct order should be 'Maktay Mato Apple', not 'Maktay Zapple Mato'.",
+          "llm_calls": 1,
+          "latency_ms": 937.881,
+          "tokens": {
+            "input_tokens": 1064,
+            "output_tokens": 111,
+            "total_tokens": 1175
+          },
+          "raw": "{\"root_cause_step\": 3, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"The orchestrator accepted the translation 'Maktay Zapple Mato' as correct without verifying the grammar. Since 'Maktay' means 'is pleasing to', the apples are the subject (nominative 'Apple') and the self is the object (accusative 'Mato'), so the correct order should be 'Maktay Mato Apple', not 'Maktay Zapple Mato'.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 3,
+          "top3_steps": [
+            3,
+            5,
+            2
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "Step 3's ledger claims 'Maktay Zapple Mato' correctly translates 'I like apples', but per the prompt the verb 'is pleasing to' makes the liker the object: apples (subject) please me (object). Correct order is Verb-Object-Subject = Maktay Mato Zapple. The agent misread the grammar rule, producing wrong word order and case assignment, then terminated at step 5.",
+          "deterministic_candidates": [],
+          "llm_calls": 1,
+          "latency_ms": 1758.444,
+          "tokens": {
+            "input_tokens": 1215,
+            "output_tokens": 131,
+            "total_tokens": 1346
+          },
+          "raw": "{\"root_cause_step\": 3, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"Step 3's ledger claims 'Maktay Zapple Mato' correctly translates 'I like apples', but per the prompt the verb 'is pleasing to' makes the liker the object: apples (subject) please me (object). Correct order is Verb-Object-Subject = Maktay Mato Zapple. The agent misread the grammar rule, producing wrong word order and case assignment, then terminated at step 5.\", \"top3_steps\": [3, 5, 2]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-52f7224e9c79431e7926afe317782711a0028750693e7456cde22ef6f4bd8bd5",
+      "source": "magentic",
+      "split": "test",
+      "steps": 21,
+      "labels": {
+        "case_id": "magentic-52f7224e9c79431e7926afe317782711a0028750693e7456cde22ef6f4bd8bd5",
+        "root_cause_step": 11,
+        "root_cause_failure_id": 3,
+        "root_cause_category": "Misinterpretation of Tool Output",
+        "root_cause_reason": "The orchestrator could have asked websurfer to get more information through scrolling instead of going ahead with incomplete information",
+        "failure_steps": [
+          5,
+          9,
+          11
+        ],
+        "failure_categories": [
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Misinterpretation of Tool Output"
+        ],
+        "failure_ids": [
+          1,
+          2,
+          3
+        ],
+        "failure_agents": [
+          "Websurfer",
+          "Websurfer",
+          "Orchestrator"
+        ],
+        "failed_agent": "Orchestrator",
+        "failure_summary": "The orchestrator failed to ensure complete data collection by the websurfer before proceeding with the search, leading to an incomplete response."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 13,
+          "top3_steps": [
+            13
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['cannot']",
+          "candidates": [
+            {
+              "step": 13,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['cannot']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 9,
+          "top3_steps": [
+            9
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "At step 9, WebSurfer opened the IMDb search results page but only reported metadata (viewport, og tags) without extracting the actual film list, ratings, or runtimes. This failure to interpret the tool output meant the agent never obtained the needed data, and subsequent steps proceeded on assumed films ('The Tenant', 'Nosferatu') without verification, leading to task failure.",
+          "llm_calls": 1,
+          "latency_ms": 1029.58,
+          "tokens": {
+            "input_tokens": 2952,
+            "output_tokens": 104,
+            "total_tokens": 3056
+          },
+          "raw": "{\"root_cause_step\": 9, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"At step 9, WebSurfer opened the IMDb search results page but only reported metadata (viewport, og tags) without extracting the actual film list, ratings, or runtimes. This failure to interpret the tool output meant the agent never obtained the needed data, and subsequent steps proceeded on assumed films ('The Tenant', 'Nosferatu') without verification, leading to task failure.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 9,
+          "top3_steps": [
+            9,
+            13,
+            21
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "Step 9 opened the IMDb search page but only 9% of the viewport was visible and metadata was generic (og:url imdb.com/search/), so the agent never actually extracted the ratings/runtimes list. Subsequent steps (13,17,21) then searched Vudu for guessed titles ('The Tenant', 'Nosferatu') without a verified ranked list, causing the chain of inconclusive availability checks. The earliest key failure is the failure to correctly read the IMDb results page.",
+          "deterministic_candidates": [
+            {
+              "step": 13,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 2200.418,
+          "tokens": {
+            "input_tokens": 3206,
+            "output_tokens": 142,
+            "total_tokens": 3348
+          },
+          "raw": "{\"root_cause_step\": 9, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"Step 9 opened the IMDb search page but only 9% of the viewport was visible and metadata was generic (og:url imdb.com/search/), so the agent never actually extracted the ratings/runtimes list. Subsequent steps (13,17,21) then searched Vudu for guessed titles ('The Tenant', 'Nosferatu') without a verified ranked list, causing the chain of inconclusive availability checks. The earliest key failure is the failure to correctly read the IMDb results page.\", \"top3_steps\": [9, 13, 21]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-55f4258484c5b398956133128a50462a767da211f8f72aa5ac5bbffb9bcbba1a",
+      "source": "magentic",
+      "split": "test",
+      "steps": 86,
+      "labels": {
+        "case_id": "magentic-55f4258484c5b398956133128a50462a767da211f8f72aa5ac5bbffb9bcbba1a",
+        "root_cause_step": 5,
+        "root_cause_failure_id": 1,
+        "root_cause_category": "Instruction/Plan Adherence Failure",
+        "root_cause_reason": "The root cause of the failures in this trajectory is WebSurfer's failure to provide a comprehensive list of movies and series featuring Ted Danson as instructed. This lack of adherence to the plan led to the Orchestrator being unable to proceed effectively, resulting in multiple failures throughout the trajectory.",
+        "failure_steps": [
+          5,
+          12,
+          16,
+          20,
+          24,
+          28,
+          32,
+          36,
+          43,
+          47,
+          51,
+          55,
+          59,
+          63,
+          70,
+          74,
+          78,
+          82,
+          86
+        ],
+        "failure_categories": [
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Guardrails Triggered"
+        ],
+        "failure_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "failure_agents": [
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer"
+        ],
+        "failed_agent": "WebSurfer",
+        "failure_summary": "The root cause of the failures in this trajectory is WebSurfer's failure to provide a comprehensive list of movies and series featuring Ted Danson as instructed. This lack of adherence to the plan led to the Orchestrator being unable to proceed effectively, resulting in multiple failures throughout the trajectory."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 9,
+          "top3_steps": [
+            9,
+            39,
+            38
+          ],
+          "failure_category": "System Failure",
+          "rationale": "步骤文本包含错误/失败信号: ['error', 'timeout']",
+          "candidates": [
+            {
+              "step": 9,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['error', 'timeout']"
+            },
+            {
+              "step": 39,
+              "score": 0.65,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Failure', 'failure']"
+            },
+            {
+              "step": 38,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            },
+            {
+              "step": 65,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            },
+            {
+              "step": 86,
+              "score": 0.55,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 5,
+          "top3_steps": [
+            5
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "WebSurfer's initial search returned only a Bing search results page with metadata, not an actual list of Ted Danson's series. The orchestrator treated this as progress and repeatedly issued similar search/scroll instructions, never extracting the needed data. The failure to correctly interpret that the tool output did not contain the required information led to a long loop of ineffective scrolling and searching, ultimately failing the task.",
+          "llm_calls": 1,
+          "latency_ms": 1969.959,
+          "tokens": {
+            "input_tokens": 3952,
+            "output_tokens": 107,
+            "total_tokens": 4059
+          },
+          "raw": "{\"root_cause_step\": 5, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"WebSurfer's initial search returned only a Bing search results page with metadata, not an actual list of Ted Danson's series. The orchestrator treated this as progress and repeatedly issued similar search/scroll instructions, never extracting the needed data. The failure to correctly interpret that the tool output did not contain the required information led to a long loop of ineffective scrolling and searching, ultimately failing the task.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 5,
+          "top3_steps": [
+            5,
+            12,
+            38
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "Step 5 WebSurfer searched 'Ted Danson TV series list' but only captured Bing search metadata/screenshot without extracting the actual list of series. This failure to interpret/extract the search results led to repeated scrolling of TVGuide (steps 12-28), loops, stalls (38,65), and eventual replanning—all downstream symptoms. The earliest key failure is the initial search result not being properly parsed.",
+          "deterministic_candidates": [
+            {
+              "step": 9,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 39,
+              "score": 0.65,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 38,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 65,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 86,
+              "score": 0.55,
+              "category": "System Failure"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 2019.247,
+          "tokens": {
+            "input_tokens": 4576,
+            "output_tokens": 127,
+            "total_tokens": 4703
+          },
+          "raw": "{\"root_cause_step\": 5, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"Step 5 WebSurfer searched 'Ted Danson TV series list' but only captured Bing search metadata/screenshot without extracting the actual list of series. This failure to interpret/extract the search results led to repeated scrolling of TVGuide (steps 12-28), loops, stalls (38,65), and eventual replanning—all downstream symptoms. The earliest key failure is the initial search result not being properly parsed.\", \"top3_steps\": [5, 12, 38]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-57d9dc6935e8a40b02e7f8ec81768fe70e68a0c05f6866927c9fda38db38a486",
+      "source": "magentic",
+      "split": "test",
+      "steps": 31,
+      "labels": {
+        "case_id": "magentic-57d9dc6935e8a40b02e7f8ec81768fe70e68a0c05f6866927c9fda38db38a486",
+        "root_cause_step": 31,
+        "root_cause_failure_id": 3,
+        "root_cause_category": "Intent Plan Misalignment",
+        "root_cause_reason": "The root cause of the failures in this trajectory is the Orchestrator's misalignment between the user's intent and the final calculation of the ticket prices. The Orchestrator failed to accurately account for the specified number of attendees, specifically omitting one child from the total count. This oversight led to an incorrect calculation that did not reflect the user's original request for tickets for 2 adults and 2 kids.",
+        "failure_steps": [
+          17,
+          21,
+          31
+        ],
+        "failure_categories": [
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Intent Plan Misalignment"
+        ],
+        "failure_ids": [
+          1,
+          2,
+          3
+        ],
+        "failure_agents": [
+          "WebSurfer",
+          "WebSurfer",
+          "Orchestrator"
+        ],
+        "failed_agent": "Orchestrator",
+        "failure_summary": "The root cause of the failures in this trajectory is the Orchestrator's misalignment between the user's intent and the final calculation of the ticket prices. The Orchestrator failed to accurately account for the specified number of attendees, specifically omitting one child from the total count. This oversight led to an incorrect calculation that did not reflect the user's original request for tickets for 2 adults and 2 kids."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 23,
+          "top3_steps": [
+            23,
+            24
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "步骤文本包含错误/失败信号: ['Stalled']",
+          "candidates": [
+            {
+              "step": 23,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            },
+            {
+              "step": 24,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Failure']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 13,
+          "top3_steps": [
+            13
+          ],
+          "failure_category": "Misinterpretation of Tool Output",
+          "rationale": "WebSurfer clicked a 'Special Event Tickets Required' link and landed on a Blackbaud event ticketing page instead of the Membership section, misinterpreting the page's navigation controls. This derailed the search for annual pass pricing, causing repeated navigation loops and failure to obtain membership costs.",
+          "llm_calls": 1,
+          "latency_ms": 1083.462,
+          "tokens": {
+            "input_tokens": 3913,
+            "output_tokens": 86,
+            "total_tokens": 3999
+          },
+          "raw": "{\"root_cause_step\": 13, \"failure_category\": \"Misinterpretation of Tool Output\", \"rationale\": \"WebSurfer clicked a 'Special Event Tickets Required' link and landed on a Blackbaud event ticketing page instead of the Membership section, misinterpreting the page's navigation controls. This derailed the search for annual pass pricing, causing repeated navigation loops and failure to obtain membership costs.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 4,
+          "top3_steps": [
+            4,
+            5,
+            23
+          ],
+          "failure_category": "Instruction/Plan Adherence Failure",
+          "rationale": "Step 4 指示 WebSurfer 查找票价与年票价格，但 WebSurfer 在步骤 5/9/13/17/21 反复点击错误链接（Special Event Tickets、FIELD TRIPS & GROUPS），从未进入 Membership 页面，导致后续步骤 23 停滞并重规划。根因是最早的检索执行偏离计划，而非步骤 23 的停滞症状。",
+          "deterministic_candidates": [
+            {
+              "step": 23,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 24,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1476.788,
+          "tokens": {
+            "input_tokens": 4285,
+            "output_tokens": 128,
+            "total_tokens": 4413
+          },
+          "raw": "{\"root_cause_step\": 4, \"failure_category\": \"Instruction/Plan Adherence Failure\", \"rationale\": \"Step 4 指示 WebSurfer 查找票价与年票价格，但 WebSurfer 在步骤 5/9/13/17/21 反复点击错误链接（Special Event Tickets、FIELD TRIPS & GROUPS），从未进入 Membership 页面，导致后续步骤 23 停滞并重规划。根因是最早的检索执行偏离计划，而非步骤 23 的停滞症状。\", \"top3_steps\": [4, 5, 23]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-5d0080cb-90d7-4712-bc33-848150e917d3",
+      "source": "magentic",
+      "split": "test",
+      "steps": 51,
+      "labels": {
+        "case_id": "magentic-5d0080cb-90d7-4712-bc33-848150e917d3",
+        "root_cause_step": 15,
+        "root_cause_failure_id": 2,
+        "root_cause_category": "Invention of new information",
+        "root_cause_reason": "The Orchestrator agent consistently hallucinated the successful download of the PDF file, leading to a series of misguided instructions to both WebSurfer and FileSurfer. This fundamental misunderstanding of the file's availability caused multiple downstream failures, as the agents were tasked with actions based on incorrect assumptions.",
+        "failure_steps": [
+          13,
+          15,
+          17,
+          19,
+          21,
+          34,
+          35,
+          50,
+          51
+        ],
+        "failure_categories": [
+          "Instruction/Plan Adherence Failure",
+          "Invention of new information",
+          "Instruction/Plan Adherence Failure",
+          "Invention of new information",
+          "Intent not supported",
+          "Invalid Invocation",
+          "Invention of new information",
+          "Invention of new information",
+          "Guardrails Triggered"
+        ],
+        "failure_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "failure_agents": [
+          "WebSurfer",
+          "Orchestrator",
+          "WebSurfer",
+          "Orchestrator",
+          "FileSurfer",
+          "Orchestrator",
+          "FileSurfer",
+          "Orchestrator",
+          "Orchestrator"
+        ],
+        "failed_agent": "Orchestrator",
+        "failure_summary": "The Orchestrator agent consistently hallucinated the successful download of the PDF file, leading to multiple failures as it issued instructions based on incorrect assumptions about the file's availability."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21,
+            36,
+            22
+          ],
+          "failure_category": "System Failure",
+          "rationale": "步骤文本包含错误/失败信号: ['404', 'Error', 'not found']",
+          "candidates": [
+            {
+              "step": 21,
+              "score": 0.75,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['404', 'Error', 'not found']"
+            },
+            {
+              "step": 36,
+              "score": 0.75,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['404', 'Error', 'not found']"
+            },
+            {
+              "step": 22,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['error', 'not found']"
+            },
+            {
+              "step": 37,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['404', 'error']"
+            },
+            {
+              "step": 41,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['error', 'unable']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21
+          ],
+          "failure_category": "System Failure",
+          "rationale": "FileSurfer failed to open the downloaded PDF, returning an Error 404 'File not found' for the expected path. This tool/system failure blocked extraction of the paper's content, preventing retrieval of the fish bag volume.",
+          "llm_calls": 1,
+          "latency_ms": 793.851,
+          "tokens": {
+            "input_tokens": 3993,
+            "output_tokens": 64,
+            "total_tokens": 4057
+          },
+          "raw": "{\"root_cause_step\": 21,\"failure_category\":\"System Failure\",\"rationale\":\"FileSurfer failed to open the downloaded PDF, returning an Error 404 'File not found' for the expected path. This tool/system failure blocked extraction of the paper's content, preventing retrieval of the fish bag volume.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21,
+            36,
+            41
+          ],
+          "failure_category": "System Failure",
+          "rationale": "步骤21首次出现FileSurfer访问PDF时返回Error 404 File not found，说明下载/保存路径与FileSurfer读取路径不一致，导致后续步骤36、41反复出现同类404错误，无法读取论文内容，最终无法获取鱼袋体积。这是最早导致后续一连串失败的关键步骤。",
+          "deterministic_candidates": [
+            {
+              "step": 21,
+              "score": 0.75,
+              "category": "System Failure"
+            },
+            {
+              "step": 36,
+              "score": 0.75,
+              "category": "System Failure"
+            },
+            {
+              "step": 22,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 37,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 41,
+              "score": 0.65,
+              "category": "System Failure"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1602.677,
+          "tokens": {
+            "input_tokens": 4711,
+            "output_tokens": 103,
+            "total_tokens": 4814
+          },
+          "raw": "{\"root_cause_step\": 21, \"failure_category\": \"System Failure\", \"rationale\": \"步骤21首次出现FileSurfer访问PDF时返回Error 404 File not found，说明下载/保存路径与FileSurfer读取路径不一致，导致后续步骤36、41反复出现同类404错误，无法读取论文内容，最终无法获取鱼袋体积。这是最早导致后续一连串失败的关键步骤。\", \"top3_steps\": [21, 36, 41]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-5f982798-16b9-4051-ab57-cfc7ebdb2a91",
+      "source": "magentic",
+      "split": "test",
+      "steps": 67,
+      "labels": {
+        "case_id": "magentic-5f982798-16b9-4051-ab57-cfc7ebdb2a91",
+        "root_cause_step": 33,
+        "root_cause_failure_id": 3,
+        "root_cause_category": "Invention of new information",
+        "root_cause_reason": "The Orchestrator could tried to recover from earlier errors but the FileSurfer hallucination was a critical failure that prevented further progress.",
+        "failure_steps": [
+          13,
+          17,
+          33
+        ],
+        "failure_categories": [
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Invention of new information"
+        ],
+        "failure_ids": [
+          1,
+          2,
+          3
+        ],
+        "failure_agents": [
+          "Websurfer",
+          "Websurfer",
+          "FileSurfer"
+        ],
+        "failed_agent": "FileSurfer",
+        "failure_summary": "The agent could not download and read the specified PDF file due to a hallucination by the FileSurfer agent."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 33,
+          "top3_steps": [
+            33,
+            44,
+            45
+          ],
+          "failure_category": "System Failure",
+          "rationale": "步骤文本包含错误/失败信号: ['404', 'Error', 'not found']",
+          "candidates": [
+            {
+              "step": 33,
+              "score": 0.75,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['404', 'Error', 'not found']"
+            },
+            {
+              "step": 44,
+              "score": 0.75,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['404', 'Error', 'not found']"
+            },
+            {
+              "step": 45,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['404', 'error']"
+            },
+            {
+              "step": 67,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['Error', 'Nothing to summarize']"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: [\"can't\"]"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21
+          ],
+          "failure_category": "Invalid Invocation",
+          "rationale": "FileSurfer was invoked with a malformed/nonexistent URL ('2007.xx'), producing a bogus download instead of the actual July 2020 paper, so the required time spans were never retrieved and the task could not be completed.",
+          "llm_calls": 1,
+          "latency_ms": 1190.599,
+          "tokens": {
+            "input_tokens": 3853,
+            "output_tokens": 71,
+            "total_tokens": 3924
+          },
+          "raw": "{\"root_cause_step\": 21,\"failure_category\":\"Invalid Invocation\",\"rationale\":\"FileSurfer was invoked with a malformed/nonexistent URL ('2007.xx'), producing a bogus download instead of the actual July 2020 paper, so the required time spans were never retrieved and the task could not be completed.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 21,
+          "top3_steps": [
+            21,
+            33,
+            44
+          ],
+          "failure_category": "Invalid Invocation",
+          "rationale": "FileSurfer 在步骤21将下载地址误当作 'http://export.arxiv.org/pdf/2007.xx' 并保存为无效文件，导致后续步骤25/29反复重下同一无效文件、步骤33/44出现 404。根因是最早的无效下载调用，而非后续 404 症状。",
+          "deterministic_candidates": [
+            {
+              "step": 33,
+              "score": 0.75,
+              "category": "System Failure"
+            },
+            {
+              "step": 44,
+              "score": 0.75,
+              "category": "System Failure"
+            },
+            {
+              "step": 45,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 67,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 1,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 1500.566,
+          "tokens": {
+            "input_tokens": 4523,
+            "output_tokens": 109,
+            "total_tokens": 4632
+          },
+          "raw": "{\"root_cause_step\": 21, \"failure_category\": \"Invalid Invocation\", \"rationale\": \"FileSurfer 在步骤21将下载地址误当作 'http://export.arxiv.org/pdf/2007.xx' 并保存为无效文件，导致后续步骤25/29反复重下同一无效文件、步骤33/44出现 404。根因是最早的无效下载调用，而非后续 404 症状。\", \"top3_steps\": [21, 33, 44]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    },
+    {
+      "case_id": "magentic-624cbf11-6a41-4692-af9c-36b3e5ca3130",
+      "source": "magentic",
+      "split": "test",
+      "steps": 130,
+      "labels": {
+        "case_id": "magentic-624cbf11-6a41-4692-af9c-36b3e5ca3130",
+        "root_cause_step": 27,
+        "root_cause_failure_id": 5,
+        "root_cause_category": "Misinterpretation of Tool Output",
+        "root_cause_reason": "The Orchestrator's misinterpretation of WebSurfer's incomplete output, particularly the absence of year information for the ice cream flavors, led to incorrect assumptions and decisions. This misunderstanding caused the Orchestrator to make guesses about the oldest flavors without sufficient data, resulting in a series of failures throughout the trajectory.",
+        "failure_steps": [
+          13,
+          17,
+          21,
+          25,
+          27,
+          31,
+          37,
+          44,
+          48,
+          52,
+          56,
+          64,
+          68,
+          72,
+          79,
+          86,
+          90,
+          94,
+          98,
+          102,
+          106,
+          110,
+          121,
+          125,
+          129
+        ],
+        "failure_categories": [
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Misinterpretation of Tool Output",
+          "Misinterpretation of Tool Output",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure",
+          "Instruction/Plan Adherence Failure"
+        ],
+        "failure_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ],
+        "failure_agents": [
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "Orchestrator",
+          "Orchestrator",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer",
+          "WebSurfer"
+        ],
+        "failed_agent": "Orchestrator",
+        "failure_summary": "The Orchestrator's misinterpretation of WebSurfer's incomplete output, particularly the absence of year information for the ice cream flavors, led to incorrect assumptions and decisions. This misunderstanding caused the Orchestrator to make guesses about the oldest flavors without sufficient data, resulting in a series of failures throughout the trajectory."
+      },
+      "methods": {
+        "baseline_b": {
+          "method": "baseline_b_deterministic",
+          "root_cause_step": 83,
+          "top3_steps": [
+            83,
+            39,
+            74
+          ],
+          "failure_category": "System Failure",
+          "rationale": "步骤文本包含错误/失败信号: ['error', 'timeout']",
+          "candidates": [
+            {
+              "step": 83,
+              "score": 0.65,
+              "category": "System Failure",
+              "reason": "步骤文本包含错误/失败信号: ['error', 'timeout']"
+            },
+            {
+              "step": 39,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            },
+            {
+              "step": 74,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            },
+            {
+              "step": 116,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output",
+              "reason": "步骤文本包含错误/失败信号: ['Stalled']"
+            }
+          ],
+          "llm_calls": 0,
+          "latency_ms": 0.0,
+          "tokens": null
+        },
+        "baseline_a": {
+          "method": "baseline_a_llm_direct",
+          "root_cause_step": 27,
+          "top3_steps": [
+            27
+          ],
+          "failure_category": "Invention of new information",
+          "rationale": "The orchestrator introduced unverified flavors 'Galactica' and 'Wavy Gravy' as candidate oldest flavors without evidence from the graveyard page, derailing the search from the actual oldest flavor and its background headstone.",
+          "llm_calls": 1,
+          "latency_ms": 799.176,
+          "tokens": {
+            "input_tokens": 3778,
+            "output_tokens": 72,
+            "total_tokens": 3850
+          },
+          "raw": "{\"root_cause_step\": 27, \"failure_category\": \"Invention of new information\", \"rationale\": \"The orchestrator introduced unverified flavors 'Galactica' and 'Wavy Gravy' as candidate oldest flavors without evidence from the graveyard page, derailing the search from the actual oldest flavor and its background headstone.\"}"
+        },
+        "tracepilot_v2": {
+          "method": "tracepilot_v2",
+          "root_cause_step": 27,
+          "top3_steps": [
+            27,
+            29,
+            39
+          ],
+          "failure_category": "Invention of new information",
+          "rationale": "Step 27 指示 Assistant 去核查“Galactica 或 Wavy Gravy”是否为最老口味，但这两个名字并非来自页面证据（步骤13-25的OCR列表中没有 Galactica，Wavy Gravy 只是普通条目）。Assistant 在步骤29据此臆断 Wavy Gravy 可能是最老口味，导致后续点击错误条目、反复 Stalled（步骤39/74/116）并最终无法回答。真正根因是步骤27凭空引入候选口味，而非后续的停滞症状。",
+          "deterministic_candidates": [
+            {
+              "step": 83,
+              "score": 0.65,
+              "category": "System Failure"
+            },
+            {
+              "step": 39,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 74,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            },
+            {
+              "step": 116,
+              "score": 0.55,
+              "category": "Misinterpretation of Tool Output"
+            }
+          ],
+          "llm_calls": 1,
+          "latency_ms": 2276.054,
+          "tokens": {
+            "input_tokens": 4247,
+            "output_tokens": 152,
+            "total_tokens": 4399
+          },
+          "raw": "{\"root_cause_step\": 27, \"failure_category\": \"Invention of new information\", \"rationale\": \"Step 27 指示 Assistant 去核查“Galactica 或 Wavy Gravy”是否为最老口味，但这两个名字并非来自页面证据（步骤13-25的OCR列表中没有 Galactica，Wavy Gravy 只是普通条目）。Assistant 在步骤29据此臆断 Wavy Gravy 可能是最老口味，导致后续点击错误条目、反复 Stalled（步骤39/74/116）并最终无法回答。真正根因是步骤27凭空引入候选口味，而非后续的停滞症状。\", \"top3_steps\": [27, 29, 39]}"
+        }
+      },
+      "errors": {},
+      "prompt_uses_labels": false
+    }
+  ],
+  "method_descriptions": {
+    "baseline_b": "确定性规则 + 关键词/数字一致性信号，不调用模型（零成本）",
+    "baseline_a": "完整轨迹直接交给 DeepSeek Flash，一次 JSON 诊断",
+    "tracepilot_v2": "规则候选 + DAG/证据血缘信号 + 同模型裁决（v2.1 Prompt：要求优先最早根因、区分下游症状）"
+  },
+  "label_isolation": "labels 只在 aggregate_metrics 计算指标时使用，未进入任何 Prompt",
+  "iterations": [
+    {
+      "version": "v2.0",
+      "prompt": "提供候选与类别提示，未强调最早根因",
+      "metrics": {
+        "cases": 25,
+        "predictions": 25,
+        "top1_accuracy": 0.2,
+        "top3_hit_rate": 0.32,
+        "failure_step_accuracy": 0.32,
+        "category_accuracy": 0.16,
+        "category_macro_f1": 0.0556,
+        "llm_calls": 25,
+        "total_tokens": 106812,
+        "avg_latency_ms": 1301.586,
+        "sample_size_definition": "AgentRx 公开 GitHub 子集 test split；标签仅在打分阶段使用"
+      }
+    },
+    {
+      "version": "v2.1",
+      "prompt": "强调最早根因、候选可能含症状、要求独立判断",
+      "metrics": {
+        "cases": 25,
+        "predictions": 25,
+        "top1_accuracy": 0.2,
+        "top3_hit_rate": 0.4,
+        "failure_step_accuracy": 0.36,
+        "category_accuracy": 0.2,
+        "category_macro_f1": 0.0926,
+        "llm_calls": 25,
+        "total_tokens": 108642,
+        "avg_latency_ms": 1596.606,
+        "sample_size_definition": "AgentRx 公开 GitHub 子集 test split；标签仅在打分阶段使用"
+      }
+    }
+  ],
+  "limitations": [
+    "子集为公开 GitHub 数据，非 HF 完整 170 条；不能宣称官方全集结果",
+    "步骤编号映射为消息下标；与 AgentRx 原始工具调用边界可能存在偏差",
+    "单次调用、单一模型；未做重复采样与显著性检验",
+    "v2.1 为在相同 25 条案例上的事后 Prompt 修订，未另设独立验证集，存在过拟合风险"
+  ],
+  "budget_after": {
+    "enabled": true,
+    "total_calls_limit": 160,
+    "total_calls_used": 117,
+    "total_calls_remaining": 43,
+    "visitor_daily_limit": 200,
+    "visitor_day": "2026-11-27",
+    "total_tokens": {
+      "input": 351960,
+      "output": 31663
+    },
+    "estimated_cost_cny": 0.415286,
+    "price_estimate_note": "按环境变量配置的人民币单价估算，不是 Provider 实际账单",
+    "updated_at": "2026-11-27T01:44:06.451595+00:00"
+  },
+  "wall_time_seconds": 40.7,
+  "errors": 0
+}

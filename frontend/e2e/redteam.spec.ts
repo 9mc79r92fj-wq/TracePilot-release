@@ -42,17 +42,10 @@ test('Red Team Lab：生成并运行六类红队案例', async ({ page }) => {
   // 金丝雀检测器应显示「已验证」
   await expect(page.locator('.card.stat').filter({ hasText: '金丝雀检测器' })).toBeVisible()
 
-  // 按类型统计表应包含六类
+  // 按类型统计表应包含六类（页面按中文类型标签展示）
   const typeTable = page.getByText('按攻击类型统计')
   await expect(typeTable).toBeVisible()
-  for (const t of [
-    'prompt_injection',
-    'tool_misuse',
-    'permission_boundary',
-    'invalid_arguments',
-    'conflicting_instructions',
-    'fault_recovery',
-  ]) {
+  for (const t of ['提示注入', '工具误用', '权限边界', '非法参数', '指令冲突', '故障恢复']) {
     await expect(page.locator('td .badge').filter({ hasText: t }).first()).toBeVisible()
   }
 
@@ -109,9 +102,14 @@ test('Red Team Lab：仅 UNSAFE 筛选显示金丝雀负控', async ({ page }) =
 test('导航：Red Team Lab 入口可达且不再有未实现页', async ({ page }) => {
   await page.goto('/')
   const nav = page.locator('.sidebar .nav')
-  await expect(nav.getByRole('link', { name: 'Red Team Lab', exact: true })).toBeVisible()
+  // 侧栏默认只展开当前路由分组，需要先展开「安全与性能」
+  const securityGroup = nav.getByRole('button', { name: '安全与性能', exact: true })
+  if ((await securityGroup.getAttribute('aria-expanded')) !== 'true') {
+    await securityGroup.click()
+  }
+  await expect(nav.getByRole('link', { name: '红队测试', exact: true })).toBeVisible()
   await expect(nav.getByRole('link', { name: /待实现/ })).toHaveCount(0)
-  await nav.getByRole('link', { name: 'Red Team Lab', exact: true }).click()
+  await nav.getByRole('link', { name: '红队测试', exact: true }).click()
   await expect(page).toHaveURL(/\/redteam$/)
   await expect(page.getByRole('heading', { name: /Red Team Lab/ })).toBeVisible()
 })

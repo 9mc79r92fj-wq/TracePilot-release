@@ -1,0 +1,181 @@
+{
+  "trace_id": "trace-bf1f2e2690f743379fadc80d22e03adf",
+  "task_id": "task-c3e9d334e27f42f9826f3e31179ccf7a",
+  "run_id": "run-0e94b48908964e369d853e1f951b2c0d",
+  "started_at": "2026-11-18T13:48:36.153149Z",
+  "ended_at": "2026-11-18T13:48:36.400866Z",
+  "status": "succeeded",
+  "steps": [
+    {
+      "step_id": "trace-bf1f2e2690f743379fadc80d22e03adf-s001",
+      "trace_id": "trace-bf1f2e2690f743379fadc80d22e03adf",
+      "parent_step_ids": [],
+      "step_type": "model_call",
+      "timestamp": "2026-11-18T13:48:36.391932Z",
+      "input": {
+        "task": "请使用计算器工具计算 1+1"
+      },
+      "output": "分析并计算该表达式",
+      "tool_name": null,
+      "tool_arguments": null,
+      "tool_result": null,
+      "status": "succeeded",
+      "error": null,
+      "duration_ms": 0,
+      "token_usage": {
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "total_tokens": 15
+      },
+      "metadata": {}
+    },
+    {
+      "step_id": "trace-bf1f2e2690f743379fadc80d22e03adf-s002",
+      "trace_id": "trace-bf1f2e2690f743379fadc80d22e03adf",
+      "parent_step_ids": [
+        "trace-bf1f2e2690f743379fadc80d22e03adf-s001"
+      ],
+      "step_type": "planning",
+      "timestamp": "2026-11-18T13:48:36.393937Z",
+      "input": {
+        "task": "请使用计算器工具计算 1+1",
+        "understanding": "分析并计算该表达式"
+      },
+      "output": {
+        "plan": [
+          "调用计算器",
+          "给出结论"
+        ]
+      },
+      "tool_name": null,
+      "tool_arguments": null,
+      "tool_result": null,
+      "status": "succeeded",
+      "error": null,
+      "duration_ms": 0,
+      "token_usage": {
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "total_tokens": 15
+      },
+      "metadata": {}
+    },
+    {
+      "step_id": "trace-bf1f2e2690f743379fadc80d22e03adf-s003",
+      "trace_id": "trace-bf1f2e2690f743379fadc80d22e03adf",
+      "parent_step_ids": [
+        "trace-bf1f2e2690f743379fadc80d22e03adf-s002"
+      ],
+      "step_type": "model_call",
+      "timestamp": "2026-11-18T13:48:36.393937Z",
+      "input": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "你是执行助手。请按照执行计划完成用户任务，可以使用提供的工具获取真实数据。优先调用工具验证，最后直接用中文给出最终结论。不要输出内部思考或推理过程。"
+          },
+          {
+            "role": "user",
+            "content": "任务：请使用计算器工具计算 1+1\n执行计划：\n1. 调用计算器\n2. 给出结论"
+          }
+        ]
+      },
+      "output": "",
+      "tool_name": null,
+      "tool_arguments": null,
+      "tool_result": null,
+      "status": "succeeded",
+      "error": null,
+      "duration_ms": 0,
+      "token_usage": {
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "total_tokens": 15
+      },
+      "metadata": {}
+    },
+    {
+      "step_id": "trace-bf1f2e2690f743379fadc80d22e03adf-s004",
+      "trace_id": "trace-bf1f2e2690f743379fadc80d22e03adf",
+      "parent_step_ids": [
+        "trace-bf1f2e2690f743379fadc80d22e03adf-s003"
+      ],
+      "step_type": "tool_call",
+      "timestamp": "2026-11-18T13:48:36.397878Z",
+      "input": null,
+      "output": null,
+      "tool_name": "calculator",
+      "tool_arguments": {
+        "expression": "1+1"
+      },
+      "tool_result": {
+        "expression": "1+1",
+        "result": 2
+      },
+      "status": "succeeded",
+      "error": null,
+      "duration_ms": 0,
+      "token_usage": null,
+      "metadata": {}
+    },
+    {
+      "step_id": "trace-bf1f2e2690f743379fadc80d22e03adf-s005",
+      "trace_id": "trace-bf1f2e2690f743379fadc80d22e03adf",
+      "parent_step_ids": [
+        "trace-bf1f2e2690f743379fadc80d22e03adf-s004"
+      ],
+      "step_type": "model_call",
+      "timestamp": "2026-11-18T13:48:36.397878Z",
+      "input": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "你是执行助手。请按照执行计划完成用户任务，可以使用提供的工具获取真实数据。优先调用工具验证，最后直接用中文给出最终结论。不要输出内部思考或推理过程。"
+          },
+          {
+            "role": "user",
+            "content": "任务：请使用计算器工具计算 1+1\n执行计划：\n1. 调用计算器\n2. 给出结论"
+          },
+          {
+            "role": "assistant",
+            "tool_calls": [
+              {
+                "id": "c1",
+                "type": "function",
+                "function": {
+                  "name": "calculator",
+                  "arguments": "{\"expression\": \"1+1\"}"
+                }
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "content": "{\"expression\": \"1+1\", \"result\": 2}",
+            "tool_call_id": "c1"
+          }
+        ]
+      },
+      "output": "最终回答：计算完成",
+      "tool_name": null,
+      "tool_arguments": null,
+      "tool_result": null,
+      "status": "succeeded",
+      "error": null,
+      "duration_ms": 0,
+      "token_usage": {
+        "input_tokens": 10,
+        "output_tokens": 5,
+        "total_tokens": 15
+      },
+      "metadata": {}
+    }
+  ],
+  "metadata": {
+    "schema_version": "0.1.0",
+    "model": "deepseek-chat",
+    "tool_call_count": 1,
+    "simulated": true,
+    "simulation_note": "模型响应为模拟，工具执行为真实本地工具"
+  }
+}

@@ -1,4 +1,10 @@
-// 统一 API 请求封装：基于 axios，从环境变量读取后端地址（默认 127.0.0.1:8000）
+// 统一 API 请求封装。
+//
+// 后端地址优先级：
+// 1) 显式配置 VITE_API_BASE_URL（前后端分离部署时使用）；
+// 2) 开发模式默认 http://127.0.0.1:8000（Vite 5173 + 本地后端）；
+// 3) 生产构建默认同源相对路径（空 baseURL，请求路径本身已带 /api 前缀，
+//    如单端口同源部署的 ModelScope 创空间），避免把开发机地址打进生产 bundle。
 
 import axios from 'axios'
 import type {
@@ -14,7 +20,8 @@ import type {
   TracesResponse,
 } from './types'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000'
+const DEFAULT_BASE_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : ''
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE_URL
 
 export const api = axios.create({
   baseURL: BASE_URL,

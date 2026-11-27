@@ -17,20 +17,13 @@ from backend.app.services.counterfactual_engine import (  # noqa: E402
     CounterfactualError,
     run_counterfactual_experiment,
 )
+from fixture_data import STEP21_FAULT_ID, load_fixture_trace  # noqa: E402
 
 DATA_TRACES = PROJECT_ROOT / "data" / "traces"
 
 
 def _fault_trace() -> TraceRecord:
-    for p in sorted(glob.glob(str(DATA_TRACES / "*.json"))):
-        r = TraceRecord.model_validate_json(Path(p).read_text(encoding="utf-8"))
-        if any(
-            isinstance(s.metadata.get("fault_injection"), dict)
-            and s.metadata["fault_injection"].get("injected") is True
-            for s in r.steps
-        ):
-            return r
-    pytest.skip("缺少故障 Trace 数据")
+    return load_fixture_trace(STEP21_FAULT_ID)
 
 
 # 1. 原始 Trace 不被修改

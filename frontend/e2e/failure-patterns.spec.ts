@@ -35,10 +35,9 @@ test('失败模式：分布图 + 排行榜 + 分母透明', async ({ page }) => 
   // 自动分析卡片
   await expect(page.getByText(/失败模式挖掘（Failure Pattern Mining）/)).toBeVisible()
   await expect(page.getByText('Failure Pattern Explorer')).toBeVisible({ timeout: 60_000 })
-
-  // 分母声明
+  // 分母声明（当前 UI：占比分母为本次分析的 Bad Case 数；UNKNOWN 单独计数）
   await expect(page.getByText('统计分母', { exact: true })).toBeVisible()
-  await expect(page.getByText(/未执行案例不计入任何模式/).first()).toBeVisible()
+  await expect(page.getByText(/占比分母为本次分析的 Bad Case 数/).first()).toBeVisible()
 
   // 分布图 + 排行榜
   await expect(page.getByText('失败模式分布（点击下钻）')).toBeVisible()

@@ -1,0 +1,347 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "queryforge_trace_v1.schema.json",
+  "$defs": {
+    "QueryForgeEventType": {
+      "description": "QueryForge 步骤事件类型（v1 白名单）。\n\n未知 event_type 会被 Pydantic 直接拒绝；新增类型需要协议小版本 + 显式映射，\n不允许「按兜底类型静默接收」。",
+      "enum": [
+        "planning",
+        "model_call",
+        "tool_call",
+        "retrieval",
+        "rerank",
+        "citation_validation",
+        "reflection"
+      ],
+      "title": "QueryForgeEventType",
+      "type": "string"
+    },
+    "QueryForgeExecutionMode": {
+      "description": "QueryForge 本次 trace 的执行方式。",
+      "enum": [
+        "real_api",
+        "mock",
+        "simulated",
+        "replay"
+      ],
+      "title": "QueryForgeExecutionMode",
+      "type": "string"
+    },
+    "QueryForgeSpan": {
+      "additionalProperties": false,
+      "description": "QueryForge trace 中的一个步骤（span）。",
+      "properties": {
+        "span_id": {
+          "description": "span 唯一 ID（trace 内唯一）",
+          "minLength": 1,
+          "title": "Span Id",
+          "type": "string"
+        },
+        "parent_span_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "父 span ID；null 表示根 span。必须指向 trace 内已存在的 span，且不得成环",
+          "title": "Parent Span Id"
+        },
+        "event_type": {
+          "$ref": "#/$defs/QueryForgeEventType",
+          "description": "事件类型，见 QueryForgeEventType"
+        },
+        "name": {
+          "description": "步骤名称（工具名 / 模型名 / 操作名）",
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "started_at": {
+          "description": "span 开始时间（必须带时区）",
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "latency_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "耗时（毫秒，允许小数）；未知为 null，禁止用 0 冒充",
+          "title": "Latency Ms"
+        },
+        "input": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "步骤输入（必须可 JSON 序列化）",
+          "title": "Input"
+        },
+        "output": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "步骤输出（必须可 JSON 序列化）",
+          "title": "Output"
+        },
+        "attributes": {
+          "additionalProperties": true,
+          "description": "扩展属性（如 retrieval_mode / index_revision / tool_call_id）；原样保留到 metadata",
+          "title": "Attributes",
+          "type": "object"
+        },
+        "token_usage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryForgeTokenUsage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "token 用量；仅 model_call / planning / reflection 允许携带，未知为 null"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryForgeSpanError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "错误信息；失败步骤建议提供"
+        },
+        "status": {
+          "$ref": "#/$defs/QueryForgeSpanStatus",
+          "description": "span 状态，见 QueryForgeSpanStatus"
+        }
+      },
+      "required": [
+        "span_id",
+        "event_type",
+        "name",
+        "started_at",
+        "status"
+      ],
+      "title": "QueryForgeSpan",
+      "type": "object"
+    },
+    "QueryForgeSpanError": {
+      "additionalProperties": false,
+      "description": "span 上的错误信息（失败步骤建议提供）。",
+      "properties": {
+        "type": {
+          "description": "错误类型 / 异常类名，如 LLMUnavailable",
+          "minLength": 1,
+          "title": "Type",
+          "type": "string"
+        },
+        "message": {
+          "description": "错误消息",
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "recoverable": {
+          "default": false,
+          "description": "是否可通过重试 / 替代方案恢复",
+          "title": "Recoverable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "message"
+      ],
+      "title": "QueryForgeSpanError",
+      "type": "object"
+    },
+    "QueryForgeSpanStatus": {
+      "description": "单个 span 的状态（与 TracePilot StepStatus 值一一对应）。",
+      "enum": [
+        "pending",
+        "running",
+        "succeeded",
+        "failed",
+        "skipped",
+        "waiting",
+        "interrupted"
+      ],
+      "title": "QueryForgeSpanStatus",
+      "type": "string"
+    },
+    "QueryForgeTokenUsage": {
+      "additionalProperties": false,
+      "description": "单个 span 的 token 用量；全部字段可空表示 unknown。\n\n不得为了「看起来完整」而填 0：缺失即 ``null``。若 ``input_tokens`` 或\n``output_tokens`` 任一缺失，映射层会整体按 unknown 处理并保留原始值，\n不会把缺失字段补 0。",
+      "properties": {
+        "input_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "输入 token 数；未知为 null，禁止用 0 冒充",
+          "title": "Input Tokens"
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "输出 token 数；未知为 null，禁止用 0 冒充",
+          "title": "Output Tokens"
+        },
+        "total_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "总 token 数；未知为 null。缺失时可校验为 input+output",
+          "title": "Total Tokens"
+        }
+      },
+      "title": "QueryForgeTokenUsage",
+      "type": "object"
+    },
+    "QueryForgeTraceStatus": {
+      "description": "整条 trace 的最终状态（与 TracePilot TraceStatus 值一一对应）。",
+      "enum": [
+        "running",
+        "succeeded",
+        "failed",
+        "partial",
+        "interrupted"
+      ],
+      "title": "QueryForgeTraceStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "QueryForge Trace 协议 v1 顶层结构。\n\n``model_json_schema()`` 的输出即 ``docs/schemas/queryforge_trace_v1.schema.json``\n的正文（另加 ``$schema`` / ``$id``），测试会校验两者一致。",
+  "properties": {
+    "trace_id": {
+      "description": "trace 唯一 ID；导入时若不能作为安全文件名，会生成新 ID 并保留原值",
+      "minLength": 1,
+      "title": "Trace Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "description": "协议版本，v1 固定为 '1.0'；未知版本拒绝导入",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "task_id": {
+      "description": "任务 / 会话 ID（同一任务可多次运行）",
+      "minLength": 1,
+      "title": "Task Id",
+      "type": "string"
+    },
+    "run_id": {
+      "description": "本次运行 ID",
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "execution_mode": {
+      "$ref": "#/$defs/QueryForgeExecutionMode",
+      "description": "执行方式：real_api / mock / simulated / replay"
+    },
+    "model": {
+      "description": "本次 trace 使用的模型名（如 deepseek-flash）",
+      "minLength": 1,
+      "title": "Model",
+      "type": "string"
+    },
+    "started_at": {
+      "description": "trace 开始时间（必须带时区）",
+      "format": "date-time",
+      "title": "Started At",
+      "type": "string"
+    },
+    "ended_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "trace 结束时间（必须带时区）；running 状态可为 null，终态必须提供",
+      "title": "Ended At"
+    },
+    "status": {
+      "$ref": "#/$defs/QueryForgeTraceStatus",
+      "description": "trace 最终状态"
+    },
+    "attributes": {
+      "additionalProperties": true,
+      "description": "trace 级扩展属性（原样保留到 metadata.queryforge.attributes）",
+      "title": "Attributes",
+      "type": "object"
+    },
+    "spans": {
+      "description": "步骤列表；顺序不限，导入时按依赖关系排序",
+      "items": {
+        "$ref": "#/$defs/QueryForgeSpan"
+      },
+      "minItems": 1,
+      "title": "Spans",
+      "type": "array"
+    }
+  },
+  "required": [
+    "trace_id",
+    "schema_version",
+    "task_id",
+    "run_id",
+    "execution_mode",
+    "model",
+    "started_at",
+    "status",
+    "spans"
+  ],
+  "title": "QueryForgeTraceV1",
+  "type": "object"
+}

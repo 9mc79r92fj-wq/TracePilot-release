@@ -126,7 +126,7 @@ test('Fault Attribution: 故障 Trace + 基线 → 节点分类与结论口径',
   await expect(page.locator('table.tbl tbody tr').first()).toBeVisible()
 
   // 结论口径：可达≠因果 必须显式声明
-  await expect(page.getByText(/可达 ≠ 因果/)).toBeVisible()
+  await expect(page.getByText(/可达不等同因果/)).toBeVisible()
   await expect(page.getByText(/DAG 可达性与基线对比/)).toBeVisible()
 
   // 分类筛选可用
@@ -142,16 +142,21 @@ test('Fault Attribution: 故障 Trace + 基线 → 节点分类与结论口径',
 test('导航：两个页面已标记为已实现（不再是占位页）', async ({ page }) => {
   await page.goto('/')
   const nav = page.locator('.sidebar .nav')
-  // 不再出现「待实现」后缀
-  await expect(nav.getByRole('link', { name: 'Trace Comparison', exact: true })).toBeVisible()
-  await expect(nav.getByRole('link', { name: 'Fault Attribution', exact: true })).toBeVisible()
+  // 侧栏默认只展开当前路由分组，需要先展开「故障诊断」
+  const diagnosticsGroup = nav.getByRole('button', { name: '故障诊断', exact: true })
+  if ((await diagnosticsGroup.getAttribute('aria-expanded')) !== 'true') {
+    await diagnosticsGroup.click()
+  }
+  // 导航已改为中文标签（此前的英文项已本地化）
+  await expect(nav.getByRole('link', { name: '轨迹对比', exact: true })).toBeVisible()
+  await expect(nav.getByRole('link', { name: '故障归因', exact: true })).toBeVisible()
   await expect(nav.getByRole('link', { name: /待实现/ })).toHaveCount(0)
 
-  await nav.getByRole('link', { name: 'Trace Comparison', exact: true }).click()
+  await nav.getByRole('link', { name: '轨迹对比', exact: true }).click()
   await expect(page).toHaveURL(/\/comparison$/)
   await expect(page.getByText('该模块尚未实现')).toHaveCount(0)
 
-  await nav.getByRole('link', { name: 'Fault Attribution', exact: true }).click()
+  await nav.getByRole('link', { name: '故障归因', exact: true }).click()
   await expect(page).toHaveURL(/\/attribution$/)
   await expect(page.getByText('该模块尚未实现')).toHaveCount(0)
 })

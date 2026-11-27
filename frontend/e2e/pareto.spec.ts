@@ -90,12 +90,16 @@ test('Pareto Explorer：KPI + 可比性警告 + 三维散点 + Frontier', async 
   await expect(page.locator('.pareto-kpis').getByText('非支配解')).toBeVisible()
   await expect(page.getByText('本地确定性数据 · 付费 API 0 次')).toBeVisible()
 
-  // 可比性检查：多数据集 → 明确警告，且不把结果解释为真实模型性能比较
+  // 可比性检查：默认最大可比组，带可比性警告，且不把结果解释为真实模型性能比较
   const compare = page.locator('.pareto-compare')
   await expect(compare).toBeVisible()
   await expect(compare).toContainText('可比性：')
-  await expect(compare).toContainText('跨数据集') // DATASET_ID_MISMATCH 警告说明
-  await expect(compare).toContainText('不是 Provider 实际账单')
+  // 至少暴露一条可比性警告（评分口径/样本量/数据集不一致）
+  await expect(compare).toContainText(
+    /SCORING_MODE_MISMATCH|SMALL_SAMPLE_SIZE|DATASET_ID_MISMATCH/,
+  )
+  await expect(compare).toContainText('模拟数据不代表真实模型性能')
+  await expect(page.getByText(/不是 Provider 实际账单/)).toBeVisible()
 
   // 三维散点与二维投影切换
   await expect(page.locator('.pareto-scatter svg')).toBeVisible()
@@ -176,7 +180,7 @@ test('Pareto Explorer：候选详情 + Evaluation Run 关联 + 悬停指标', as
   await expect(detail).toContainText('候选版本详情')
   await expect(detail.locator('.pareto-metric-row')).toBeVisible()
   await expect(detail).toContainText('Agent 版本')
-  await expect(detail).toContainText('不是 Provider 实际账单')
+  await expect(detail).toContainText(/金额为估算值；PRICE_UNKNOWN 与缺失成本显示「—」/)
 
   // 关联 Evaluation Run
   await detail.getByRole('button', { name: '查看 Evaluation Run' }).click()

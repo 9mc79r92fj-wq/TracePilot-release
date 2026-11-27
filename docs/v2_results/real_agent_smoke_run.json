@@ -1,0 +1,76 @@
+{
+  "run": {
+    "run_id": "run-3f296e4bfa854d01b13df9d07414061d",
+    "task": "计算 125 * 48，并说明使用了哪个工具，最后给出结果。",
+    "mode": "real_api",
+    "data_source": "real_api",
+    "simulated": false,
+    "status": "succeeded",
+    "created_at": "2026-11-27T01:34:46.100383+00:00",
+    "limits": {
+      "max_model_calls": 5,
+      "max_total_tokens": 12000,
+      "max_tool_calls": 2,
+      "max_wall_seconds": 90,
+      "max_tool_rounds": 2,
+      "api_max_retries": 0,
+      "max_tokens_per_call": 768
+    },
+    "model": "deepseek-flash",
+    "trace_id": "trace-63d1ae6a744648bf920216a0361b982b",
+    "trace_path": "C:\\Users\\yyxxy\\Desktop\\TracePilot\\data\\traces\\trace-63d1ae6a744648bf920216a0361b982b.json",
+    "final_answer": "**所用工具**：算术计算器（calculator），执行表达式 `125 * 48`。\n\n**计算结果**：125 × 48 = **6000**",
+    "plan": [
+      "识别任务为计算 125×48，并需说明所用工具。",
+      "选择算术计算器作为计算工具。",
+      "使用该工具计算 125×48。",
+      "记录所用工具名称和计算结果 6000。",
+      "按“工具说明+结果”的格式输出最终答案。"
+    ],
+    "tool_calls": [
+      {
+        "name": "calculator",
+        "arguments": {
+          "expression": "125 * 48"
+        },
+        "result": {
+          "expression": "125 * 48",
+          "result": 6000
+        }
+      }
+    ],
+    "token_usage": {
+      "input_tokens": 3202,
+      "output_tokens": 628,
+      "total_tokens": 3830,
+      "steps_with_usage": 4
+    },
+    "elapsed_ms": 9297,
+    "error": null,
+    "limit_violations": [],
+    "model_selection": {
+      "selected": "deepseek-flash",
+      "fallback": false,
+      "reason": null
+    },
+    "limitations": [
+      "仅使用白名单本地无副作用工具（calculator / text_analyzer / sqlite_query）",
+      "真实模式禁止自动重试，避免失败重试产生额外费用"
+    ]
+  },
+  "budget_after": {
+    "enabled": true,
+    "total_calls_limit": 160,
+    "total_calls_used": 7,
+    "total_calls_remaining": 153,
+    "visitor_daily_limit": 40,
+    "visitor_day": "2026-11-27",
+    "total_tokens": {
+      "input": 4834,
+      "output": 1147
+    },
+    "estimated_cost_cny": 0.007128,
+    "price_estimate_note": "按环境变量配置的人民币单价估算，不是 Provider 实际账单",
+    "updated_at": "2026-11-27T01:34:55.398203+00:00"
+  }
+}

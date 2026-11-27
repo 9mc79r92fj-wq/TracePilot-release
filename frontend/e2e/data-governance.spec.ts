@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test'
 
 /**
  * 第 55-A 步：数据治理与可信度浏览器验收。
@@ -11,8 +11,23 @@ import { expect, test, type Page } from '@playwright/test'
  */
 
 const API = 'http://127.0.0.1:8000'
-/** 第 55-A 步创建的真实本地执行 MOCK 失败 Trace（脚本生成，非手写 JSON）。 */
-const FAILED_MOCK_TRACE_ID = 'trace-f3b36afd4f034bbea8715fd64a3b1719'
+
+/**
+ * 解析一条「MOCK 失败且含故障注入」的 Trace（由仓库脚本
+ * `python scripts/create_mock_failure_trace.py` 生成；脚本每次生成的 trace_id 不固定，
+ * 因此从 API 动态发现，避免数据重建后 spec 因硬编码 id 失效）。
+ */
+async function resolveFailedMockTraceId(request: APIRequestContext): Promise<string> {
+  const resp = await request.get(`${API}/api/traces?source_class=MOCK&status=failed`)
+  expect(resp.ok(), await resp.text()).toBeTruthy()
+  const body = (await resp.json()) as {
+    traces: { trace_id: string; fault_types: string[]; step_count: number }[]
+  }
+  const hit =
+    body.traces.find((t) => t.fault_types.length > 0 && t.step_count >= 7) ?? body.traces[0]
+  expect(hit, '应存在 MOCK 失败 Trace 用于来源分类/资格验收（请先运行 E2E fixture 脚本）').toBeTruthy()
+  return hit.trace_id
+}
 
 // 成本分析首次分析全库 1.6 万 Trace 需要数十秒；先预热后端缓存，
 // 避免页面 120 秒请求超时（该超时本身已放宽，但预热能让后续断言更稳定）。
@@ -51,12 +66,12 @@ test('Overview：数据口径 + 全库来源分类 + REAL_API 空态提示', asy
   await expect(page.getByText('数据范围与来源')).toBeVisible({
     timeout: 90_000,
   })
-  await expect(page.getByText(/只统计主 Trace 目录/)).toBeVisible()
-  await expect(page.getByText(/统计全库（主 Trace 目录 \+ 评测 Trace 目录）/)).toBeVisible()
+  await expect(page.getByText(/仅统计主 Trace 目录/)).toBeVisible()
+  await expect(page.getByText(/统计全库（含评测 Trace 目录）/)).toBeVisible()
   await expect(page.getByText(String(data.agent_traces)).first()).toBeVisible()
 
-  await expect(page.getByText('数据来源分类（全库，只读派生）')).toBeVisible()
-  const sourceTable = page.locator('.card', { hasText: '数据来源分类（全库，只读派生）' })
+  await expect(page.getByText('数据来源分类（全库）')).toBeVisible()
+  const sourceTable = page.locator('.card', { hasText: '数据来源分类（全库）' })
   for (const cls of ['REAL_API', 'MOCK', 'SIMULATED', 'REPLAY', 'UNKNOWN']) {
     await expect(sourceTable.getByText(cls, { exact: true }).first()).toBeVisible()
   }
@@ -65,7 +80,7 @@ test('Overview：数据口径 + 全库来源分类 + REAL_API 空态提示', asy
   }
 
   await expect(page.getByText('失败记录概览（主 Trace 目录）')).toBeVisible()
-  await expect(page.getByText(/失败 Trace 并未丢失/)).toBeVisible()
+  await expect(page.getByText(/失败 Trace 保存在主 Trace 目录/)).toBeVisible()
 
   expect(serious(errors)).toEqual([])
 })
@@ -111,21 +126,22 @@ test('Trace Explorer：按来源/状态/故障筛选失败 Trace；REAL_API 空�
   expect(serious(errors)).toEqual([])
 })
 
-test('Trace 详情：来源分类 MOCK + 四类受控实验资格说明', async ({ page }) => {
+test('Trace 详情：来源分类 MOCK + 四类受控实验资格说明', async ({ page, request }) => {
   const errors = collectErrors(page)
-  await page.goto(`/traces/${FAILED_MOCK_TRACE_ID}`, { waitUntil: 'domcontentloaded' })
+  const failedMockTraceId = await resolveFailedMockTraceId(request)
+  await page.goto(`/traces/${failedMockTraceId}`, { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: /Trace 详情/ })).toBeVisible({
     timeout: 30_000,
   })
-  await expect(page.getByText('数据来源分类（只读派生，不修改 Trace）')).toBeVisible({
+  await expect(page.getByText('数据来源分类', { exact: true })).toBeVisible({
     timeout: 60_000,
   })
-  const classCard = page.locator('.card', { hasText: '数据来源分类（只读派生，不修改 Trace）' })
+  const classCard = page.locator('.card', { hasText: '数据来源分类' })
   await expect(classCard.getByText('MOCK / 模拟')).toBeVisible()
   await expect(page.getByText(/data_source=mock（本地 Mock Agent 实际执行）/)).toBeVisible()
 
-  await expect(page.getByText('受控实验资格（为什么可用 / 不可用）')).toBeVisible()
-  const eligibility = page.locator('.card', { hasText: '受控实验资格（为什么可用 / 不可用）' })
+  await expect(page.getByText('受控实验资格', { exact: true })).toBeVisible()
+  const eligibility = page.locator('.card', { hasText: '受控实验资格' })
   for (const label of ['只读重放', '受控重跑', '反事实实验', '修复候选生成']) {
     await expect(eligibility.getByText(label, { exact: true })).toBeVisible()
   }
@@ -145,7 +161,7 @@ test('Cost Analytics：来源范围筛选 + UNKNOWN/PRICE_UNKNOWN 不按 0 + REA
   await expect(page.locator('.ca-kpis')).toBeVisible({ timeout: 120_000 })
 
   // 全库口径：范围提示 + 来源范围徽标
-  await expect(page.getByText(/统计口径：/)).toBeVisible()
+  await expect(page.getByText(/统计范围：/)).toBeVisible()
   await expect(page.locator('#ca-scope')).toHaveValue('')
 
   // REAL_API 范围：明确空态，不把 0 当真实成本

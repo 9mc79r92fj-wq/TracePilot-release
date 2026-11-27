@@ -618,24 +618,36 @@ class DeepSeekJudgeProvider:
     def score(
         self, rubric: Rubric, judge_input: JudgeInput, raw_block: str
     ) -> tuple[list[dict], dict | None]:
-        import asyncio
-
         messages = self.build_messages(rubric, raw_block)
         last_error: Exception | None = None
 
         for attempt in range(self._max_retries + 1):
             try:
-                response = asyncio.run(
-                    asyncio.wait_for(
-                        self._client.chat.completions.create(
-                            model=self.model_name,
-                            messages=messages,
-                            temperature=0.0,
-                            max_tokens=1500,
-                            stream=False,
-                        ),
-                        timeout=self._timeout,
+                from backend.app.services.real_api_budget import (
+                    RealCallBudgetExceeded,
+                    reserve_real_call,
+                )
+                from backend.app.services.request_context import get_client_key
+
+                try:
+                    reserve_real_call(
+                        kind="judge_model_call",
+                        model=self.model_name,
+                        visitor_key=get_client_key(),
                     )
+                except RealCallBudgetExceeded as exc:
+                    raise JudgeError(f"真实 Judge 调用预算不足：{exc}") from exc
+
+                response = self._client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    temperature=0.0,
+                    max_tokens=3000,
+                    stream=False,
+                    timeout=self._timeout,
+                    # DeepSeek 支持 JSON Output；要求模型只输出 JSON 对象，
+                    # 降低长 JSON 被截断或混入解释文字的概率。
+                    response_format={"type": "json_object"},
                 )
                 content = response.choices[0].message.content or ""
                 parsed = _extract_json(content)
@@ -650,6 +662,16 @@ class DeepSeekJudgeProvider:
                         "output_tokens": getattr(u, "completion_tokens", 0) or 0,
                         "total_tokens": getattr(u, "total_tokens", 0) or 0,
                     }
+                    from backend.app.services.real_api_budget import record_real_usage
+                    from backend.app.services.request_context import get_client_key
+
+                    record_real_usage(
+                        kind="judge_model_call",
+                        model=self.model_name,
+                        input_tokens=usage.get("input_tokens"),
+                        output_tokens=usage.get("output_tokens"),
+                        visitor_key=get_client_key(),
+                    )
                 return scores, usage
             except Exception as exc:  # 超时 / 网络 / 解析 / 校验
                 last_error = exc
@@ -849,6 +871,22 @@ class LLMJudge:
 # 工厂
 # ---------------------------------------------------------------------------
 
+def _resolve_judge_model(model: str | None) -> str:
+    """使用当前官方模型名；旧别名做兼容映射，非法值回退 deepseek-flash。"""
+    from backend.app.services.agent_runner import (
+        ALLOWED_MODELS,
+        DEFAULT_REAL_MODEL,
+        LEGACY_MODEL_ALIASES,
+    )
+
+    candidate = (model or os.environ.get("DEEPSEEK_MODEL") or DEFAULT_REAL_MODEL).strip()
+    if candidate in ALLOWED_MODELS:
+        return candidate
+    if candidate in LEGACY_MODEL_ALIASES:
+        return LEGACY_MODEL_ALIASES[candidate]
+    return DEFAULT_REAL_MODEL
+
+
 def build_judge(
     mode: str = "mock",
     *,
@@ -888,12 +926,25 @@ def build_judge(
         )
 
     if client is None:
-        raise RealJudgeDisabledError("真实 Judge 需要显式提供已配置的模型客户端")
+        api_key = (os.environ.get("DEEPSEEK_API_KEY") or "").strip()
+        if not api_key:
+            raise RealJudgeDisabledError("真实 Judge 需要 DEEPSEEK_API_KEY 或已配置的模型客户端")
+        try:
+            from openai import OpenAI
+
+            client = OpenAI(
+                api_key=api_key,
+                base_url=(os.environ.get("DEEPSEEK_BASE_URL") or "https://api.deepseek.com").rstrip("/"),
+                timeout=DEFAULT_TIMEOUT_SECONDS,
+                max_retries=0,
+            )
+        except Exception as exc:  # pragma: no cover - SDK 初始化异常
+            raise RealJudgeDisabledError("真实 Judge 客户端初始化失败") from exc
 
     return LLMJudge(
         DeepSeekJudgeProvider(
             client=client,
-            model=model or os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
+            model=_resolve_judge_model(model),
             timeout_seconds=timeout_seconds,
             max_retries=max_retries,
         )

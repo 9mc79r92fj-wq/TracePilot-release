@@ -132,10 +132,8 @@ test('版本对比：跨数据集 → NOT_COMPARABLE 且差异不得解释为提
   await page.getByRole('button', { name: '运行回归检测' }).click()
   await expect(page.locator('.rx-banner')).toBeVisible({ timeout: 120_000 })
   await expect(page.getByText('门禁 INCONCLUSIVE')).toBeVisible()
-  await expect(page.getByText(/门禁无法判定，不视为通过/)).toBeVisible()
-  await expect(
-    page.getByText(/INCONCLUSIVE 表示无法判定，绝不视为 PASS/).first(),
-  ).toBeVisible()
+  await expect(page.getByText(/INCONCLUSIVE 视为无法判定，不等同 PASS/).first()).toBeVisible()
+  await expect(page.getByText(/风险等级取规则严重度最大值/)).toBeVisible()
 })
 
 test('回归检测：风险矩阵 + 规则明细 + 门禁', async ({ page }) => {
@@ -159,7 +157,7 @@ test('回归检测：风险矩阵 + 规则明细 + 门禁', async ({ page }) => 
 
   // 门禁语义声明（横幅与报告限制中各出现一次 → 取第一个）
   await expect(
-    page.getByText(/INCONCLUSIVE 表示无法判定，绝不视为 PASS/).first(),
+    page.getByText(/INCONCLUSIVE 视为无法判定，不等同 PASS/).first(),
   ).toBeVisible()
 })
 
@@ -201,7 +199,12 @@ test('质量门禁：确定性检查展示阈值/实际值/触发规则', async 
   await expect(
     page.getByText(/PROJECT_DEMO_DEFAULT_NOT_INDUSTRY_STANDARD/).first(),
   ).toBeVisible()
-  await expect(page.getByText(/INCONCLUSIVE 绝不等于/).first()).toBeVisible()
+  // 门禁语义声明位于「限制说明」折叠区（当前 UI），展开后验证 INCONCLUSIVE 不等于 PASS
+  const gateCard = page.locator('.card', { hasText: '质量门禁（CI）' })
+  await gateCard.getByText(/限制说明（\d+）/).click()
+  await expect(gateCard.locator('.vc-limits')).toContainText(
+    'INCONCLUSIVE 表示无法判定，绝不等于 PASS',
+  )
 
   // 触发规则 + 全部 11 项检查
   await expect(page.getByText('GATE_TASK_SUCCESS_BELOW_THRESHOLD').first()).toBeVisible()

@@ -115,8 +115,8 @@ test('手机端：侧栏默认收起，汉堡按钮可展开导航', async ({ pa
   expect(boxAfter?.x ?? -1).toBeGreaterThanOrEqual(0)
 
   // 点击导航项后可跳转且侧栏关闭
-  await sidebar.getByRole('button', { name: 'Agent执行与轨迹', exact: true }).click()
-  await sidebar.getByRole('link', { name: 'Agent运行', exact: true }).click()
+  await sidebar.getByRole('button', { name: 'Agent 执行与轨迹', exact: true }).click()
+  await sidebar.getByRole('link', { name: 'Agent 运行', exact: true }).click()
   await expect(page).toHaveURL(/\/runs$/)
   await expect(page.getByRole('heading', { name: /Agent Runs/ })).toBeVisible()
 })

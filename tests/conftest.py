@@ -21,6 +21,7 @@ for _p in (str(PROJECT_ROOT), str(TESTS_DIR)):
         sys.path.insert(0, _p)
 
 from eval_fixtures import real_run  # noqa: E402
+from fixture_data import install_fixture_traces, remove_fixture_traces  # noqa: E402
 
 # 测试会通过生产默认路径写入 Trace（AgentRunner / 评测执行器）；这些目录是
 # 产品统计口径的数据源，测试写入会污染统计。会话结束时把「会话内新增」的
@@ -35,7 +36,17 @@ _MUTABLE_DATA_FILES = (
 
 
 @pytest.fixture(scope="session", autouse=True)
-def _quarantine_test_data_pollution():
+def _install_fixture_traces():
+    """把历史 fixture Trace 临时放入数据目录，供依赖 API/存储的测试读取。"""
+    installed = install_fixture_traces()
+    try:
+        yield installed
+    finally:
+        remove_fixture_traces(installed)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _quarantine_test_data_pollution(_install_fixture_traces):
     """隔离测试对生产数据目录的写入（仅清理会话内新增/重写的文件）。"""
     trace_snapshot = {
         str(directory): {p.name for p in directory.glob("*.json")} if directory.exists() else set()

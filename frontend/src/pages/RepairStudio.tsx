@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RefreshCw, ShieldCheck } from 'lucide-react'
+import { ArrowRight, RefreshCw, ShieldCheck, Wrench } from 'lucide-react'
 import { api, apiErrorMessage, fetchTraces } from '../api'
+import {
+  fetchV2Status,
+  readableReadiness,
+  validateRealRepairs,
+  v2ErrorMessage,
+} from '../v2api'
+import type { RealRepairValidation, V2RealApiStatus } from '../v2api'
+import { useAdminAuth } from '../components/AdminAuth'
 import { useTraceUrlParam } from '../hooks/useTraceUrlParam'
 import type { TraceSummary } from '../types'
 import { Card, EmptyState, ErrorBox, Spinner, StatusBadge } from '../components/ui'
@@ -143,6 +151,33 @@ export default function RepairStudio() {
   const [selected, setSelected] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // 真实 API 修复验证（会消耗真实模型预算；需管理员会话 + 服务端预算）
+  const admin = useAdminAuth()
+  const [realStatus, setRealStatus] = useState<V2RealApiStatus | null>(null)
+  const [realStatusError, setRealStatusError] = useState<string | null>(null)
+  const [realMaxCandidates, setRealMaxCandidates] = useState(2)
+  const [realBusy, setRealBusy] = useState(false)
+  const [realError, setRealError] = useState<string | null>(null)
+  const [realResult, setRealResult] = useState<RealRepairValidation | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void fetchV2Status()
+      .then((s) => {
+        if (cancelled) return
+        setRealStatus(s.real_api)
+        setRealStatusError(null)
+      })
+      .catch((e) => {
+        if (cancelled) return
+        setRealStatus(null)
+        setRealStatusError(v2ErrorMessage(e))
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const loadTraces = useCallback(async () => {
     setError(null)
     try {
@@ -260,6 +295,28 @@ export default function RepairStudio() {
       setBusy(false)
     }
   }
+
+  async function validateReal() {
+    if (!traceId) return
+    setRealBusy(true)
+    setRealError(null)
+    setRealResult(null)
+    try {
+      setRealResult(await validateRealRepairs(traceId, realMaxCandidates))
+    } catch (e) {
+      setRealError(v2ErrorMessage(e))
+    } finally {
+      setRealBusy(false)
+    }
+  }
+
+  const realAvailable = realStatus?.available === true
+  const realBlockers = readableReadiness(realStatus?.blocking_reasons)
+  const realAdminRequired = admin.session?.required === true
+  const realAdminReady = admin.session
+    ? !realAdminRequired || admin.session.authenticated
+    : admin.error !== null
+  const realDisabled = realBusy || !traceId || !realAvailable || !realAdminReady
 
   const shown: Candidate[] = report?.candidates ?? cands?.candidates ?? []
   const selectedCandidate = shown.find((c) => c.repair_id === selected)
@@ -523,6 +580,175 @@ export default function RepairStudio() {
       )}
 
       {!traceId && !error && <EmptyState text="请选择一条故障 Trace" />}
+
+      <Card
+        title="真实 API 受控实验（修复验证）"
+        action={
+          <span className={'badge ' + (realAvailable ? 'partial' : 'muted')}>
+            {realAvailable ? '付费 · 真实调用' : '不可用'}
+          </span>
+        }
+      >
+        <div className="stack">
+          <p className="muted small" style={{ margin: 0 }}>
+            对当前选中 Trace 的修复候选，用真实 DeepSeek API 逐个重放验证。真实执行只能表达「调整超时/重试」与
+            「修正参数」类候选；需要伪造工具返回的候选会被服务端明确拒绝，而不是假装验证。
+          </p>
+
+          <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
+            <span className="badge muted">目标 Trace</span>
+            <span className="mono small">{traceId || '未选择 Trace'}</span>
+            {realStatus && (
+              <span className="badge muted">真实 API {realAvailable ? '可用' : '不可用'}</span>
+            )}
+            {admin.session && (
+              <span className={'badge ' + (admin.session.authenticated ? 'success' : 'muted')}>
+                管理员 {admin.session.authenticated ? '已认证' : realAdminRequired ? '未登录（必需）' : '未登录'}
+              </span>
+            )}
+            {cands && <span className="badge muted">候选数 {cands.candidate_count}</span>}
+          </div>
+
+          <div className="field">
+            <div className="k">最多验证候选数（1–3，每个候选 1 次真实重放）</div>
+            <input
+              type="number"
+              min={1}
+              max={3}
+              value={realMaxCandidates}
+              onChange={(e) => setRealMaxCandidates(Number(e.target.value))}
+            />
+          </div>
+
+          <div className="errorbox" style={{ background: 'var(--warning-soft)', color: 'var(--warning)' }}>
+            <strong>该操作会消耗真实模型预算</strong>：每个候选都会发起真实模型调用，按上游调用次数扣减服务端
+            持久预算，费用不可撤销；预算不足时服务端直接拒绝（不会发出上游请求）。
+          </div>
+
+          {realStatusError && (
+            <div className="muted small">无法读取 V2 真实 API 状态：{realStatusError}</div>
+          )}
+          {!realStatus && !realStatusError && (
+            <div className="muted small">正在读取 V2 真实 API 状态…</div>
+          )}
+          {realStatus && !realAvailable && (
+            <div className="errorbox" style={{ background: 'var(--warning-soft)', color: 'var(--warning)' }}>
+              真实 API 不可用：{realBlockers.length ? realBlockers.join('；') : '服务端未开启或预算未配置'}
+            </div>
+          )}
+          {!realAdminReady && (
+            <div className="cf-note small">
+              需要管理员登录：请先打开「V2 实验」页完成管理员登录，再回到本页执行真实验证。
+            </div>
+          )}
+          {!traceId && <div className="muted small">请先在上方选择一条故障 Trace。</div>}
+
+          <div className="row" style={{ gap: 10 }}>
+            <button
+              className="btn primary"
+              type="button"
+              onClick={() => void validateReal()}
+              disabled={realDisabled}
+              title={
+                !realAvailable ? '真实 API 不可用' : !realAdminReady ? '需要管理员登录' : !traceId ? '请先选择 Trace' : undefined
+              }
+            >
+              <Wrench size={15} /> {realBusy ? '真实 API 验证中…' : '真实 API 修复验证'}
+            </button>
+            <button className="btn" type="button" onClick={() => navigate('/v2')}>
+              V2 实验页（登录 / 预算） <ArrowRight size={14} />
+            </button>
+            {realBusy && <span className="muted small">真实模型调用可能需要数十秒…</span>}
+          </div>
+
+          {realError && <ErrorBox message={realError} />}
+
+          {realResult && (
+            <div className="cf-note">
+              <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+                <span className="badge success">execution_mode: {realResult.execution_mode}</span>
+                <span className="badge muted">
+                  候选 {realResult.candidate_count} · 真实验证通过 {realResult.executed_count}
+                </span>
+                {realResult.paid_api_called && <span className="badge partial">已发生真实调用</span>}
+              </div>
+              <div className="stack small" style={{ marginTop: 10 }}>
+                {realResult.candidates.length === 0 && (
+                  <div className="muted">该 Trace 没有可由真实执行表达的修复候选。</div>
+                )}
+                {realResult.candidates.map((candidate) => {
+                  const statusMeta =
+                    candidate.status === 'verified_real'
+                      ? { cls: 'success', label: '真实验证通过' }
+                      : candidate.status === 'rejected_not_real_executable'
+                        ? { cls: 'partial', label: '真实执行不可表达' }
+                        : candidate.status === 'failed'
+                          ? { cls: 'failed', label: '真实验证失败' }
+                          : { cls: 'muted', label: candidate.status }
+                  const outcomes = candidate.outcome ?? []
+                  const tokens = outcomes.reduce(
+                    (sum, item) => sum + (typeof item.total_tokens === 'number' ? item.total_tokens : 0),
+                    0,
+                  )
+                  const hasToken = outcomes.some((item) => typeof item.total_tokens === 'number')
+                  return (
+                    <div key={candidate.repair_id} className="ev-box">
+                      <div className="row" style={{ gap: 8 }}>
+                        <span className={'badge ' + statusMeta.cls}>{statusMeta.label}</span>
+                        <span className="badge blue">{candidate.repair_type}</span>
+                        <span className="mono" style={{ fontSize: 11 }}>
+                          {candidate.repair_id}
+                        </span>
+                      </div>
+                      {candidate.reason && (
+                        <div className="muted" style={{ marginTop: 4 }}>{candidate.reason}</div>
+                      )}
+                      {outcomes.map((outcome) => (
+                        <div
+                          key={outcome.trace_id}
+                          className="row"
+                          style={{ justifyContent: 'space-between', gap: 8, marginTop: 4 }}
+                        >
+                          <span className="row" style={{ gap: 8 }}>
+                            <StatusBadge status={outcome.status} />
+                            <span className="mono" style={{ fontSize: 11 }}>{outcome.trace_id}</span>
+                          </span>
+                          <span className="muted">
+                            Token {outcome.total_tokens ?? '未记录'} · 延迟{' '}
+                            {outcome.elapsed_ms === null || outcome.elapsed_ms === undefined
+                              ? '未记录'
+                              : `${outcome.elapsed_ms} ms`}
+                          </span>
+                        </div>
+                      ))}
+                      {candidate.causal_evidence_level && (
+                        <div className="muted" style={{ marginTop: 4 }}>
+                          因果证据等级：{candidate.causal_evidence_level}
+                        </div>
+                      )}
+                      {outcomes.length > 0 && (
+                        <div className="muted" style={{ marginTop: 4 }}>
+                          合计 Token：{hasToken ? tokens : '未记录'}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+                {(realResult.limitations.length ?? 0) > 0 && (
+                  <div>
+                    <strong>限制</strong>
+                    <ul style={{ margin: '2px 0 0 16px' }}>
+                      {realResult.limitations.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </Card>
 
       {reportId && (
         <Card title="证据血缘（Evidence Lineage）">

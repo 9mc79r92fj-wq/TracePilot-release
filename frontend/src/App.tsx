@@ -20,6 +20,7 @@ import EvaluationPipeline from './pages/EvaluationPipeline'
 import CostAnalytics from './pages/CostAnalytics'
 import ParetoExplorer from './pages/ParetoExplorer'
 import Architecture from './pages/Architecture'
+import V2Experiments from './pages/V2Experiments'
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/redteam" element={<RedTeamLab />} />
         <Route path="/adversarial" element={<AdversarialLab />} />
         <Route path="/architecture" element={<Architecture />} />
+        <Route path="/v2" element={<V2Experiments />} />
         <Route path="/dag" element={<DagAnalysis />} />
         <Route path="/dag/:traceId" element={<DagAnalysis />} />
         <Route path="/runs" element={<AgentRuns />} />

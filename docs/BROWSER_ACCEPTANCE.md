@@ -1,5 +1,10 @@
 # 全站浏览器交互验收报告（第 42 步）
 
+> **历史文档说明（2026-11-27）**：本文记录第 42 步时的浏览器验收结果，其中的 PASS 数字与
+> 页面文案属于当时状态。第 74 步统一 UI 文案、V2.0 新增 `/v2` 页面后，E2E 断言已同步更新
+> （见 `frontend/e2e/README.md`）；**V2.0 最新验收结果以
+> [`V2_ENGINEERING_REPORT.md`](V2_ENGINEERING_REPORT.md) 与 `docs/V2_BENCHMARK_REPORT.md` 为准**。
+
 - 验收时间：2026-11-18
 - 工具：**Playwright 1.65.1** + **Microsoft Edge**（`channel: 'msedge'`，复用系统浏览器，无需下载 Chromium）
 - 测试目录：`frontend/e2e/`

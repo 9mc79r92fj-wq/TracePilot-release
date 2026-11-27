@@ -10,7 +10,9 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+
+from backend.app.security import require_admin
 from pydantic import BaseModel
 
 from backend.app.services.execution_config import get_execution_limits
@@ -137,7 +139,7 @@ def get_document(doc_id: str) -> dict[str, Any]:
     return json.loads(path.read_text(encoding='utf-8'))
 
 
-@router.post('')
+@router.post('', dependencies=[Depends(require_admin)])
 async def upload_document(file: UploadFile = File(...)):
     filename = Path(file.filename or '').name
     if not filename or Path(filename).suffix.lower() not in ALLOWED:
@@ -177,8 +179,14 @@ def document_detail(doc_id: str):
     return {'document': get_document(doc_id)}
 
 
-@router.delete('/{doc_id}')
+@router.delete('/{doc_id}', dependencies=[Depends(require_admin)])
 def document_delete(doc_id: str):
     get_document(doc_id)
     (ROOT / f'{doc_id}.json').unlink(missing_ok=True)
     return {'deleted': True}
+
+
+@router.post('/{doc_id}/delete', dependencies=[Depends(require_admin)])
+def document_delete_post(doc_id: str):
+    """DELETE 的 POST 等价入口：兼容不支持 DELETE 的公网网关（ModelScope）。"""
+    return document_delete(doc_id)

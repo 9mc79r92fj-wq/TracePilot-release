@@ -5,7 +5,8 @@ import { expect, test } from '@playwright/test'
  *
  * 此前该交互无任何自动化测试（技术债 P1-4）。
  * 验证：时间轴展开/收起、上一/下一事件、播放/暂停、回到起点、
- *       跳转故障、播放速度切换、进度条，以及"缺时间戳步骤被排除而非推断"的诚实提示。
+ *       跳转故障、播放速度切换、进度条，以及"缺时间戳步骤被排除而非推断"的诚实提示
+ *       （当前 UI 文案：缺少时间戳的步骤「未纳入时间轴」）。
  */
 
 function serious(errors: string[]): string[] {
@@ -94,11 +95,11 @@ test('DAG 时间旅行：缺时间戳步骤被排除并显式说明（不推断�
     await toggle.click()
   }
 
-  const note = page.getByText(/缺少可用时间戳/)
+  const note = page.getByText(/缺少时间戳/)
   if ((await note.count()) > 0) {
     await expect(note.first()).toBeVisible()
-    await expect(note.first()).toContainText(/未推断/)
+    await expect(note.first()).toContainText(/未纳入时间轴/)
   } else {
-    await expect(page.getByText(/缺少可用时间戳/)).toHaveCount(0)
+    await expect(page.getByText(/缺少时间戳/)).toHaveCount(0)
   }
 })

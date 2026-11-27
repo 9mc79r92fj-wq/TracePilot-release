@@ -1023,3 +1023,23 @@ input[type='range'] { accent-color: var(--primary); }
 .tp-doc-preview pre { font-family:inherit; white-space:pre-wrap; overflow-wrap:anywhere; font-size:12px; line-height:1.6; }
 @media(max-width:850px){ .tp-doc-grid{grid-template-columns:1fr;} .tp-doc-header{flex-wrap:wrap;} }
 
+
+/* =========================================
+   STEP V2 | V2 实验 / 真实调用预算
+   ========================================= */
+
+/* 受控操作禁用态：真实调用 / 管理员受限按钮需明确不可点击 */
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover,
+.btn[aria-disabled='true']:hover {
+  background: var(--surface);
+}
+
+.btn.primary:disabled:hover {
+  background: var(--primary);
+}

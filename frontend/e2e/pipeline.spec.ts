@@ -81,7 +81,10 @@ test('流水线：创建 → 启动 → 阶段流程图 → 最终报告（Mock�
   // 最终报告：可复现性字段 + 评测摘要 + 质量门禁未执行说明
   await expect(page.getByText('pipeline_run_id').first()).toBeVisible()
   await expect(page.getByText('agent_version')).toBeVisible()
-  await expect(page.getByText(/受控执行器，不伪造/)).toBeVisible()
+  // 可复现性来自真实配置指纹与执行模式（不是伪造的固定字段）
+  await expect(page.locator('.pl-report-grid')).toContainText('execution_mode')
+  await expect(page.locator('.pl-report-grid')).toContainText('random_seed')
+  await expect(page.locator('.pl-report-grid')).toContainText('config_fingerprint')
   await expect(page.getByText('评测摘要（确定性）')).toBeVisible()
   await expect(page.getByText('质量门禁未执行（缺少基线或版本对比）')).toBeVisible()
 
