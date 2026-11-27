@@ -135,7 +135,7 @@
 
 | 项目 | 实际结果 |
 |---|---|
-| 空间仓库提交 | `3393690`（V2 首次推送）→ `6dcd13b`（修复 `frontend/dist` 未提交导致的资源 404 后重新部署） |
+| 空间仓库提交 | `3393690`（V2 首次推送）→ `6dcd13b`（修复 `frontend/dist` 未提交导致的资源 404 后重新部署）→ 最终同步提交（文档/CI 修复后第三次部署，2026-11-27 11:34 完成） |
 | 云端构建 | 成功；studio/runtime 均 `Running` |
 | 公网健康检查 | `GET /api/health` → `{"status":"ok","trace_count":48}` |
 | 浏览器验收 | 真实 Edge 打开官方创空间页 → iframe 内工作台正常；「系统 → V2 实验」显示真实 API「不可用」、预算 0/0、AgentRx 三组对照（25 例）、Judge 校准、QueryForge 导入；管理员令牌登录成功且刷新后保持（HttpOnly SameSite=Lax Cookie） |
