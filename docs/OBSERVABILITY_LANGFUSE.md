@@ -134,6 +134,8 @@ docker compose up -d          # 默认 Web 端口 3000
 - 真实本地 Trace dry-run：`python scripts/export_langfuse.py --dry-run --limit 3` →
   3 条 Trace / 20 个 Span，生成 3 个 OTLP JSON（约 21–26KB/条）；
 - 协议联调：测试内置 OTLP mock HTTP 服务校验请求头、负载与重试行为；
+- **线上验证**（2026-11-28）：部署到魔搭后，`GET /api/observability/langfuse` 返回
+  `sdk.available=true`、`sdk.version=5.2.0`，默认 `enabled=false`（不会产生外部调用）；
 - **未执行**：真实 LangFuse 实例端到端（本机无实例）。这是已知限制，不宣称已验证。
 
 ## 8. 常见问题

@@ -200,3 +200,34 @@ python scripts/verify_public_deploy.py
 | 构建超时 | 本地先 `docker build` 验证；云端构建节点网络波动时重试 |
 | 部署后数据为空 | 检查持久卷 `/mnt/workspace/tracepilot` 与 `.seeded` 标记；勿删除持久卷 |
 | 误触发真实费用 | 立即把 `TRACEPILOT_REAL_TOTAL_CALL_LIMIT` 置 0 并重启；检查 `/api/admin/budget` |
+
+## 附录 A：本次发布记录（2026-11-28）
+
+| 项目 | 实际值 |
+|---|---|
+| 发布内容 | LangFuse SDK/OTLP 可观测性、kind K8s 编排、术语统一（Plan-and-Execute / 受控执行 / 评测流水线）、JD 术语映射 |
+| requirements 变更 | 新增 `langfuse==5.2.0`（含官方 SDK 依赖） |
+| 本地镜像验证 | `docker build` 成功；`docker run -p 7860:7860` 容器 `healthy`；`/api/health` ok、`/api/v2/status` 正常、`/api/observability/langfuse` 返回 `sdk.available=true (5.2.0)`、`/v2` 200 |
+| 空间仓库回滚点 | `91aaf2e3f2e25a84e9f2ce4277493e1b850b46c6` |
+| 空间仓库发布提交 | `c16291f9aec97baaa9e2296dfe88d800f6de23cc`（普通 push，无 force） |
+| 云端构建 | 成功；studio/runtime 均 `Running` |
+| 公网健康门禁 | 7/7 PASS（health / v2 status / 真实 API 关闭 / 预算 fail-closed / Judge 校准 / 互操作 schema / 首页） |
+| 持久化 | 发布后 `trace_count=49`（沿用持久卷数据，未清库） |
+| 原链接 | 未变：<https://www.modelscope.cn/studios/luis123XI394/TracePilot> |
+
+### 一键回滚（本次发布专用）
+
+```powershell
+# 1) 设置令牌（只在当前 shell，不落盘）
+$env:MODELSCOPE_TOKEN = "<你的 ModelScope 令牌>"
+
+# 2) 一键回滚：revert 最新部署提交 -> 普通 push -> 触发重新部署 -> 等待 Running + 健康检查
+cd C:\Users\yyxxy\Desktop\TracePilot
+.\scripts\rollback_modelscope.ps1 -SpaceRepo "$env:TEMP\tracepilot-space-deploy"
+
+# 3) 复核（只读）
+python scripts\verify_public_deploy.py
+```
+
+> 回滚后空间仓库会恢复到 `91aaf2e` 的代码内容（通过 `git revert` 产生新提交，不 force、不丢历史）。
+> **不使用** `reset --hard` + 强推：该方式会改写空间仓库历史，只允许在 revert 无法执行时由维护者人工确认后使用。

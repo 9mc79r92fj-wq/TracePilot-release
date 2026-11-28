@@ -1,3 +1,5 @@
 # 统一行尾：容器入口脚本必须 LF，否则 Linux 报 exec: no such file or directory
 *.sh text eol=lf
 *.ps1 text eol=crlf
+# Benchmark 快照按字节校验（manifest 记录 SHA-256/bytes），禁止 EOL 转换
+data/benchmarks/** -text
