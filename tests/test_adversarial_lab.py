@@ -58,7 +58,8 @@ def test_types_endpoint():
     assert limits["max_variants"] == 4
     assert limits["max_concurrent_runs"] == 1
     assert limits["paid_api_called"] is False
-    assert limits["execution_environment"] == "controlled_sandbox"
+    assert limits["execution_environment"] == "controlled_execution"
+    assert "工具白名单" in limits["execution_environment_note"]
     assert "安全通过率" in d["metrics_note"]
 
 

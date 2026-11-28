@@ -1,0 +1,29 @@
+# TracePilot · 可选持久化示例
+#
+# 重要：本文件默认不纳入 kustomization.yaml 的资源列表。
+# 原因：kind 默认集群没有 StorageClass，直接 apply 会让 PVC 一直 Pending，
+# 若 Deployment 同时引用它，Pod 会卡在调度阶段，导致「一条命令 apply」失败。
+#
+# 启用步骤（详见 README「可选：启用持久化」）：
+#   1. 安装 local-path-provisioner，它会创建名为 local-path 的 StorageClass；
+#   2. kubectl apply -f deploy/k8s/pvc.yaml；
+#   3. 把 deployment.yaml 末尾注释的 PVC 卷替换掉 emptyDir，再 apply -k。
+#
+# 访问模式 ReadWriteOnce：单节点单副本场景使用；SQLite 只允许单写者。
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tracepilot-data
+  namespace: tracepilot
+  labels:
+    app.kubernetes.io/name: tracepilot
+    app.kubernetes.io/component: storage
+    app.kubernetes.io/part-of: tracepilot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # local-path-provisioner 创建的 StorageClass 名称；安装前 apply 会保持 Pending
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi

@@ -88,7 +88,7 @@ Bad Case 分析（`docs/V2_BAD_CASE_ANALYSIS.md`）：V2 的 20 个 Top-1 错误
 
 - 候选生成、干预成本函数（干预节点数、额外 Token、额外延迟）、搜索边界、终止条件都在
   `backend/app/services/real_counterfactual.py` 与 `counterfactual_engine` 中显式定义；
-- 沙箱限制：只允许白名单工具（calculator / text_analyzer），禁止 subprocess/文件/网络；
+- 受控执行限制（工具白名单 + 有界步数）：只允许白名单工具（calculator / text_analyzer），禁止 subprocess/文件/网络；
 - 结论等级：本次真实实验的因果证据等级是 **weak**（单案例、单次重放），不宣称"生产普遍因果"。
 
 ## 6. LLM Judge 校准（不说"人工标注"）

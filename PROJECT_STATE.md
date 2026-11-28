@@ -23,7 +23,7 @@ Judge/校准/多 Judge/真实执行/红队/对抗评测/自动归因/失败模�
 
 ## 已完成（有测试/实测证据）
 
-1. 环境：独立目录、Harness 工作区、Git 仓库、`.venv`（Python 3.11）、`.gitignore` 完整（敏感文件零泄露）。
+1. 环境：独立目录、智能体开发工具工作区、Git 仓库、`.venv`（Python 3.11）、`.gitignore` 完整（敏感文件零泄露）。
 2. 文档：PRD、ARCHITECTURE、TRACE_SCHEMA、FAULT_INJECTION、COUNTERFACTUAL_ENGINE、MINIMAL_REPAIR、EVALUATION_ENGINE、FEATURE_AUDIT、TECH_DEBT、DECISIONS。
 3. Trace Schema（Pydantic v2，21 测试）。
 4. 依赖解析与 DAG 分析（串行/并行/多父汇合/环检测/拓扑排序/祖先后代，10 测试）。

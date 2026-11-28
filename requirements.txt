@@ -32,3 +32,6 @@ pyyaml==6.0.3
 
 # --- 待安装（下载中断，网络恢复后补充；勿在本文件记录未安装版本） ---
 # langchain-openai / numpy / pandas / scipy / scikit-learn / sqlalchemy / chromadb
+
+# --- 可观测性：LangFuse 官方 SDK（Trace 导出；默认关闭，不影响启动路径） ---
+langfuse==5.2.0

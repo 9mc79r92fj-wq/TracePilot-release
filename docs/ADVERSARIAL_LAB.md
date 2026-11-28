@@ -30,7 +30,7 @@
 | 攻击类型 | ≤6 |
 | 载荷长度 | ≤1200 字符 |
 | 并发运行 | 1（超出返回 429） |
-| 执行环境 | `controlled_sandbox` |
+| 执行环境 | `controlled_execution`（受控执行：工具白名单 + 有界步数） |
 | 付费 API | 禁用（`paid_api_called=false`，Token 恒 0） |
 
 ## 3. Attack Coverage Map 计算口径

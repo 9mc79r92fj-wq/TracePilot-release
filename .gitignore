@@ -69,3 +69,5 @@ data/v2_real_runs/
 # 本地数据快照（E2E 前后临时备份，不属于项目内容）
 data.polluted_backup/
 
+# 可观测性导出运行期产物（增量状态/锁/dry-run 负载，不入库）
+data/observability/

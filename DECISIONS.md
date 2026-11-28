@@ -9,4 +9,4 @@
 5. 使用LangGraph构建Agent执行流程。
 6. 使用DeepSeek API作为模型服务。
 7. 使用Git管理项目版本。
-8. 使用DeepSeek Harness作为主要代码开发工具。
+8. 使用 DeepSeek 智能体开发工具作为主要代码开发工具。

@@ -50,7 +50,11 @@ jobs:
       - name: Initialize demo SQLite data
         run: python scripts/init_demo_db.py
 
-      # 5. 运行后端测试（确定性、无付费 API）
+      # 5. 术语防雷检查（禁用词规则见 docs/TERMINOLOGY.md）
+      - name: Terminology guard
+        run: python scripts/check_terminology.py
+
+      # 6. 运行后端测试（确定性、无付费 API）
       - name: Run backend tests
         env:
           PYTHONIOENCODING: utf-8

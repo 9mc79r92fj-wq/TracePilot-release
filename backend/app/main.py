@@ -267,6 +267,21 @@ def v2_benchmark_rootcause() -> dict[str, Any]:
     return report
 
 
+@app.get("/api/observability/langfuse")
+def observability_langfuse_status() -> dict[str, Any]:
+    """只读：LangFuse/OTLP 导出配置与最近一次导出状态（不返回密钥、不发网络请求）。
+
+    默认关闭；只有显式配置 ``TRACEPILOT_LANGFUSE_ENABLED=1`` 或执行导出 CLI 才会生效。
+    """
+    from backend.app.services.langfuse_export import describe_export_status
+    from backend.app.services.langfuse_sdk_export import sdk_available, sdk_version
+
+    return {
+        **describe_export_status(),
+        "sdk": {"available": sdk_available(), "version": sdk_version()},
+    }
+
+
 def _queryforge_schema() -> dict[str, Any]:
     """读取协议 JSON Schema。
 
@@ -2231,7 +2246,8 @@ def _rt_limits() -> dict[str, Any]:
         "max_concurrent_runs": 1,
         "max_wall_seconds": 120,
         "paid_api_called": False,
-        "execution_environment": "controlled_sandbox",
+        "execution_environment": "controlled_execution",
+        "execution_environment_note": "受控执行：工具白名单 + 有界步数",
     }
 
 

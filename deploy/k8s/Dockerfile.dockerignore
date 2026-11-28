@@ -1,0 +1,41 @@
+# BuildKit 专用 ignore（与 deploy/k8s/Dockerfile 同目录，自动优先生效）
+#
+# 为什么需要它：仓库根 .dockerignore 为“后端镜像 + 预构建前端”场景排除了 frontend/，
+# 而 kind 镜像需要在前端构建阶段读取 frontend/ 源码。BuildKit 会优先使用本文件，
+# 从而在不修改根 .dockerignore、不影响既有部署的前提下完成前端构建。
+#
+# 关键区别：**不排除 frontend/**，但排除依赖、构建产物与测试文件。
+.git
+.gitignore
+.venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+htmlcov
+tests
+docs
+backups
+ci-reports
+*.log
+.env
+.env.*
+backend/.env
+backend/data
+data
+data.polluted_backup
+frontend/dist
+frontend/e2e
+frontend/test-results
+frontend/playwright-report
+frontend/e2e-results.json
+frontend/.env.local
+frontend/.env.development
+docker-compose.yml
+render.yaml
+/Dockerfile
+/Dockerfile.multistage
+/.dockerignore
+/TracePilot-ModelScope

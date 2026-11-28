@@ -1,0 +1,17 @@
+# TracePilot · kind 单节点集群配置（本地演练专用）
+#
+# 用法：
+#   kind create cluster --name tracepilot --config deploy/k8s/kind-config.yaml
+#
+# 端口链路：宿主机 127.0.0.1:8080 -> kind 节点容器 30080 -> Service(nodePort 30080) -> Pod 7860
+# 只监听 127.0.0.1，避免把本地演示环境暴露到局域网。
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: tracepilot
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 8080
+        listenAddress: "127.0.0.1"
+        protocol: TCP

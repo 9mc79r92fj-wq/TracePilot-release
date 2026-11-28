@@ -1,0 +1,128 @@
+# TracePilot · 单副本 Deployment（kind 单节点 / K8s >= 1.27）
+#
+# 设计要点：
+# - replicas: 1 + strategy Recreate：SQLite 单写者，避免滚动更新时新旧 Pod
+#   同时写库；也兼容可选 RWO PVC（见 pvc.yaml）。
+# - 容器端口 http=7860：FastAPI 单端口同源提供 /api 与前端 SPA；
+#   liveness/readiness 均探测 /api/health（命名端口引用 7860）。
+# - 数据目录默认 emptyDir：保证「kubectl apply -k deploy/k8s」无需 StorageClass
+#   即可成功；需要持久化时按 README 安装 local-path-provisioner、apply pvc.yaml，
+#   再把本文件末尾注释里的 PVC 卷替换 emptyDir。
+# - 全清单不含任何明文 Key/Token：敏感变量只经 optional Secret
+#   tracepilot-secrets 的 secretKeyRef 注入，Secret 缺失时 Pod 仍可启动。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tracepilot
+  namespace: tracepilot
+  labels:
+    app.kubernetes.io/name: tracepilot
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: tracepilot
+  annotations:
+    tracepilot.dev/description: "kind 单节点单端口部署（/api + SPA，监听 7860）"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tracepilot
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tracepilot
+        app.kubernetes.io/component: api
+        app.kubernetes.io/part-of: tracepilot
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: tracepilot
+          image: tracepilot:local
+          imagePullPolicy: IfNotPresent
+          # emptyDir 会覆盖镜像内预建的目录；启动前以非 root 用户创建运行期目录，
+          # 目录可写性由 Pod 级 fsGroup=10001 保证。之后 exec 交给 uvicorn（单端口 7860）。
+          command:
+            - sh
+            - -c
+            - >-
+              mkdir -p /app/data/documents /app/data/traces /app/data/evaluation/traces
+              /app/data/knowledge /app/data/hitl /app/backend/data/documents
+              && exec python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 7860
+          ports:
+            - name: http
+              containerPort: 7860
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: tracepilot-config
+          env:
+            # 可选 Secret：kind 演练不创建 Secret 也能启动（公开演示模式禁止真实调用）
+            - name: DEEPSEEK_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tracepilot-secrets
+                  key: DEEPSEEK_API_KEY
+                  optional: true
+            - name: TRACEPILOT_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: tracepilot-secrets
+                  key: TRACEPILOT_ADMIN_TOKEN
+                  optional: true
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: app-data
+              mountPath: /app/data
+            - name: backend-data
+              mountPath: /app/backend/data
+      volumes:
+        # 默认：emptyDir，保证默认 kustomization 可直接 apply（kind 无默认 StorageClass）
+        - name: app-data
+          emptyDir: {}
+        - name: backend-data
+          emptyDir: {}
+        # 可选持久化（需先安装 local-path-provisioner 并 kubectl apply -f pvc.yaml）：
+        # 用下面的 PVC 卷替换上面的 emptyDir 后重新执行 kubectl apply -k deploy/k8s。
+        # - name: app-data
+        #   persistentVolumeClaim:
+        #     claimName: tracepilot-data
+        # - name: backend-data
+        #   persistentVolumeClaim:
+        #     claimName: tracepilot-data

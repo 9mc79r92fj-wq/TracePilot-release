@@ -1,0 +1,15 @@
+# TracePilot · kind 交付命名空间
+#
+# 隔离说明：专用命名空间仅用于本地 kind 演练；与魔搭（ModelScope）创空间线上
+# 部署完全隔离，不共享 Deployment / Service / 数据卷。
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tracepilot
+  labels:
+    app.kubernetes.io/name: tracepilot
+    app.kubernetes.io/part-of: tracepilot
+    # Pod Security Admission：baseline 即可覆盖本清单（非 root、drop ALL、
+    # allowPrivilegeEscalation=false）。后续若要提升到 restricted，需要给
+    # 容器/ Pod 补全全部安全字段并单独验证后再切换。
+    pod-security.kubernetes.io/enforce: baseline

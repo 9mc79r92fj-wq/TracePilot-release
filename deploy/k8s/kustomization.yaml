@@ -1,0 +1,17 @@
+# TracePilot · kind 单节点默认部署入口
+#
+# 用法：kubectl apply -k deploy/k8s
+#
+# 默认资源只包含「无外部依赖、可直接 apply」的四类对象：
+#   Namespace + ConfigMap + Deployment + Service
+# - kind-config.yaml 是 kind 集群配置，不是 K8s API 资源，不能放进 resources；
+# - pvc.yaml 依赖 local-path-provisioner（kind 默认无 StorageClass），
+#   单独 apply，避免默认路径因 PVC Pending 而失败（见 README）。
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: tracepilot
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
